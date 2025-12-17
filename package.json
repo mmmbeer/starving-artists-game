@@ -1,0 +1,27 @@
+{
+  "name": "starving-artists-game",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "server:dev": "npm --workspace server run dev",
+    "server:start": "npm --workspace server run start",
+    "server:test": "npm --workspace server run test",
+    "server:build": "npm --workspace server run build",
+    "client:dev": "npm --workspace client run dev",
+    "client:build": "npm --workspace client run build",
+    "client:test": "npm --workspace client run test",
+    "test": "jest --config tests/jest.config.ts"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.3",
+    "@types/supertest": "^2.0.12",
+    "jest": "^29.4.3",
+    "supertest": "^6.3.4",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.3.2"
+  }
+}

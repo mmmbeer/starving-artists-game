@@ -1,0 +1,36 @@
+.placeholder-panel {
+  border: 1px solid #d1d1d6;
+  border-radius: 12px;
+  padding: 1.5rem;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+}
+
+.placeholder-panel header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.placeholder-panel header p {
+  color: #646569;
+  margin-top: 0.5rem;
+}
+
+.placeholder-panel button {
+  margin-top: 1rem;
+  background: #1d4ed8;
+  color: white;
+  border: none;
+  border-radius: 999px;
+  padding: 0.65rem 1.25rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.placeholder-panel button:hover {
+  background: #2563eb;
+}
