@@ -96,6 +96,21 @@ const applyAction = (state: GameState, action: GameAction): GameState => {
   return assertSuccess(gameReducer(state, action));
 };
 
+const endPlayerTurn = (state: GameState, playerId: string, timestamp: string): GameState =>
+  applyAction(state, { type: 'END_TURN', payload: { playerId }, meta: { timestamp } });
+
+const completePhase = (state: GameState, timestamps: string[]): GameState => {
+  let nextState = state;
+  const totalPlayers = nextState.turn.order.length;
+  const actionsTaken = nextState.turn.actionsTakenThisPhase;
+  const remainingActions = totalPlayers - actionsTaken;
+  for (let index = 0; index < remainingActions; index += 1) {
+    const currentPlayer = nextState.turn.order[nextState.turn.currentPlayerIndex];
+    nextState = endPlayerTurn(nextState, currentPlayer, timestamps[index % timestamps.length]);
+  }
+  return nextState;
+};
+
 const advancePhase = (state: GameState, timestamp: string): GameState =>
   assertSuccess(gameReducer(state, { type: 'ADVANCE_PHASE', meta: { timestamp } }));
 
@@ -163,9 +178,10 @@ describe('game reducer fundamentals', () => {
       payload: { playerId: 'player-1', slotIndex: 0 },
       meta: { timestamp: '2024-01-01T00:04:00.000Z' }
     });
-    const canvas = afterBuy.players[0].studio.canvases[0];
+    const afterBuyPhase = completePhase(afterBuy, ['2024-01-01T00:04:30.000Z', '2024-01-01T00:04:45.000Z']);
+    const canvas = afterBuyPhase.players[0].studio.canvases[0];
     const targetSquareId = canvas.definition.squares[0].id;
-    const firstWild = applyAction(afterBuy, {
+    const firstWild = applyAction(afterBuyPhase, {
       type: 'APPLY_PAINT_TO_CANVAS',
       payload: {
         playerId: 'player-1',
@@ -175,9 +191,14 @@ describe('game reducer fundamentals', () => {
       },
       meta: { timestamp: '2024-01-01T00:05:00.000Z' }
     });
+    const afterAfternoonPhase = completePhase(firstWild, ['2024-01-01T00:05:30.000Z', '2024-01-01T00:05:45.000Z']);
+    const afterSellingPhase = completePhase(afterAfternoonPhase, ['2024-01-01T00:05:55.000Z', '2024-01-01T00:06:05.000Z']);
+    const nextActor = afterSellingPhase.turn.order[afterSellingPhase.turn.currentPlayerIndex];
+    const readyForSecondWild = endPlayerTurn(afterSellingPhase, nextActor, '2024-01-01T00:06:15.000Z');
+    expect(readyForSecondWild.turn.order[readyForSecondWild.turn.currentPlayerIndex]).toBe('player-1');
     const secondSquareId = canvas.definition.squares[1].id;
     const errorResult = assertError(
-      gameReducer(firstWild, {
+      gameReducer(readyForSecondWild, {
         type: 'APPLY_PAINT_TO_CANVAS',
         payload: {
           playerId: 'player-1',
@@ -253,7 +274,8 @@ describe('game reducer fundamentals', () => {
     );
     expect(beforeError.message).toMatch(/not yet complete/);
 
-    const filledOnce = applyAction(postBuy, {
+    const afterBuyPhase = completePhase(postBuy, ['2024-01-01T00:08:20.000Z', '2024-01-01T00:08:25.000Z']);
+    const filledOnce = applyAction(afterBuyPhase, {
       type: 'APPLY_PAINT_TO_CANVAS',
       payload: {
         playerId: 'player-1',
@@ -263,7 +285,11 @@ describe('game reducer fundamentals', () => {
       },
       meta: { timestamp: '2024-01-01T00:09:00.000Z' }
     });
-    const filledAll = applyAction(filledOnce, {
+    const afterFirstPaintPhase = completePhase(filledOnce, ['2024-01-01T00:09:15.000Z', '2024-01-01T00:09:20.000Z']);
+    const afterSellingPhase = completePhase(afterFirstPaintPhase, ['2024-01-01T00:09:30.000Z', '2024-01-01T00:09:35.000Z']);
+    const morningActor = afterSellingPhase.turn.order[afterSellingPhase.turn.currentPlayerIndex];
+    const nextMorningReady = endPlayerTurn(afterSellingPhase, morningActor, '2024-01-01T00:09:50.000Z');
+    const filledAll = applyAction(nextMorningReady, {
       type: 'APPLY_PAINT_TO_CANVAS',
       payload: {
         playerId: 'player-1',
@@ -276,15 +302,24 @@ describe('game reducer fundamentals', () => {
 
     expect(isCanvasComplete(filledAll.players[0].studio.canvases[0])).toBe(true);
 
-    const sellingAfterComplete = advancePhase(
-      advancePhase(filledAll, '2024-01-01T00:09:30.000Z'),
-      '2024-01-01T00:09:40.000Z'
-    );
-    const sellIntentState = applyAction(sellingAfterComplete, {
-      type: 'DECLARE_SELL_INTENT',
-      payload: { playerId: 'player-1', canvasIds: [canvas.id] },
-      meta: { timestamp: '2024-01-01T00:11:00.000Z' }
-    });
+    const morningFinisher = filledAll.turn.order[filledAll.turn.currentPlayerIndex];
+    const afterMorningFinish = endPlayerTurn(filledAll, morningFinisher, '2024-01-01T00:10:10.000Z');
+    const afterAfternoonFinish = completePhase(afterMorningFinish, ['2024-01-01T00:10:30.000Z', '2024-01-01T00:10:35.000Z']);
+      const currentSellPlayer =
+        afterAfternoonFinish.turn.order[afterAfternoonFinish.turn.currentPlayerIndex];
+      const sellIntentReadyState = endPlayerTurn(
+        afterAfternoonFinish,
+        currentSellPlayer,
+        '2024-01-01T00:11:10.000Z'
+      );
+      expect(
+        sellIntentReadyState.turn.order[sellIntentReadyState.turn.currentPlayerIndex]
+      ).toBe('player-1');
+      const sellIntentState = applyAction(sellIntentReadyState, {
+        type: 'DECLARE_SELL_INTENT',
+        payload: { playerId: 'player-1', canvasIds: [canvas.id] },
+        meta: { timestamp: '2024-01-01T00:11:00.000Z' }
+      });
     expect(sellIntentState.sellIntents['player-1']).toContain(canvas.id);
   });
 });

@@ -6,32 +6,25 @@ import {
   BuyCanvasAction,
   DeclareSellIntentAction,
   DrawPaintCubesAction,
+  EndTurnAction,
   GameAction,
   InitializeGameAction
 } from './actions';
 import { validateAction } from './validators';
 import { createCanvasState, drawFromBag } from './utils';
 import { storeSnapshot } from './snapshots';
+import { advanceTurnAfterAction, initializeTurnState, transitionPhase } from './TurnController';
 
 const slotCost = (index: number) => index + 1;
 
-const advanceTurnState = (state: GameState) => {
-  if (state.turn.order.length === 0) {
-    return {
-      turn: state.turn,
-      nextPlayerIndex: state.currentPlayerIndex
-    };
+const finalizePlayerAction = (state: GameState, timestamp: string): ActionResult => {
+  const { nextState, phaseCompleted } = advanceTurnAfterAction(state);
+  let finalState = { ...nextState, updatedAt: timestamp };
+  if (phaseCompleted) {
+    finalState = transitionPhase(finalState, { timestamp });
   }
-
-  const nextIndex = (state.turn.currentPlayerIndex + 1) % state.turn.order.length;
-  return {
-    turn: {
-      ...state.turn,
-      currentPlayerIndex: nextIndex,
-      actionsTakenThisPhase: state.turn.actionsTakenThisPhase + 1
-    },
-    nextPlayerIndex: nextIndex
-  };
+  storeSnapshot(finalState);
+  return { nextState: finalState };
 };
 
 const buildMarket = (
@@ -78,17 +71,17 @@ const handleInitializeGame = (action: InitializeGameAction): ActionResult => {
     sellIntents[player.id] = [];
   });
 
+  const canonicalOrder = payload.turnOrder;
+  const firstPlayer = payload.firstPlayerId ?? canonicalOrder[0];
+  const turnState = initializeTurnState(canonicalOrder, firstPlayer);
+
   const gameState: GameState = {
     id: payload.gameId,
     phase: GamePhase.LOBBY,
     players,
-    turnOrder: payload.turnOrder,
-    currentPlayerIndex: 0,
-    turn: {
-      order: payload.turnOrder,
-      currentPlayerIndex: 0,
-      actionsTakenThisPhase: 0
-    },
+    turnOrder: canonicalOrder,
+    currentPlayerIndex: turnState.currentPlayerIndex,
+    turn: turnState,
     day: {
       dayNumber: 1,
       hasNutritionApplied: false
@@ -103,7 +96,7 @@ const handleInitializeGame = (action: InitializeGameAction): ActionResult => {
     paintBag: payload.paintBag,
     canvasDeck: remainingDeck,
     sellIntents,
-    firstPlayerId: payload.firstPlayerId ?? payload.turnOrder[0],
+    firstPlayerId: firstPlayer,
     createdAt: timestamp,
     updatedAt: timestamp
   };
@@ -113,40 +106,11 @@ const handleInitializeGame = (action: InitializeGameAction): ActionResult => {
 };
 
 const handleAdvancePhase = (state: GameState, action: AdvancePhaseAction): ActionResult => {
-  const desiredPhase = action.payload?.targetPhase;
-  const orderedPhases = [
-    GamePhase.LOBBY,
-    GamePhase.MORNING,
-    GamePhase.AFTERNOON,
-    GamePhase.SELLING,
-    GamePhase.ENDED
-  ];
-  const currentIndex = orderedPhases.indexOf(state.phase);
-  const nextIndex = desiredPhase ? orderedPhases.indexOf(desiredPhase) : currentIndex + 1;
-  const nextPhase = orderedPhases[nextIndex];
-
-  const nextDay = { ...state.day };
-  if (state.phase === GamePhase.SELLING && nextPhase === GamePhase.MORNING) {
-    nextDay.dayNumber += 1;
-    nextDay.hasNutritionApplied = false;
-  }
-
-  const nextTurn = {
-    ...state.turn,
-    currentPlayerIndex: 0,
-    actionsTakenThisPhase: 0
-  };
-
   const timestamp = action.meta?.timestamp ?? state.updatedAt;
-  const nextState: GameState = {
-    ...state,
-    phase: nextPhase,
-    day: nextDay,
-    turn: nextTurn,
-    currentPlayerIndex: 0,
-    updatedAt: timestamp
-  };
-
+  const nextState = transitionPhase(state, {
+    targetPhase: action.payload?.targetPhase,
+    timestamp
+  });
   storeSnapshot(nextState);
   return { nextState };
 };
@@ -167,19 +131,14 @@ const handleDrawPaintCubes = (state: GameState, action: DrawPaintCubesAction): A
   const nextPlayers = [...state.players];
   nextPlayers[playerIndex] = updatedPlayer;
 
-  const { turn, nextPlayerIndex } = advanceTurnState(state);
   const timestamp = action.meta?.timestamp ?? state.updatedAt;
-  const nextState: GameState = {
+  const intermediateState: GameState = {
     ...state,
     players: nextPlayers,
-    paintBag: remaining,
-    turn,
-    currentPlayerIndex: nextPlayerIndex,
-    updatedAt: timestamp
+    paintBag: remaining
   };
 
-  storeSnapshot(nextState);
-  return { nextState };
+  return finalizePlayerAction(intermediateState, timestamp);
 };
 
 const handleBuyCanvas = (state: GameState, action: BuyCanvasAction): ActionResult => {
@@ -231,23 +190,18 @@ const handleBuyCanvas = (state: GameState, action: BuyCanvasAction): ActionResul
     lastUpdated: action.meta?.timestamp ?? state.paintMarket.lastUpdated
   };
 
-  const { turn, nextPlayerIndex } = advanceTurnState(state);
   const timestamp = action.meta?.timestamp ?? state.updatedAt;
-  const nextState: GameState = {
+  const intermediateState: GameState = {
     ...state,
     players: nextPlayers,
     canvasMarket: {
       slots: reorganizedSlots
     },
     canvasDeck: nextDeck,
-    paintMarket: updatedPaintMarket,
-    turn,
-    currentPlayerIndex: nextPlayerIndex,
-    updatedAt: timestamp
+    paintMarket: updatedPaintMarket
   };
 
-  storeSnapshot(nextState);
-  return { nextState };
+  return finalizePlayerAction(intermediateState, timestamp);
 };
 
 const handleApplyPaintToCanvas = (state: GameState, action: ApplyPaintToCanvasAction): ActionResult => {
@@ -279,18 +233,13 @@ const handleApplyPaintToCanvas = (state: GameState, action: ApplyPaintToCanvasAc
   const nextPlayers = [...state.players];
   nextPlayers[playerIndex] = updatedPlayer;
 
-  const { turn, nextPlayerIndex } = advanceTurnState(state);
   const timestamp = action.meta?.timestamp ?? state.updatedAt;
-  const nextState: GameState = {
+  const intermediateState: GameState = {
     ...state,
-    players: nextPlayers,
-    turn,
-    currentPlayerIndex: nextPlayerIndex,
-    updatedAt: timestamp
+    players: nextPlayers
   };
 
-  storeSnapshot(nextState);
-  return { nextState };
+  return finalizePlayerAction(intermediateState, timestamp);
 };
 
 const handleDeclareSellIntent = (state: GameState, action: DeclareSellIntentAction): ActionResult => {
@@ -299,18 +248,18 @@ const handleDeclareSellIntent = (state: GameState, action: DeclareSellIntentActi
     [action.payload.playerId]: [...action.payload.canvasIds]
   };
 
-  const { turn, nextPlayerIndex } = advanceTurnState(state);
   const timestamp = action.meta?.timestamp ?? state.updatedAt;
-  const nextState: GameState = {
+  const intermediateState: GameState = {
     ...state,
-    sellIntents: nextSellIntents,
-    turn,
-    currentPlayerIndex: nextPlayerIndex,
-    updatedAt: timestamp
+    sellIntents: nextSellIntents
   };
 
-  storeSnapshot(nextState);
-  return { nextState };
+  return finalizePlayerAction(intermediateState, timestamp);
+};
+
+const handleEndTurn = (state: GameState, action: EndTurnAction): ActionResult => {
+  const timestamp = action.meta?.timestamp ?? state.updatedAt;
+  return finalizePlayerAction(state, timestamp);
 };
 
 export const gameReducer = (state: GameState | undefined, action: GameAction): ActionResult => {
@@ -332,6 +281,8 @@ export const gameReducer = (state: GameState | undefined, action: GameAction): A
       return handleApplyPaintToCanvas(state!, action);
     case 'DECLARE_SELL_INTENT':
       return handleDeclareSellIntent(state!, action);
+    case 'END_TURN':
+      return handleEndTurn(state!, action);
     default:
       return { error: { message: 'Unhandled action type' } };
   }

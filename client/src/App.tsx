@@ -19,7 +19,12 @@ function App() {
     joinGame,
     leaveGame,
     startGame,
-    resetGameState
+    resetGameState,
+    actionHistory,
+    onWork,
+    onBuyCanvas,
+    onApplyPaint,
+    onEndTurn
   } = useLobbyState();
 
   return (
@@ -30,7 +35,16 @@ function App() {
       </header>
       <main>
         {gameState ? (
-          <GameView gameState={gameState} onReturn={resetGameState} />
+        <GameView
+          gameState={gameState}
+          onReturn={resetGameState}
+          actionHistory={actionHistory}
+          onWork={onWork}
+          onBuyCanvas={onBuyCanvas}
+          onPaint={onApplyPaint}
+          onEndTurn={onEndTurn}
+          playerId={playerId}
+        />
         ) : (
           <LobbyView
             lobby={lobby}

@@ -8,4 +8,10 @@ export { GameSession } from './GameSession';
 import { GameSessionManager } from './GameSessionManager';
 export { GameSessionManager } from './GameSessionManager';
 export const lobbySessionManager = new GameSessionManager();
-export type { LobbyEvent, GameStartedEvent, LobbyEventReason } from './GameSessionManager';
+export type {
+  LobbyEvent,
+  GameStartedEvent,
+  GameStateUpdatedEvent,
+  LobbyEventReason,
+  GameActionSummary
+} from './GameSessionManager';

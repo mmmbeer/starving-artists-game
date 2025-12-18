@@ -2,7 +2,8 @@ import { GamePhase, GameState, PlayerId } from '../types';
 import type { PlayerProfile } from '../../../shared/types/player';
 import type { LobbyPlayerView, LobbySnapshot } from '../../../shared/types/lobby';
 import { gameReducer } from './reducer';
-import { AdvancePhaseAction, InitializeGameAction, InitializeGamePayload } from './actions';
+import { AdvancePhaseAction, GameAction, InitializeGameAction } from './actions';
+import type { InitializeGamePayload } from '../../../shared/types/gameActions';
 import { StartGamePayload } from './types';
 
 const MIN_PLAYERS = 1;
@@ -202,6 +203,15 @@ export class GameSession {
     }
 
     this.state = advanceResult.nextState;
+    return this.state;
+  }
+
+  public applyAction(action: GameAction): GameState {
+    const result = gameReducer(this.state, action);
+    if ('error' in result) {
+      throw new Error(result.error.message);
+    }
+    this.state = result.nextState;
     return this.state;
   }
 

@@ -1,12 +1,15 @@
 import { EventEmitter } from 'events';
 import { GamePhase, GameState } from '../types';
 import { GameSession } from './GameSession';
+import type { GameAction } from './actions';
 import type { PlayerProfile } from '../../../shared/types/player';
 import type { LobbySnapshot } from '../../../shared/types/lobby';
 import type { GameId, PlayerId } from '../../../shared/types/common';
 import { persistGameMetadata, persistPlayerMembership } from '../db/sessionPersistence';
 import type { PersistPlayerRecord } from '../db/sessionPersistence';
 import type { StartGamePayload } from './types';
+import type { GameActionSummary } from '../../../shared/types/realtime';
+export type { GameActionSummary } from '../../../shared/types/realtime';
 
 export type LobbyEventReason = 'created' | 'join' | 'reconnect' | 'leave' | 'start';
 
@@ -20,6 +23,12 @@ export interface LobbyEvent {
 export interface GameStartedEvent {
   gameId: GameId;
   state: GameState;
+}
+
+export interface GameStateUpdatedEvent {
+  gameId: GameId;
+  state: GameState;
+  action?: GameActionSummary;
 }
 
 export class GameSessionManager extends EventEmitter {
@@ -65,6 +74,19 @@ export class GameSessionManager extends EventEmitter {
     return session.getLobbySnapshot();
   }
 
+  public fetchGameState(gameId: GameId): GameState {
+    const session = this.getSessionOrThrow(gameId);
+    return session.getState();
+  }
+
+  public isPlayerInGame(gameId: GameId, playerId: PlayerId): boolean {
+    const session = this.sessions.get(gameId);
+    if (!session) {
+      return false;
+    }
+    return session.hasPlayer(playerId);
+  }
+
   public startGame(gameId: GameId, payload: StartGamePayload, requestedBy: PlayerId): GameState {
     const session = this.getSessionOrThrow(gameId);
     const newState = session.startGame(payload, requestedBy);
@@ -74,7 +96,33 @@ export class GameSessionManager extends EventEmitter {
     });
     this.emitLobbyUpdate(gameId, session.getLobbySnapshot(), 'start', requestedBy);
     this.emitGameStarted(gameId, newState);
+    this.emitGameStateUpdated(gameId, newState);
     return newState;
+  }
+
+  public applyAction(gameId: GameId, action: GameAction, requestedBy: PlayerId): GameState {
+    const session = this.getSessionOrThrow(gameId);
+    const playerId = this.getActionPlayerId(action);
+    if (playerId && playerId !== requestedBy) {
+      throw new Error('Player may only act on their own turn');
+    }
+
+    const timestamp = new Date().toISOString();
+    const actionWithMeta = {
+      ...action,
+      meta: {
+        ...(action.meta ?? {}),
+        timestamp
+      }
+    };
+
+    const nextState = session.applyAction(actionWithMeta);
+    void persistGameMetadata(gameId, session.getHostId(), nextState.phase);
+    const summary = playerId
+      ? { playerId, actionType: action.type, timestamp }
+      : undefined;
+    this.emitGameStateUpdated(gameId, nextState, summary);
+    return nextState;
   }
 
   public destroySession(gameId: GameId): void {
@@ -101,6 +149,10 @@ export class GameSessionManager extends EventEmitter {
     this.emit('game-started', { gameId, state } as GameStartedEvent);
   }
 
+  private emitGameStateUpdated(gameId: GameId, state: GameState, action?: GameActionSummary) {
+    this.emit('game-state-updated', { gameId, state, action } as GameStateUpdatedEvent);
+  }
+
   private persistPlayer(session: GameSession, playerId: PlayerId): void {
     const player = session
       .getState()
@@ -118,5 +170,18 @@ export class GameSessionManager extends EventEmitter {
     };
 
     void persistPlayerMembership(session.getId(), record);
+  }
+
+  private getActionPlayerId(action: GameAction): PlayerId | undefined {
+    switch (action.type) {
+      case 'DRAW_PAINT_CUBES':
+      case 'BUY_CANVAS':
+      case 'APPLY_PAINT_TO_CANVAS':
+      case 'DECLARE_SELL_INTENT':
+      case 'END_TURN':
+        return action.payload.playerId;
+      default:
+        return undefined;
+    }
   }
 }

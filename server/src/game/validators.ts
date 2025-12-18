@@ -5,11 +5,13 @@ import {
   BuyCanvasAction,
   DeclareSellIntentAction,
   DrawPaintCubesAction,
+  EndTurnAction,
   GameAction,
   GameError,
   InitializeGameAction
 } from './actions';
 import { findPlayerById, findPlayerCanvas, getSquareDefinition, isCanvasComplete, wildCubeCount } from './utils';
+import { getCurrentPlayerId, isPlayersTurn } from './TurnController';
 
 const PHASE_SEQUENCE = [
   GamePhase.LOBBY,
@@ -23,7 +25,21 @@ const actionAllowedPhases = {
   draw: [GamePhase.MORNING, GamePhase.AFTERNOON],
   buy: [GamePhase.MORNING, GamePhase.AFTERNOON],
   paint: [GamePhase.MORNING, GamePhase.AFTERNOON],
-  sellIntent: [GamePhase.SELLING]
+  sellIntent: [GamePhase.SELLING],
+  endTurn: [GamePhase.MORNING, GamePhase.AFTERNOON, GamePhase.SELLING]
+};
+
+const ensurePlayerOnTurn = (state: GameState, playerId: string): GameError | undefined => {
+  const currentPlayerId = getCurrentPlayerId(state);
+  if (!currentPlayerId) {
+    return { message: 'Current player not determined yet' };
+  }
+
+  if (!isPlayersTurn(state, playerId)) {
+    return { message: `Player ${playerId} may not act now` };
+  }
+
+  return undefined;
 };
 
 export const validateInitializeGame = (action: InitializeGameAction): GameError | undefined => {
@@ -109,7 +125,7 @@ export const validateDrawPaintCubes = (state: GameState | undefined, action: Dra
     return { message: 'Unknown player attempted to draw cubes' };
   }
 
-  return undefined;
+  return ensurePlayerOnTurn(state, action.payload.playerId);
 };
 
 export const validateBuyCanvas = (state: GameState | undefined, action: BuyCanvasAction): GameError | undefined => {
@@ -135,7 +151,7 @@ export const validateBuyCanvas = (state: GameState | undefined, action: BuyCanva
     return { message: 'Player does not have enough cubes to purchase canvas' };
   }
 
-  return undefined;
+  return ensurePlayerOnTurn(state, player.id);
 };
 
 export const validateApplyPaintCube = (
@@ -188,7 +204,7 @@ export const validateApplyPaintCube = (
     return { message: 'Only one wild cube may be used per canvas' };
   }
 
-  return undefined;
+  return ensurePlayerOnTurn(state, player.id);
 };
 
 export const validateDeclareSellIntent = (
@@ -219,7 +235,23 @@ export const validateDeclareSellIntent = (
     }
   }
 
-  return undefined;
+  return ensurePlayerOnTurn(state, player.id);
+};
+
+export const validateEndTurn = (state: GameState | undefined, action: EndTurnAction): GameError | undefined => {
+  if (!state) {
+    return { message: 'Game has not been initialized' };
+  }
+
+  if (!actionAllowedPhases.endTurn.includes(state.phase)) {
+    return { message: 'Cannot end turn during this phase' };
+  }
+
+  if (!state.players.some((player) => player.id === action.payload.playerId)) {
+    return { message: 'Unknown player attempted to end their turn' };
+  }
+
+  return ensurePlayerOnTurn(state, action.payload.playerId);
 };
 
 export const validateAction = (state: GameState | undefined, action: GameAction): GameError | undefined => {
@@ -236,6 +268,8 @@ export const validateAction = (state: GameState | undefined, action: GameAction)
       return validateApplyPaintCube(state, action);
     case 'DECLARE_SELL_INTENT':
       return validateDeclareSellIntent(state, action);
+    case 'END_TURN':
+      return validateEndTurn(state, action);
     default:
       return { message: 'Unknown action type' };
   }

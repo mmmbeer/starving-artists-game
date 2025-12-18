@@ -1,8 +1,14 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { LobbySnapshot } from '../../../shared/types/lobby';
 import type { GameState } from '../../../shared/types/game';
 import type { PaintCube } from '../../../shared/types/paint';
 import type { CanvasDefinition } from '../../../shared/types/canvas';
+import type { GameActionIntent } from '../../../shared/types/gameActions';
+import type {
+  GameRealtimeServerMessage,
+  GameRealtimeClientMessage,
+  GameActionSummary
+} from '../../../shared/types/realtime';
 
 export type LobbyConnectionStatus = 'idle' | 'connecting' | 'connected' | 'error';
 
@@ -54,6 +60,8 @@ export const useLobbyState = () => {
   const [displayName, setDisplayName] = useState('Artist');
 
   const wsRef = useRef<WebSocket | null>(null);
+  const gameSocketRef = useRef<WebSocket | null>(null);
+  const [actionHistory, setActionHistory] = useState<GameActionSummary[]>([]);
 
   const updateLobby = useCallback((snapshot: LobbySnapshot) => {
     setLobby(snapshot);
@@ -61,6 +69,10 @@ export const useLobbyState = () => {
     if (snapshot.phase === 'LOBBY') {
       setGameState(null);
     }
+  }, []);
+
+  const pushActionHistory = useCallback((entry: GameActionSummary) => {
+    setActionHistory((previous) => [entry, ...previous].slice(0, 10));
   }, []);
 
   const connectRealtime = useCallback(() => {
@@ -117,6 +129,109 @@ export const useLobbyState = () => {
     };
   }, [gameId, playerId, updateLobby]);
 
+  const connectGameRealtime = useCallback(() => {
+    if (!gameId || !playerId || !gameState) {
+      gameSocketRef.current?.close();
+      gameSocketRef.current = null;
+      return;
+    }
+
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/realtime/game?gameId=${encodeURIComponent(
+      gameId
+    )}&playerId=${encodeURIComponent(playerId)}`;
+
+    gameSocketRef.current?.close();
+    const socket = new WebSocket(wsUrl);
+    gameSocketRef.current = socket;
+
+    socket.onopen = () => {
+      setError(null);
+    };
+
+    socket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data) as GameRealtimeServerMessage;
+        switch (data.type) {
+          case 'GAME_STATE_UPDATED':
+            setGameState(data.payload.state);
+            if (data.payload.lastAction) {
+              pushActionHistory(data.payload.lastAction);
+            }
+            break;
+          case 'ERROR':
+            setError(data.payload.message);
+            break;
+          default:
+            break;
+        }
+      } catch {
+        setError('Failed to parse realtime game message');
+      }
+    };
+
+    socket.onerror = () => {
+      setError('Realtime game connection failed');
+    };
+
+    socket.onclose = () => {
+      if (gameSocketRef.current === socket) {
+        gameSocketRef.current = null;
+      }
+    };
+  }, [gameId, playerId, gameState, pushActionHistory]);
+
+  const sendGameAction = useCallback((intent: GameActionIntent) => {
+    const socket = gameSocketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+      throw new Error('Game connection is not ready');
+    }
+
+    const message: GameRealtimeClientMessage = {
+      type: 'GAME_ACTION',
+      payload: intent
+    };
+
+    socket.send(JSON.stringify(message));
+  }, []);
+
+  const performWork = useCallback(() => {
+    if (!playerId) {
+      throw new Error('Player ID is required');
+    }
+    sendGameAction({ type: 'DRAW_PAINT_CUBES', payload: { playerId, count: 3 } });
+  }, [playerId, sendGameAction]);
+
+  const performEndTurn = useCallback(() => {
+    if (!playerId) {
+      throw new Error('Player ID is required');
+    }
+    sendGameAction({ type: 'END_TURN', payload: { playerId } });
+  }, [playerId, sendGameAction]);
+
+  const performBuyCanvas = useCallback(
+    (slotIndex: number) => {
+      if (!playerId) {
+        throw new Error('Player ID is required');
+      }
+      sendGameAction({ type: 'BUY_CANVAS', payload: { playerId, slotIndex } });
+    },
+    [playerId, sendGameAction]
+  );
+
+  const performPaint = useCallback(
+    (canvasId: string, squareId: string, cubeId: string) => {
+      if (!playerId) {
+        throw new Error('Player ID is required');
+      }
+      sendGameAction({
+        type: 'APPLY_PAINT_TO_CANVAS',
+        payload: { playerId, canvasId, squareId, cubeId }
+      });
+    },
+    [playerId, sendGameAction]
+  );
+
   useEffect(() => {
     connectRealtime();
     return () => {
@@ -124,6 +239,20 @@ export const useLobbyState = () => {
       wsRef.current = null;
     };
   }, [connectRealtime]);
+
+  useEffect(() => {
+    if (!gameState) {
+      gameSocketRef.current?.close();
+      gameSocketRef.current = null;
+      setActionHistory([]);
+      return;
+    }
+    connectGameRealtime();
+    return () => {
+      gameSocketRef.current?.close();
+      gameSocketRef.current = null;
+    };
+  }, [connectGameRealtime, gameState]);
 
   const createGame = useCallback(async (): Promise<LobbySnapshot> => {
     if (!playerId || !displayName) {
@@ -223,6 +352,9 @@ export const useLobbyState = () => {
   }, [gameId, lobby, playerId]);
 
   const resetGameState = useCallback(() => {
+    gameSocketRef.current?.close();
+    gameSocketRef.current = null;
+    setActionHistory([]);
     setGameState(null);
   }, []);
 
@@ -245,6 +377,11 @@ export const useLobbyState = () => {
     joinGame,
     leaveGame,
     startGame,
-    resetGameState
+    resetGameState,
+    actionHistory,
+    onWork: performWork,
+    onBuyCanvas: performBuyCanvas,
+    onApplyPaint: performPaint,
+    onEndTurn: performEndTurn
   };
 };

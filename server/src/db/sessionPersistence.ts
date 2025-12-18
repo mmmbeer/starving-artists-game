@@ -13,9 +13,10 @@ export const persistGameMetadata = async (gameId: GameId, hostId: PlayerId, phas
   try {
     await dbQuery(
       `
-        INSERT INTO game_sessions (game_id, host_id, phase, created_at, updated_at)
-        VALUES (?, ?, ?, NOW(), NOW())
-        ON DUPLICATE KEY UPDATE host_id = VALUES(host_id), phase = VALUES(phase), updated_at = NOW()
+        INSERT INTO game_sessions (game_id, host_id, phase, created_at, updated_at, expires_at)
+        VALUES (?, ?, ?, NOW(), NOW(), DATE_ADD(NOW(), INTERVAL 48 HOUR))
+        ON DUPLICATE KEY UPDATE host_id = VALUES(host_id), phase = VALUES(phase), updated_at = NOW(),
+          expires_at = DATE_ADD(NOW(), INTERVAL 48 HOUR)
       `,
       [gameId, hostId, phase]
     );
