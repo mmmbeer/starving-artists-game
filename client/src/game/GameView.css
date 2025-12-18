@@ -1,0 +1,29 @@
+.game-view {
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.game-view__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.game-view__header button {
+  padding: 0.65rem 0.9rem;
+  border-radius: 0.75rem;
+  border: none;
+  background: #111;
+  color: #fff;
+  font-weight: 600;
+}
+
+.game-view__details {
+  margin-top: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}

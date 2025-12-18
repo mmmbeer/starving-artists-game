@@ -25,6 +25,26 @@ CREATE TABLE game_players (
   UNIQUE KEY unique_game_player (game_id, user_id)
 );
 
+CREATE TABLE game_sessions (
+  game_id VARCHAR(64) PRIMARY KEY,
+  host_id VARCHAR(64) NOT NULL,
+  phase ENUM('LOBBY','MORNING','AFTERNOON','SELLING','ENDED') NOT NULL DEFAULT 'LOBBY',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE game_session_players (
+  id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  session_id VARCHAR(64) NOT NULL,
+  player_id VARCHAR(64) NOT NULL,
+  display_name VARCHAR(128) NOT NULL,
+  player_order INT NOT NULL,
+  is_connected BOOLEAN NOT NULL DEFAULT TRUE,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY unique_session_player (session_id, player_id),
+  FOREIGN KEY (session_id) REFERENCES game_sessions(game_id)
+);
+
 CREATE TABLE game_state_snapshots (
   id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
   game_id BIGINT UNSIGNED NOT NULL,

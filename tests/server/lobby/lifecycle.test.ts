@@ -1,70 +1,142 @@
 import request from 'supertest';
 import { createApp } from '../../../server/src/app';
-import { PaintColor } from '../../../shared/types/game';
 import type { CanvasDefinition } from '../../../shared/types/canvas';
 import type { PaintCube } from '../../../shared/types/paint';
+import type { LobbySnapshot } from '../../../shared/types/lobby';
+import { GamePhase } from '../../../shared/types/game';
+import type { GameState } from '../../../shared/types/game';
 
-const createCanvasDefinition = (id: string, allowedColors: PaintColor[][]): CanvasDefinition => ({
-  id,
-  title: `Canvas ${id}`,
-  starValue: 1,
-  paintValue: 1,
-  foodValue: 1,
-  squares: allowedColors.map((allowed, index) => ({
-    id: `${id}-square-${index}`,
-    position: { x: index, y: 0 },
-    allowedColors: [...allowed]
-  }))
-});
+jest.mock('../../../server/src/db/sessionPersistence', () => ({
+  persistGameMetadata: jest.fn(async () => undefined),
+  persistPlayerMembership: jest.fn(async () => undefined)
+}));
 
-const createPaintBag = (): PaintCube[] => [
+const samplePaintBag = (): PaintCube[] => [
   { id: 'bag-red', color: 'red' },
   { id: 'bag-blue', color: 'blue' },
   { id: 'bag-green', color: 'green' }
 ];
 
-describe('lobby lifecycle integrating reducer', () => {
-  it('starts a game via reducer and allows phase advancements', async () => {
+const sampleCanvas = (id: string, allowed: PaintCube['color'][][]): CanvasDefinition => ({
+  id,
+  title: `Canvas ${id}`,
+  starValue: 1,
+  paintValue: 1,
+  foodValue: 1,
+  squares: allowed.map((colors, index) => ({
+    id: `${id}-square-${index}`,
+    position: { x: index, y: 0 },
+    allowedColors: [...colors]
+  }))
+});
+
+describe('Lobby lifecycle routes', () => {
+  it('creates a lobby and exposes the host player with a join link', async () => {
     const app = createApp();
-    const createResponse = await request(app).post('/lobby/create').send();
-    const gameId = createResponse.body.id;
+    const response = await request(app)
+      .post('/lobby/create')
+      .send({ playerId: 'host', displayName: 'Host' })
+      .expect(201);
 
-    await request(app)
+    const lobby = response.body.lobby as LobbySnapshot;
+    expect(lobby.hostId).toBe('host');
+    expect(lobby.players).toHaveLength(1);
+    expect(lobby.joinLink).toBe(`/lobby/${lobby.gameId}`);
+    expect(lobby.readiness.playerCount).toBe(1);
+  });
+
+  it('allows players to join until capacity is reached and handles reconnects gracefully', async () => {
+    const app = createApp();
+    const { gameId } = (await request(app)
+      .post('/lobby/create')
+      .send({ playerId: 'host', displayName: 'Host' })).body.lobby;
+
+    const playersToAdd = ['alice', 'bob', 'carol'];
+    for (let index = 0; index < playersToAdd.length; index += 1) {
+      const id = playersToAdd[index];
+      const joinResponse = await request(app)
+        .post(`/lobby/${gameId}/join`)
+        .send({ playerId: id, displayName: id })
+        .expect(200);
+
+      const lobby = joinResponse.body.lobby as LobbySnapshot;
+      expect(lobby.players).toHaveLength(Math.min(1 + index + 1, 4));
+    }
+
+    // Attempt to rejoin an existing player without increasing the roster
+    const reconnectResponse = await request(app)
       .post(`/lobby/${gameId}/join`)
-      .send({ playerId: 'player-1', displayName: 'Alice' })
+      .send({ playerId: 'bob', displayName: 'Bob New' })
       .expect(200);
+    const reconnectLobby = reconnectResponse.body.lobby as LobbySnapshot;
+    expect(reconnectLobby.players).toHaveLength(4);
+    expect(reconnectLobby.players.find((player) => player.id === 'bob')?.displayName).toBe('Bob New');
 
-    await request(app)
+    const overCapacityResponse = await request(app)
       .post(`/lobby/${gameId}/join`)
-      .send({ playerId: 'player-2', displayName: 'Bob' })
-      .expect(200);
+      .send({ playerId: 'dan', displayName: 'Dan' })
+      .expect(400);
+    expect(overCapacityResponse.body.error).toMatch(/lobby is full/i);
+  });
 
+  it('marks a player disconnected and allows reconnection through the same slot', async () => {
+    const app = createApp();
+    const { gameId } = (await request(app)
+      .post('/lobby/create')
+      .send({ playerId: 'host', displayName: 'Host' })).body.lobby;
+
+    await request(app).post(`/lobby/${gameId}/join`).send({ playerId: 'friend', displayName: 'Friend' }).expect(200);
+
+    const leaveResponse = await request(app)
+      .post(`/lobby/${gameId}/leave`)
+      .send({ playerId: 'friend' })
+      .expect(200);
+    const afterLeaveLobby = leaveResponse.body.lobby as LobbySnapshot;
+    expect(afterLeaveLobby.players.find((player) => player.id === 'friend')?.isConnected).toBe(false);
+
+    const rejoinResponse = await request(app)
+      .post(`/lobby/${gameId}/join`)
+      .send({ playerId: 'friend', displayName: 'Friend' })
+      .expect(200);
+    const afterRejoinLobby = rejoinResponse.body.lobby as LobbySnapshot;
+    expect(afterRejoinLobby.players.find((player) => player.id === 'friend')?.isConnected).toBe(true);
+  });
+
+  it('starts the game only for the host and advances into the morning phase', async () => {
+    const app = createApp();
+    const createResponse = await request(app)
+      .post('/lobby/create')
+      .send({ playerId: 'host', displayName: 'Host' })
+      .expect(201);
+
+    const { gameId } = createResponse.body.lobby as LobbySnapshot;
+    await request(app).post(`/lobby/${gameId}/join`).send({ playerId: 'player-1', displayName: 'Player One' }).expect(200);
+
+    // Unauthorized start attempt
+    await request(app)
+      .post(`/lobby/${gameId}/start`)
+      .send({
+        playerId: 'player-1',
+        paintBag: samplePaintBag(),
+        canvasDeck: [sampleCanvas('canvas-1', [['red']])],
+        initialPaintMarket: [],
+        initialMarketSize: 1
+      })
+      .expect(403);
+
+    // Proper host start
     const startResponse = await request(app)
       .post(`/lobby/${gameId}/start`)
       .send({
-        paintBag: createPaintBag(),
-        canvasDeck: [
-          createCanvasDefinition('canvas-a', [['red'], ['blue']]),
-          createCanvasDefinition('canvas-b', [['orange'], ['green']])
-        ],
-        initialPaintMarket: [{ id: 'market-blue', color: 'blue' }],
-        initialMarketSize: 2,
-        turnOrder: ['player-2', 'player-1'],
-        firstPlayerId: 'player-2'
+        playerId: 'host',
+        paintBag: samplePaintBag(),
+        canvasDeck: [sampleCanvas('canvas-2', [['blue']])],
+        initialPaintMarket: [],
+        initialMarketSize: 1
       })
       .expect(200);
 
-    expect(startResponse.body.phase).toBe('LOBBY');
-    expect(startResponse.body.players).toHaveLength(2);
-    expect(startResponse.body.canvasMarket.slots).toHaveLength(2);
-    expect(startResponse.body.paintBag).toHaveLength(createPaintBag().length);
-
-    const advanceResponse = await request(app)
-      .post(`/lobby/${gameId}/advance-phase`)
-      .send({ targetPhase: 'MORNING' })
-      .expect(200);
-
-    expect(advanceResponse.body.phase).toBe('MORNING');
-    expect(advanceResponse.body.turn.currentPlayerIndex).toBe(0);
+    const gameState = startResponse.body.gameState as GameState;
+    expect(gameState.phase).toBe(GamePhase.MORNING);
   });
 });

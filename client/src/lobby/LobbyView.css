@@ -1,0 +1,147 @@
+.lobby-view {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.lobby-view__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.lobby-view__status {
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+}
+
+.lobby-view__status--connected {
+  background: #d4ffd8;
+  color: #0f6c1a;
+}
+
+.lobby-view__status--connecting {
+  background: #fff4d1;
+  color: #b36f00;
+}
+
+.lobby-view__status--error {
+  background: #ffd8d8;
+  color: #a30f0f;
+}
+
+.lobby-view__status--idle {
+  background: #f0f0f0;
+  color: #555;
+}
+
+.lobby-view__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.lobby-card {
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.lobby-card label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.lobby-card input {
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid #d0d0d0;
+  font-size: 1rem;
+}
+
+.lobby-card__controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.lobby-card__controls button {
+  flex: 1;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.75rem;
+  border: none;
+  background: #111;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lobby-card__controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lobby-card__join-link {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.lobby-view__players {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lobby-player {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.lobby-player:last-child {
+  border-bottom: 0;
+}
+
+.lobby-player__status {
+  font-size: 0.8rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  background: #f0f0f0;
+}
+
+.lobby-player__status.online {
+  background: #d4ffd8;
+}
+
+.lobby-player__status.offline {
+  background: #ffd8d8;
+}
+
+.lobby-player__host {
+  font-size: 0.75rem;
+  color: #555;
+}
+
+.lobby-card__phase,
+.lobby-card__readiness {
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.lobby-view__error {
+  color: #b30f0f;
+  font-weight: 600;
+}

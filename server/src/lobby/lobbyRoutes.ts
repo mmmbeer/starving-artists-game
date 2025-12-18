@@ -1,70 +1,106 @@
 import { Router } from 'express';
-import { joinGame, createGame, fetchLobby, startGame, advanceGamePhase } from './lobbyService';
+import { createGame, fetchLobby, joinGame, leaveGame, startGame } from './lobbyService';
 
 const router = Router();
 
-router.post('/create', (_req, res) => {
+const formatError = (error: unknown) => {
+  const message = (error as Error).message ?? 'Unknown error';
+  if (message.toLowerCase().includes('not found')) {
+    return { status: 404, message };
+  }
+  if (message.toLowerCase().includes('host')) {
+    return { status: 403, message };
+  }
+  return { status: 400, message };
+};
+
+router.post('/create', (req, res) => {
+  const { playerId, displayName } = req.body;
+  if (!playerId || !displayName) {
+    return res.status(400).json({ error: 'playerId and displayName are required to create a game' });
+  }
+
   try {
-    const newGame = createGame();
-    return res.status(201).json(newGame);
+    const snapshot = createGame({ id: playerId, displayName });
+    return res.status(201).json({ lobby: snapshot });
   } catch (error) {
-    return res.status(500).json({ error: (error as Error).message });
+    const { status, message } = formatError(error);
+    return res.status(status).json({ error: message });
   }
 });
 
 router.post('/:gameId/join', (req, res) => {
   const { gameId } = req.params;
   const { playerId, displayName } = req.body;
-
   if (!playerId || !displayName) {
-    return res.status(400).json({ error: 'playerId and displayName are required' });
+    return res.status(400).json({ error: 'playerId and displayName are required to join a game' });
   }
 
   try {
-    const updatedLobby = joinGame(gameId, { id: playerId, displayName });
-    return res.status(200).json(updatedLobby);
+    const snapshot = joinGame(gameId, { id: playerId, displayName });
+    return res.status(200).json({ lobby: snapshot });
   } catch (error) {
-    return res.status(404).json({ error: (error as Error).message });
+    const { status, message } = formatError(error);
+    return res.status(status).json({ error: message });
+  }
+});
+
+router.post('/:gameId/leave', (req, res) => {
+  const { gameId } = req.params;
+  const { playerId } = req.body;
+  if (!playerId) {
+    return res.status(400).json({ error: 'playerId is required to leave a game' });
+  }
+
+  try {
+    const snapshot = leaveGame(gameId, playerId);
+    return res.status(200).json({ lobby: snapshot });
+  } catch (error) {
+    const { status, message } = formatError(error);
+    return res.status(status).json({ error: message });
   }
 });
 
 router.get('/:gameId', (req, res) => {
   const { gameId } = req.params;
-
   try {
-    const lobby = fetchLobby(gameId);
-    return res.status(200).json(lobby);
+    const snapshot = fetchLobby(gameId);
+    return res.status(200).json({ lobby: snapshot });
   } catch (error) {
-    return res.status(404).json({ error: (error as Error).message });
+    const { status, message } = formatError(error);
+    return res.status(status).json({ error: message });
   }
 });
 
 router.post('/:gameId/start', (req, res) => {
   const { gameId } = req.params;
-  try {
-    const started = startGame(gameId, {
-      paintBag: req.body.paintBag,
-      canvasDeck: req.body.canvasDeck,
-      initialPaintMarket: req.body.initialPaintMarket,
-      initialMarketSize: req.body.initialMarketSize,
-      turnOrder: req.body.turnOrder,
-      firstPlayerId: req.body.firstPlayerId,
-      timestamp: req.body.timestamp
-    });
-    return res.status(200).json(started);
-  } catch (error) {
-    return res.status(400).json({ error: (error as Error).message });
-  }
-});
+  const { playerId, paintBag, canvasDeck, initialPaintMarket, initialMarketSize, turnOrder, firstPlayerId, timestamp } =
+    req.body;
 
-router.post('/:gameId/advance-phase', (req, res) => {
-  const { gameId } = req.params;
-  const { targetPhase } = req.body;
+  if (!playerId) {
+    return res.status(400).json({ error: 'playerId is required to start the game' });
+  }
+  if (!Array.isArray(paintBag) || paintBag.length === 0) {
+    return res.status(400).json({ error: 'paintBag is required to start the game' });
+  }
+  if (!Array.isArray(canvasDeck) || canvasDeck.length === 0) {
+    return res.status(400).json({ error: 'canvasDeck is required to start the game' });
+  }
+
   try {
-    const nextState = advanceGamePhase(gameId, targetPhase, new Date().toISOString());
-    return res.status(200).json(nextState);
+    const state = startGame(gameId, playerId, {
+      paintBag,
+      canvasDeck,
+      initialPaintMarket,
+      initialMarketSize,
+      turnOrder,
+      firstPlayerId,
+      timestamp
+    });
+    return res.status(200).json({ gameState: state });
   } catch (error) {
-    return res.status(400).json({ error: (error as Error).message });
+    const { status, message } = formatError(error);
+    return res.status(status).json({ error: message });
   }
 });
 
