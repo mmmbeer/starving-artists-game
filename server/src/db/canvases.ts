@@ -12,6 +12,7 @@ interface CanvasRow extends RowDataPacket {
   paint_value: number;
   food_value: number;
   layout_json: string | Record<string, unknown> | null;
+  filename: string | null;
 }
 
 interface LayoutJson {
@@ -74,6 +75,7 @@ const buildDefinition = (row: CanvasRow): CanvasDefinition => {
     title: row.title,
     artist: row.artist ?? undefined,
     year: row.year ?? undefined,
+    filename: row.filename ?? undefined,
     starValue: row.star_value,
     paintValue: row.paint_value,
     foodValue: row.food_value,
@@ -83,7 +85,7 @@ const buildDefinition = (row: CanvasRow): CanvasDefinition => {
 
 export const fetchCanvasDefinitions = async (): Promise<CanvasDefinition[]> => {
   const rows = await dbQuery<CanvasRow>(
-    'SELECT id, title, artist, year, star_value, paint_value, food_value, layout_json FROM canvases ORDER BY id ASC'
+    'SELECT id, title, artist, year, star_value, paint_value, food_value, layout_json, filename FROM canvases ORDER BY id ASC'
   );
 
   if (rows.length === 0) {

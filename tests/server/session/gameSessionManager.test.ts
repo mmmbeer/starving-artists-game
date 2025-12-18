@@ -14,6 +14,7 @@ jest.mock('../../../server/src/db/canvases', () => ({
     {
       id: 'db-canvas-1',
       title: 'Database Canvas 1',
+      filename: 'assets/canvases/db-canvas-1.png',
       starValue: 2,
       paintValue: 2,
       foodValue: 1,
@@ -33,6 +34,7 @@ const samplePaintBag = (): PaintCube[] => [
 const sampleCanvas = (id: string): CanvasDefinition => ({
   id,
   title: `Test Canvas ${id}`,
+  filename: `assets/canvases/${id}.png`,
   starValue: 1,
   paintValue: 1,
   foodValue: 1,

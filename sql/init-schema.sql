@@ -63,5 +63,6 @@ CREATE TABLE canvases (
   paint_value INT NOT NULL,
   food_value INT NOT NULL,
   layout_json JSON NOT NULL,
+  filename VARCHAR(256),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

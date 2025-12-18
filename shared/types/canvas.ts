@@ -15,6 +15,7 @@ export interface CanvasDefinition {
   title: string;
   artist?: string;
   year?: string;
+  filename?: string;
   starValue: number;
   paintValue: number;
   foodValue: number;
