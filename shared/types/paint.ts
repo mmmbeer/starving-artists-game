@@ -1,4 +1,4 @@
-import { PaintColor, PlayerId } from './game';
+import { PaintColor, PlayerId } from './common';
 
 export interface PaintCube {
   id: string;
@@ -6,7 +6,7 @@ export interface PaintCube {
   ownerId?: PlayerId;
 }
 
-export interface PaintMarket {
-  availableCubes: Record<PaintColor, number>;
+export interface PaintMarketState {
+  cubes: PaintCube[];
   lastUpdated: string;
 }

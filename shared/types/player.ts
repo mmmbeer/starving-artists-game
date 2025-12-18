@@ -1,4 +1,4 @@
-import { PlayerId } from './game';
+import { PlayerId } from './common';
 
 export interface PlayerProfile {
   id: PlayerId;

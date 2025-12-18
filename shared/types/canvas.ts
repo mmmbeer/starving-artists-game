@@ -1,9 +1,13 @@
-import { PaintColor } from './game';
+import { PaintColor, PlayerId } from './common';
+import { PaintCube } from './paint';
 
-export interface CanvasSquare {
-  x: number;
-  y: number;
-  color: PaintColor;
+export interface CanvasSquareDefinition {
+  id: string;
+  position: {
+    x: number;
+    y: number;
+  };
+  allowedColors: PaintColor[];
 }
 
 export interface CanvasDefinition {
@@ -14,5 +18,23 @@ export interface CanvasDefinition {
   starValue: number;
   paintValue: number;
   foodValue: number;
-  layout: CanvasSquare[];
+  squares: CanvasSquareDefinition[];
+}
+
+export interface CanvasState {
+  id: string;
+  definition: CanvasDefinition;
+  ownerId?: PlayerId;
+  placedCubes: Record<string, PaintCube>;
+  createdAt: string;
+}
+
+export interface CanvasMarketSlot {
+  slotIndex: number;
+  canvas: CanvasState;
+  cost: number;
+}
+
+export interface CanvasMarketState {
+  slots: CanvasMarketSlot[];
 }
