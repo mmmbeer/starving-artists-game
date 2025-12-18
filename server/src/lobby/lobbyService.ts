@@ -20,6 +20,6 @@ export const fetchLobby = (gameId: GameId): LobbySnapshot => {
   return lobbySessionManager.fetchLobby(gameId);
 };
 
-export const startGame = (gameId: GameId, playerId: PlayerId, payload: StartGamePayload): GameState => {
+export const startGame = async (gameId: GameId, playerId: PlayerId, payload: StartGamePayload): Promise<GameState> => {
   return lobbySessionManager.startGame(gameId, payload, playerId);
 };

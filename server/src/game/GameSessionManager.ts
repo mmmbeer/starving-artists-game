@@ -9,6 +9,8 @@ import { persistGameMetadata, persistPlayerMembership } from '../db/sessionPersi
 import type { PersistPlayerRecord } from '../db/sessionPersistence';
 import type { StartGamePayload } from './types';
 import type { GameActionSummary } from '../../../shared/types/realtime';
+import type { CanvasDefinition } from '../../../shared/types/canvas';
+import { fetchCanvasDefinitions } from '../db/canvases';
 export type { GameActionSummary } from '../../../shared/types/realtime';
 
 export type LobbyEventReason = 'created' | 'join' | 'reconnect' | 'leave' | 'start';
@@ -87,9 +89,14 @@ export class GameSessionManager extends EventEmitter {
     return session.hasPlayer(playerId);
   }
 
-  public startGame(gameId: GameId, payload: StartGamePayload, requestedBy: PlayerId): GameState {
+  public async startGame(gameId: GameId, payload: StartGamePayload, requestedBy: PlayerId): Promise<GameState> {
     const session = this.getSessionOrThrow(gameId);
-    const newState = session.startGame(payload, requestedBy);
+    const canvasDeck = await this.resolveCanvasDeck(gameId, payload);
+    const payloadWithDeck: StartGamePayload = {
+      ...payload,
+      canvasDeck
+    };
+    const newState = session.startGame(payloadWithDeck, requestedBy);
     void persistGameMetadata(gameId, session.getHostId(), newState.phase);
     session.getState().players.forEach((player) => {
       this.persistPlayer(session, player.id);
@@ -183,5 +190,57 @@ export class GameSessionManager extends EventEmitter {
       default:
         return undefined;
     }
+  }
+
+  private async resolveCanvasDeck(gameId: GameId, payload: StartGamePayload): Promise<CanvasDefinition[]> {
+    if (payload.canvasDeckOverride && payload.canvasDeckOverride.length > 0) {
+      return payload.canvasDeckOverride.map((canvas) => this.cloneCanvasDefinition(canvas));
+    }
+
+    if (payload.canvasDeck && payload.canvasDeck.length > 0) {
+      return payload.canvasDeck.map((canvas) => this.cloneCanvasDefinition(canvas));
+    }
+
+    const definitions = await fetchCanvasDefinitions();
+    if (definitions.length === 0) {
+      throw new Error('No canvases available to build the deck');
+    }
+
+    return this.shuffleDefinitions(definitions, gameId);
+  }
+
+  private cloneCanvasDefinition(canvas: CanvasDefinition): CanvasDefinition {
+    return {
+      ...canvas,
+      squares: canvas.squares.map((square) => ({
+        ...square,
+        position: { ...square.position }
+      }))
+    };
+  }
+
+  private shuffleDefinitions(source: CanvasDefinition[], seedSource: string): CanvasDefinition[] {
+    const seed = this.hashSeed(seedSource);
+    const shuffled = source.map((definition) => this.cloneCanvasDefinition(definition));
+    let current = seed;
+    const nextRandom = () => {
+      current = (current * 9301 + 49297) % 233280;
+      return current / 233280;
+    };
+
+    for (let i = shuffled.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(nextRandom() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    return shuffled;
+  }
+
+  private hashSeed(value: string): number {
+    let hash = 0;
+    for (let index = 0; index < value.length; index += 1) {
+      hash = (hash * 31 + value.charCodeAt(index)) % 1000000000;
+    }
+    return hash || 1;
   }
 }

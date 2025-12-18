@@ -4,7 +4,8 @@ import type { PlayerId } from '../../../shared/types/common';
 
 export interface StartGamePayload {
   paintBag: PaintCube[];
-  canvasDeck: CanvasDefinition[];
+  canvasDeck?: CanvasDefinition[];
+  canvasDeckOverride?: CanvasDefinition[];
   initialPaintMarket?: PaintCube[];
   initialMarketSize?: number;
   turnOrder?: PlayerId[];

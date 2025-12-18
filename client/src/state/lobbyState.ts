@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { LobbySnapshot } from '../../../shared/types/lobby';
 import type { GameState } from '../../../shared/types/game';
 import type { PaintCube } from '../../../shared/types/paint';
-import type { CanvasDefinition } from '../../../shared/types/canvas';
 import type { GameActionIntent } from '../../../shared/types/gameActions';
 import type {
   GameRealtimeServerMessage,
@@ -26,18 +25,6 @@ const samplePaintBag = (): PaintCube[] => [
   { id: 'bag-green', color: 'green' },
   { id: 'bag-black', color: 'black' }
 ];
-
-const sampleCanvas = (): CanvasDefinition => ({
-  id: 'canvas-sunrise',
-  title: 'Sunrise Study',
-  starValue: 1,
-  paintValue: 1,
-  foodValue: 1,
-  squares: [
-    { id: 'sunrise-1', position: { x: 0, y: 0 }, allowedColors: ['red'] },
-    { id: 'sunrise-2', position: { x: 1, y: 0 }, allowedColors: ['orange', 'yellow'] }
-  ]
-});
 
 const normalizeGameId = (value: string) => value.replace(/.*\/lobby\//, '').trim();
 
@@ -333,7 +320,6 @@ export const useLobbyState = () => {
         body: JSON.stringify({
           playerId,
           paintBag: samplePaintBag(),
-          canvasDeck: [sampleCanvas()],
           initialPaintMarket: [],
           initialMarketSize: 2,
           turnOrder: lobby.players.map((player) => player.id),

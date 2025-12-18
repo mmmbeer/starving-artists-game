@@ -72,10 +72,19 @@ router.get('/:gameId', (req, res) => {
   }
 });
 
-router.post('/:gameId/start', (req, res) => {
+router.post('/:gameId/start', async (req, res) => {
   const { gameId } = req.params;
-  const { playerId, paintBag, canvasDeck, initialPaintMarket, initialMarketSize, turnOrder, firstPlayerId, timestamp } =
-    req.body;
+  const {
+    playerId,
+    paintBag,
+    canvasDeck,
+    canvasDeckOverride,
+    initialPaintMarket,
+    initialMarketSize,
+    turnOrder,
+    firstPlayerId,
+    timestamp
+  } = req.body;
 
   if (!playerId) {
     return res.status(400).json({ error: 'playerId is required to start the game' });
@@ -83,14 +92,12 @@ router.post('/:gameId/start', (req, res) => {
   if (!Array.isArray(paintBag) || paintBag.length === 0) {
     return res.status(400).json({ error: 'paintBag is required to start the game' });
   }
-  if (!Array.isArray(canvasDeck) || canvasDeck.length === 0) {
-    return res.status(400).json({ error: 'canvasDeck is required to start the game' });
-  }
 
   try {
-    const state = startGame(gameId, playerId, {
+    const state = await startGame(gameId, playerId, {
       paintBag,
       canvasDeck,
+      canvasDeckOverride,
       initialPaintMarket,
       initialMarketSize,
       turnOrder,

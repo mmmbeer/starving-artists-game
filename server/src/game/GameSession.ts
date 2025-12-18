@@ -168,6 +168,9 @@ export class GameSession {
     const playerSetups = this.buildPlayerSetups();
     const turnOrder = payload.turnOrder ?? playerSetups.map((player) => player.id);
     const desiredFirstPlayer = payload.firstPlayerId ?? turnOrder[0];
+    if (!payload.canvasDeck || payload.canvasDeck.length === 0) {
+      throw new Error('Canvas deck must contain cards before starting the game');
+    }
 
     const initializePayload: InitializeGamePayload = {
       gameId: this.gameId,

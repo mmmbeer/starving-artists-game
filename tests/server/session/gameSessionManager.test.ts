@@ -9,6 +9,22 @@ jest.mock('../../../server/src/db/sessionPersistence', () => ({
   persistPlayerMembership: jest.fn(async () => undefined)
 }));
 
+jest.mock('../../../server/src/db/canvases', () => ({
+  fetchCanvasDefinitions: jest.fn(async (): Promise<CanvasDefinition[]> => [
+    {
+      id: 'db-canvas-1',
+      title: 'Database Canvas 1',
+      starValue: 2,
+      paintValue: 2,
+      foodValue: 1,
+      squares: [
+        { id: 'db-canvas-1-1', position: { x: 0, y: 0 }, allowedColors: ['red'] },
+        { id: 'db-canvas-1-2', position: { x: 1, y: 0 }, allowedColors: ['blue'] }
+      ]
+    }
+  ])
+}));
+
 const samplePaintBag = (): PaintCube[] => [
   { id: 'bag-1', color: 'red' },
   { id: 'bag-2', color: 'blue' }
@@ -68,16 +84,29 @@ describe('GameSessionManager', () => {
     expect(reconnected?.isConnected).toBe(true);
   });
 
-  it('starts the game only when the host requests it', () => {
+  it('starts the game only when the host requests it', async () => {
     const { gameId } = manager.createSession({ id: 'host', displayName: 'Host' });
     manager.joinGame(gameId, { id: 'player', displayName: 'Player' });
 
-    expect(() => {
-      manager.startGame(gameId, createPayload(), 'player');
-    }).toThrow(/host/i);
+    await expect(manager.startGame(gameId, createPayload(), 'player')).rejects.toThrow(/host/i);
 
-    const gameState = manager.startGame(gameId, createPayload(), 'host');
+    const gameState = await manager.startGame(gameId, createPayload(), 'host');
     expect(gameState.phase).toBe(GamePhase.MORNING);
     expect(gameState.players).toHaveLength(2);
+  });
+
+  it('respects explicit canvas deck overrides', async () => {
+    const { gameId } = manager.createSession({ id: 'host', displayName: 'Host' });
+    manager.joinGame(gameId, { id: 'player', displayName: 'Player' });
+
+    const overrideCanvas = sampleCanvas('override-canvas');
+    const payload: StartGamePayload = {
+      ...createPayload(),
+      canvasDeckOverride: [overrideCanvas]
+    };
+
+    const state = await manager.startGame(gameId, payload, 'host');
+    const firstSlot = state.canvasMarket.slots[0];
+    expect(firstSlot.canvas.definition.id).toBe(overrideCanvas.id);
   });
 });

@@ -11,24 +11,27 @@ jest.mock('../../../server/src/db/sessionPersistence', () => ({
   persistPlayerMembership: jest.fn(async () => undefined)
 }));
 
+jest.mock('../../../server/src/db/canvases', () => ({
+  fetchCanvasDefinitions: jest.fn(async (): Promise<CanvasDefinition[]> => [
+    {
+      id: 'db-canvas-1',
+      title: 'DB Canvas 1',
+      starValue: 1,
+      paintValue: 1,
+      foodValue: 1,
+      squares: [
+        { id: 'db-canvas-1-1', position: { x: 0, y: 0 }, allowedColors: ['red'] },
+        { id: 'db-canvas-1-2', position: { x: 1, y: 0 }, allowedColors: ['blue'] }
+      ]
+    }
+  ])
+}));
+
 const samplePaintBag = (): PaintCube[] => [
   { id: 'bag-red', color: 'red' },
   { id: 'bag-blue', color: 'blue' },
   { id: 'bag-green', color: 'green' }
 ];
-
-const sampleCanvas = (id: string, allowed: PaintCube['color'][][]): CanvasDefinition => ({
-  id,
-  title: `Canvas ${id}`,
-  starValue: 1,
-  paintValue: 1,
-  foodValue: 1,
-  squares: allowed.map((colors, index) => ({
-    id: `${id}-square-${index}`,
-    position: { x: index, y: 0 },
-    allowedColors: [...colors]
-  }))
-});
 
 describe('Lobby lifecycle routes', () => {
   it('creates a lobby and exposes the host player with a join link', async () => {
@@ -118,7 +121,6 @@ describe('Lobby lifecycle routes', () => {
       .send({
         playerId: 'player-1',
         paintBag: samplePaintBag(),
-        canvasDeck: [sampleCanvas('canvas-1', [['red']])],
         initialPaintMarket: [],
         initialMarketSize: 1
       })
@@ -130,7 +132,6 @@ describe('Lobby lifecycle routes', () => {
       .send({
         playerId: 'host',
         paintBag: samplePaintBag(),
-        canvasDeck: [sampleCanvas('canvas-2', [['blue']])],
         initialPaintMarket: [],
         initialMarketSize: 1
       })
