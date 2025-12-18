@@ -1,5 +1,24 @@
-import { GameId, GamePhase, GameState, PlayerId, PlayerState } from '../../../shared/types/game';
+import { gameReducer } from '../game';
+import type {
+  AdvancePhaseAction,
+  InitializeGameAction,
+  InitializeGamePayload,
+  PlayerSetup
+} from '../game/actions';
+import type { CanvasDefinition } from '../../../shared/types/canvas';
+import type { PaintCube } from '../../../shared/types/paint';
 import { PlayerProfile } from '../../../shared/types/player';
+import { GameId, GamePhase, GameState, PlayerId, PlayerState } from '../types';
+
+export interface StartGamePayload {
+  paintBag: PaintCube[];
+  canvasDeck: CanvasDefinition[];
+  initialPaintMarket?: PaintCube[];
+  initialMarketSize?: number;
+  turnOrder?: PlayerId[];
+  firstPlayerId?: PlayerId;
+  timestamp?: string;
+}
 
 const lobbyStore = new Map<GameId, GameState>();
 let nextGameSequence = 1;
@@ -83,10 +102,98 @@ export const joinGame = (gameId: GameId, player: PlayerProfile): GameState => {
   return snapshotState(updated);
 };
 
+const buildPlayerSetups = (players: PlayerState[]): PlayerSetup[] =>
+  players
+    .slice()
+    .sort((a, b) => a.order - b.order)
+    .map((player) => ({
+      id: player.id,
+      displayName: player.displayName,
+      order: player.order,
+      nutrition: player.nutrition,
+      score: player.score,
+      studioCubes: player.studio.paintCubes
+    }));
+
+export const startGame = (gameId: GameId, config: StartGamePayload): GameState => {
+  const existing = lobbyStore.get(gameId);
+  if (!existing) {
+    throw new Error(`Game ${gameId} not found`);
+  }
+
+  if (existing.phase !== GamePhase.LOBBY) {
+    throw new Error('Game has already started');
+  }
+
+  if (!config.paintBag || config.paintBag.length === 0) {
+    throw new Error('Paint bag is required to start the game');
+  }
+
+  if (!config.canvasDeck || config.canvasDeck.length === 0) {
+    throw new Error('Canvas deck is required to start the game');
+  }
+
+  if (existing.players.length === 0) {
+    throw new Error('At least one player is required to start the game');
+  }
+
+  const timestamp = config.timestamp ?? createTimestamp();
+
+  const playerSetups = buildPlayerSetups(existing.players);
+  const turnOrder = config.turnOrder ?? playerSetups.map((player) => player.id);
+  const desiredFirstPlayer = config.firstPlayerId ?? turnOrder[0];
+
+  const payload: InitializeGamePayload = {
+    gameId,
+    timestamp,
+    players: playerSetups,
+    turnOrder,
+    paintBag: config.paintBag.map((cube) => ({ ...cube })),
+    canvasDeck: config.canvasDeck.map((canvas) => ({ ...canvas })),
+    initialPaintMarket: config.initialPaintMarket?.map((cube) => ({ ...cube })),
+    initialMarketSize: config.initialMarketSize,
+    firstPlayerId: desiredFirstPlayer
+  };
+
+  const action: InitializeGameAction = {
+    type: 'INITIALIZE_GAME',
+    payload
+  };
+
+  const result = gameReducer(undefined, action);
+  if ('error' in result) {
+    throw new Error(result.error.message);
+  }
+
+  lobbyStore.set(gameId, result.nextState);
+  return result.nextState;
+};
+
 export const fetchLobby = (gameId: GameId): GameState => {
   const existing = lobbyStore.get(gameId);
   if (!existing) {
     throw new Error(`Game ${gameId} not found`);
   }
   return snapshotState(existing);
+};
+
+export const advanceGamePhase = (gameId: GameId, targetPhase?: GamePhase, timestamp?: string): GameState => {
+  const existing = lobbyStore.get(gameId);
+  if (!existing) {
+    throw new Error(`Game ${gameId} not found`);
+  }
+
+  const action: AdvancePhaseAction = {
+    type: 'ADVANCE_PHASE',
+    payload: targetPhase ? { targetPhase } : undefined,
+    meta: timestamp ? { timestamp } : undefined
+  };
+
+  const result = gameReducer(existing, action);
+  if ('error' in result) {
+    throw new Error(result.error.message);
+  }
+
+  lobbyStore.set(gameId, result.nextState);
+  return result.nextState;
 };

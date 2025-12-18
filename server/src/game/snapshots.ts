@@ -1,16 +1,9 @@
-import { GameId, GameState } from '../types';
-
-export interface SerializedGameState {
-  id: GameId;
-  payload: string;
-  recordedAt: string;
-}
-
-const snapshotStore = new Map<GameId, SerializedGameState[]>();
+import { GameState } from '../types';
+import { persistSnapshot, getPersistedSnapshots, SerializedGameStateRecord } from '../db/snapshots';
 
 export const serializeGameState = (state: GameState): string => JSON.stringify(state);
 
-export const prepareSnapshotForPersistence = (state: GameState): SerializedGameState => ({
+export const prepareSnapshotForPersistence = (state: GameState): SerializedGameStateRecord => ({
   id: state.id,
   payload: serializeGameState(state),
   recordedAt: state.updatedAt
@@ -18,8 +11,7 @@ export const prepareSnapshotForPersistence = (state: GameState): SerializedGameS
 
 export const storeSnapshot = (state: GameState): void => {
   const record = prepareSnapshotForPersistence(state);
-  const existing = snapshotStore.get(state.id) ?? [];
-  snapshotStore.set(state.id, [...existing, record]);
+  persistSnapshot(record);
 };
 
-export const getSnapshots = (gameId: GameId): SerializedGameState[] => snapshotStore.get(gameId) ?? [];
+export { getPersistedSnapshots as getSnapshots };
