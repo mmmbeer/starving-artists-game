@@ -1,8 +1,9 @@
-/node_modules
-/server/node_modules
-/client/node_modules
-/server/dist
-/client/dist
-/tests/__snapshots__
-*.log
-*.local
+.git/
+.env
+.htaccess
+_archive/
+.gitignore
+node_modules/
+node_modules
+
+dist/
