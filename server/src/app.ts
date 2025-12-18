@@ -1,8 +1,18 @@
 import express, { Request, Response } from 'express';
+import fs from 'fs';
 import path from 'path';
 import lobbyRouter from './lobby/lobbyRoutes';
 
-const clientDist = path.resolve(__dirname, '..', '..', 'client', 'dist');
+const clientDistCandidates = [
+  path.resolve(__dirname, '..', '..', '..', '..', 'client', 'dist'),
+  path.resolve(__dirname, '..', '..', 'client', 'dist'),
+];
+
+const clientDist = clientDistCandidates.find((candidate) => fs.existsSync(candidate));
+
+if (!clientDist) {
+  throw new Error(`client dist directory not found; checked ${clientDistCandidates.join(', ')}`);
+}
 
 export const createApp = () => {
   const app = express();
