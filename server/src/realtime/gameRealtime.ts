@@ -19,6 +19,10 @@ const send = (socket: WebSocket, message: RealtimeMessage) => {
   }
 };
 
+const assertNever = (value: never): never => {
+  throw new Error(`Unhandled action intent ${JSON.stringify(value)}`);
+};
+
 const buildGameAction = (intent: GameActionIntent, playerId: PlayerId): GameAction => {
   switch (intent.type) {
     case 'DRAW_PAINT_CUBES':
@@ -40,7 +44,7 @@ const buildGameAction = (intent: GameActionIntent, playerId: PlayerId): GameActi
     case 'DECLARE_SELL_INTENT':
       return { type: 'DECLARE_SELL_INTENT', payload: { playerId, canvasIds: intent.payload.canvasIds } };
     default:
-      throw new Error(`Unsupported action type ${intent.type}`);
+      return assertNever(intent);
   }
 };
 
