@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
 import lobbyRouter from './lobby/lobbyRoutes';
+import { getRealtimeHealth } from './realtime/health';
 
 const clientDistCandidates = [
   path.resolve(__dirname, '..', '..', '..', '..', 'client', 'dist'),
@@ -20,6 +21,10 @@ export const createApp = () => {
 
   app.get('/health', (_req: Request, res: Response) => {
     res.status(200).json({ status: 'ok' });
+  });
+
+  app.get('/realtime/health', (_req: Request, res: Response) => {
+    res.status(200).json(getRealtimeHealth());
   });
 
   app.use('/lobby', lobbyRouter);

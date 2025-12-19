@@ -3,6 +3,7 @@ import { initDbPool } from './db/pool';
 import { getConfig } from './config/env';
 import { startLobbyRealtime } from './realtime/lobbyRealtime';
 import { startGameRealtime } from './realtime/gameRealtime';
+import { getRealtimeHealth, setRealtimeHealthProviders } from './realtime/health';
 
 const config = getConfig();
 initDbPool();
@@ -15,15 +16,7 @@ const server = app.listen(config.port, () => {
 
 const { stop: stopLobbyRealtime, getStats: getLobbyHealth } = startLobbyRealtime(server);
 const { stop: stopGameRealtime, getStats: getGameHealth } = startGameRealtime(server);
-
-app.get('/realtime/health', (_req, res) => {
-  res.status(200).json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    lobby: getLobbyHealth(),
-    game: getGameHealth()
-  });
-});
+setRealtimeHealthProviders(getLobbyHealth, getGameHealth);
 
 const gracefulShutdown = async () => {
   // eslint-disable-next-line no-console
