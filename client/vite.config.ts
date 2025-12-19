@@ -7,7 +7,11 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/lobby': 'http://localhost:4000'
+      '/lobby': 'http://localhost:4000',
+      '/realtime': {
+        target: 'http://localhost:4000',
+        ws: true
+      }
     }
   },
   build: {

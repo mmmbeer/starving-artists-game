@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { GameState } from '@shared/types/game';
-import { GamePhase } from '@shared/types/game';
 import type { GameActionSummary } from '@shared/types/realtime';
 import type { PaintCube } from '@shared/types/paint';
 import CanvasRenderer from './canvas/CanvasRenderer';
@@ -24,6 +23,8 @@ type OptimisticPlacement = Record<string, { canvasId: string; squareId: string; 
 
 const buildPlacementKey = (canvasId: string, squareId: string) => `${canvasId}:${squareId}`;
 
+const ACTION_PHASES = ['MORNING', 'AFTERNOON'] as const;
+
 const GameView = ({
   gameState,
   onReturn,
@@ -41,7 +42,7 @@ const GameView = ({
   const localStudio = localPlayer?.studio;
   const cubes = localStudio?.paintCubes ?? [];
   const canvases = localStudio?.canvases ?? [];
-  const isActionPhase = [GamePhase.MORNING, GamePhase.AFTERNOON].includes(gameState.phase);
+  const isActionPhase = ACTION_PHASES.includes(gameState.phase);
 
   const [optimisticPlacements, setOptimisticPlacements] = useState<OptimisticPlacement>({});
   const [isActionPending, setIsActionPending] = useState(false);
