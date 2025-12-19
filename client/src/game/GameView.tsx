@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { GameState } from '../../../shared/types/game';
-import { GamePhase } from '../../../shared/types/game';
-import type { GameActionSummary } from '../../../shared/types/realtime';
-import type { PaintCube } from '../../../shared/types/paint';
+import type { GameState } from '@shared/types/game';
+import { GamePhase } from '@shared/types/game';
+import type { GameActionSummary } from '@shared/types/realtime';
+import type { PaintCube } from '@shared/types/paint';
 import CanvasRenderer from './canvas/CanvasRenderer';
 import PaintCubeLayer from './paint/PaintCubeLayer';
 import { PaintDragProvider, PaintDropIntent } from './paint/dragContext';

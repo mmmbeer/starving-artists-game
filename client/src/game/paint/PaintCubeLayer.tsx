@@ -1,4 +1,4 @@
-import type { PaintCube } from '../../../shared/types/paint';
+import type { PaintCube } from '@shared/types/paint';
 import DraggablePaintCube from './DraggablePaintCube';
 import './PaintCubeLayer.css';
 

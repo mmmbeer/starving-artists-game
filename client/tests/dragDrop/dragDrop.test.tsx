@@ -1,5 +1,5 @@
 import { fireEvent, render } from '@testing-library/react';
-import type { PaintCube } from '../../src/shared/types/paint';
+import type { PaintCube } from '@shared/types/paint';
 import type { ReactNode } from 'react';
 import CanvasSquareOverlay from '../../src/game/canvas/CanvasSquareOverlay';
 import DraggablePaintCube from '../../src/game/paint/DraggablePaintCube';

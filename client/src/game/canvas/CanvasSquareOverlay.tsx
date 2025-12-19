@@ -1,7 +1,7 @@
 import type { CSSProperties, PointerEvent } from 'react';
 import { useMemo } from 'react';
-import type { PaintColor } from '../../../shared/types/common';
-import type { PaintCube } from '../../../shared/types/paint';
+import type { PaintColor } from '@shared/types/common';
+import type { PaintCube } from '@shared/types/paint';
 import type { CanvasSquareOverlayProps } from './types';
 import { usePaintDrag } from '../paint/dragContext';
 

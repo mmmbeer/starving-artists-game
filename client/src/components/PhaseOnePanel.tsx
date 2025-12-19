@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
-import type { GameState } from '../../../shared/types/game';
-import type { CanvasDefinition } from '../../../shared/types/canvas';
-import type { PaintCube } from '../../../shared/types/paint';
+import type { GameState } from '@shared/types/game';
+import type { CanvasDefinition } from '@shared/types/canvas';
+import type { PaintCube } from '@shared/types/paint';
 import './PhaseOnePanel.css';
 
 const sampleCanvasDeckFactory = (): CanvasDefinition[] => [

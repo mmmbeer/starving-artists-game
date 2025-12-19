@@ -1,4 +1,4 @@
-import type { LobbySnapshot } from '../../../shared/types/lobby';
+import type { LobbySnapshot } from '@shared/types/lobby';
 import type { LobbyConnectionStatus } from '../state/lobbyState';
 import './LobbyView.css';
 

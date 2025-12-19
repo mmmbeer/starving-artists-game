@@ -1,5 +1,5 @@
 import type { PointerEventHandler } from 'react';
-import type { PaintCube } from '../../../shared/types/paint';
+import type { PaintCube } from '@shared/types/paint';
 import { usePaintDrag } from './dragContext';
 
 interface DraggablePaintCubeProps {

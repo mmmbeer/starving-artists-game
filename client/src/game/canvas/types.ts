@@ -1,5 +1,5 @@
-import type { PaintCube } from '../../../shared/types/paint';
-import type { CanvasState, CanvasSquareDefinition } from '../../../shared/types/canvas';
+import type { PaintCube } from '@shared/types/paint';
+import type { CanvasState, CanvasSquareDefinition } from '@shared/types/canvas';
 
 export interface CanvasRendererProps {
   canvas: CanvasState;

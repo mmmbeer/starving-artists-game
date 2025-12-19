@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import type { PaintCube } from '../../../shared/types/paint';
+import type { PaintCube } from '@shared/types/paint';
 import './PaintCubeLayer.css';
 
 type DropTarget = {

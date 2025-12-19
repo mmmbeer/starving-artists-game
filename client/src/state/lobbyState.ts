@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { LobbySnapshot } from '../../../shared/types/lobby';
-import type { GameState } from '../../../shared/types/game';
-import type { PaintCube } from '../../../shared/types/paint';
-import type { GameActionIntent } from '../../../shared/types/gameActions';
+import type { LobbySnapshot } from '@shared/types/lobby';
+import type { GameState } from '@shared/types/game';
+import type { PaintCube } from '@shared/types/paint';
+import type { GameActionIntent } from '@shared/types/gameActions';
 import type {
   GameRealtimeServerMessage,
   GameRealtimeClientMessage,
   GameActionSummary
-} from '../../../shared/types/realtime';
+} from '@shared/types/realtime';
 
 export type LobbyConnectionStatus = 'idle' | 'connecting' | 'connected' | 'error';
 
