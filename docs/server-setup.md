@@ -81,7 +81,7 @@ We added `docs/scripts/realtime-health-check.js` to walk through both websocket 
 
 ### Usage
 1. Ensure dependencies installed: from the repo root run `npm install`.
-2. Run the script with:
+2. Run the script with either `--key=value` or `--key value` syntax:
    ```sh
    node docs/scripts/realtime-health-check.js --host www.starvingartistsgame.com --gameId game-1 --playerId player-1
    ```

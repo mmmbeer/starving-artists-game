@@ -4,22 +4,40 @@ const WebSocket = require('ws');
 
 const parseArgs = () => {
   const args = { host: 'www.starvingartistsgame.com', protocol: 'wss', timeout: 5000, gameId: 'game-1', playerId: 'player-1' };
-  process.argv.slice(2).forEach((arg) => {
-    if (!arg.startsWith('--')) {
-      return;
+  const tokens = process.argv.slice(2);
+  for (let index = 0; index < tokens.length; index += 1) {
+    const token = tokens[index];
+    if (!token.startsWith('--')) {
+      continue;
     }
-    const [rawKey, rawValue] = arg.slice(2).split('=');
-    const key = rawKey.trim();
-    const value = rawValue === undefined ? 'true' : rawValue.trim();
+    const hasEquals = token.includes('=');
+    let key;
+    let value;
+
+    if (hasEquals) {
+      const [rawKey, rawValue] = token.slice(2).split('=');
+      key = rawKey.trim();
+      value = rawValue === undefined ? 'true' : rawValue.trim();
+    } else {
+      key = token.slice(2).trim();
+      const nextToken = tokens[index + 1];
+      if (nextToken && !nextToken.startsWith('--')) {
+        value = nextToken.trim();
+        index += 1;
+      } else {
+        value = 'true';
+      }
+    }
+
     if (!key) {
-      return;
+      continue;
     }
     if (key === 'timeout') {
       args.timeout = Number(value) || args.timeout;
-      return;
+      continue;
     }
     args[key] = value;
-  });
+  }
   return args;
 };
 
