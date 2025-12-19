@@ -22,9 +22,9 @@ This guide walks through the pieces you need to wire the single-page app on `www
 
 ## 4. Apache / cPanel configuration for `/realtime`
 
-### 4.1. Preferred method: Apache VirtualHost snippet
-1. In WHM/cPanel’s **Apache Configuration > Include Editor**, add the following inside the specific VirtualHost for `www.starvingartistsgame.com`. If WHM lacks the UI, upload the snippet to `/etc/apache2/conf.d/includes/pre_virtualhost_global.conf` or similar according to your host’s instructions.
-2. Insert these directives inside the VirtualHost block that serves `www.starvingartistsgame.com`:
+### 4.1. Preferred method: Apache VirtualHost include
+1. In WHM/cPanel’s **Apache Configuration > Include Editor**, paste the following inside the VirtualHost for `www.starvingartistsgame.com` (or drop it via `/etc/apache2/conf.d/includes/pre_virtualhost_global.conf` if the UI is unavailable).
+2. Add this chunk so the `/lobby` HTTP routes and `/realtime` websocket routes forward to the Node API on port `4000`:
    ```apache
    ProxyPreserveHost On
    ProxyPass "/lobby"  "http://127.0.0.1:4000/lobby"  retry=0
@@ -36,18 +36,9 @@ This guide walks through the pieces you need to wire the single-page app on `www
    ProxyPass "/realtime/game"  "ws://127.0.0.1:4000/realtime/game"  retry=0
    ProxyPassReverse "/realtime/game"  "ws://127.0.0.1:4000/realtime/game"
    ```
-3. Ensure a `ProxyPass` is only used for websocket paths; do **not** open a wildcard `ProxyPass /realtime http://...` because Apache will attempt HTTP/1.1 for all of them and break the `Upgrade`.
-4. The `mod_proxy_wstunnel` module automatically handles the `Upgrade` and `Connection` headers. If you must do it in `.htaccess` (rare on shared hosts), the snippet would look like:
-   ```apache
-   RewriteEngine On
-   RewriteCond %{HTTP:Upgrade} =websocket [NC]
-   RewriteRule ^realtime/(.*)$ ws://127.0.0.1:4000/realtime/$1 [P,L]
-   RewriteCond %{HTTP:Upgrade} !=websocket [NC]
-   RewriteRule ^realtime/(.*)$ http://127.0.0.1:4000/realtime/$1 [P,L]
-   ```
-   That still needs `mod_proxy`/`mod_proxy_wstunnel` enabled, and `.htaccess` proxying can be disabled by hosts, so prefer the include snippet.
-5. Reload Apache from WHM’s **Restart Services > HTTP Server (Apache)** or via SSH (`apachectl graceful`).
-6. Verify `apachectl -M | grep proxy` shows `proxy_module`, `proxy_http_module`, and `proxy_wstunnel_module`.
+3. Only proxy the websocket paths explicitly; a wildcard `ProxyPass /realtime http://...` would downgrade the upgrade handshake and break `wss://` traffic.
+4. Reload Apache from WHM’s **Restart Services > HTTP Server (Apache)** or via SSH (`apachectl graceful`).
+5. Confirm `apachectl -M | grep proxy` lists `proxy_module`, `proxy_http_module`, and `proxy_wstunnel_module`.
 
 ## 5. Alternative: dedicated `realtime.starvingartistsgame.com` subdomain
 1. In cPanel > Domains > Subdomains, create `realtime.starvingartistsgame.com` pointing at the same document root (or a minimal folder if you only plan to reverse proxy).
@@ -57,11 +48,15 @@ This guide walks through the pieces you need to wire the single-page app on `www
    ProxyPreserveHost On
    ProxyPass "/"  "http://127.0.0.1:4000/"
    ProxyPassReverse "/"  "http://127.0.0.1:4000/"
+
    RewriteEngine On
    RewriteCond %{HTTP:Upgrade} =websocket [NC]
    RewriteRule ^(.*)$ ws://127.0.0.1:4000/$1 [P,L]
+   RewriteCond %{HTTP:Upgrade} !=websocket [NC]
+   RewriteRule ^(.*)$ http://127.0.0.1:4000/$1 [P,L]
    ```
-4. On the client side you must now point websocket connections to `wss://realtime.starvingartistsgame.com/realtime/...`. Update `client/src/state/lobbyState.ts` to build URLs using a configurable host (e.g., via `import.meta.env.VITE_REALTIME_HOST` or a runtime variable) so the page keeps using `www` for HTTP but `realtime.` for websockets.
+4. Alternatively, if you cannot edit the VirtualHost directly, drop a `.htaccess` in the subdomain’s document root with the same rewrite rules to conditionally proxy websocket upgrade headers.
+5. Update the client to keep HTTP traffic on `www` but point websockets at `wss://realtime.starvingartistsgame.com` by configuring `VITE_REALTIME_URL` (see the new `.env.example`).
 
 ## 6. Health + diagnostics
 1. The server now exposes `/realtime/health` (in addition to the main health endpoint). Hitting `https://www.starvingartistsgame.com/realtime/health` returns:
@@ -105,3 +100,13 @@ We added `docs/scripts/realtime-health-check.js` to walk through both websocket 
 - For a subdomain, proxy the entire subdomain and point the client’s websocket builder at `realtime.starvingartistsgame.com`.
 
 Follow these steps to keep the shared host setup deterministic: every websocket handshake goes through Apache, every state change is served by the backend, and the health tooling makes it clear whether the webs servers are live before the client tries any actions.
+
+## 9. Client environment overrides
+1. Create a `client/.env` (or use `client/.env.example`) to override host destinations in development or production. The repository now ships the example:
+   ```
+   VITE_SITE_ORIGIN=https://www.starvingartistsgame.com
+   VITE_REALTIME_URL=wss://realtime.starvingartistsgame.com
+   ```
+2. `VITE_SITE_ORIGIN` prefixes every `/lobby` HTTP request, so builds that run on other domains (e.g., a staging site) can still reach `www`’s lobby APIs.
+3. `VITE_REALTIME_URL` provides the websocket base that `client/src/state/lobbyState.ts` uses when constructing `/realtime/lobby` and `/realtime/game` sockets. Pointing it at `wss://realtime.starvingartistsgame.com` keeps websockets on the dedicated subdomain regardless of where the SPA is served.
+4. When you update the `.env`, rebuild the client (`npm --workspace client run build`) so the new variables are embedded in the compiled bundle.

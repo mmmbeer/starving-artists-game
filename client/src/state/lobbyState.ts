@@ -19,6 +19,17 @@ type StartGameResponse = {
   gameState: GameState;
 };
 
+const getRealtimeBase = () => {
+  const override = import.meta.env.VITE_REALTIME_URL;
+  if (override) {
+    return override.replace(/\/$/, '');
+  }
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${protocol}//${window.location.host}`;
+};
+
+const apiBase = import.meta.env.VITE_SITE_ORIGIN ? import.meta.env.VITE_SITE_ORIGIN.replace(/\/$/, '') : '';
+
 const samplePaintBag = (): PaintCube[] => [
   { id: 'bag-red', color: 'red' },
   { id: 'bag-blue', color: 'blue' },
@@ -29,7 +40,8 @@ const samplePaintBag = (): PaintCube[] => [
 const normalizeGameId = (value: string) => value.replace(/.*\/lobby\//, '').trim();
 
 const createJsonRequest = async (url: string, init: RequestInit) => {
-  const response = await fetch(url, init);
+  const target = apiBase ? `${apiBase}${url}` : url;
+  const response = await fetch(target, init);
   const payload = await response.json();
   if (!response.ok) {
     throw new Error(payload.error ?? 'Request failed');
@@ -70,10 +82,10 @@ export const useLobbyState = () => {
       return;
     }
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/realtime/lobby?gameId=${encodeURIComponent(
-      gameId
-    )}&playerId=${encodeURIComponent(playerId)}`;
+    const base = getRealtimeBase();
+    const wsUrl = `${base}/realtime/lobby?gameId=${encodeURIComponent(gameId)}&playerId=${encodeURIComponent(
+      playerId
+    )}`;
 
     wsRef.current?.close();
     const socket = new WebSocket(wsUrl);
@@ -123,10 +135,10 @@ export const useLobbyState = () => {
       return;
     }
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/realtime/game?gameId=${encodeURIComponent(
-      gameId
-    )}&playerId=${encodeURIComponent(playerId)}`;
+    const base = getRealtimeBase();
+    const wsUrl = `${base}/realtime/game?gameId=${encodeURIComponent(gameId)}&playerId=${encodeURIComponent(
+      playerId
+    )}`;
 
     gameSocketRef.current?.close();
     const socket = new WebSocket(wsUrl);
