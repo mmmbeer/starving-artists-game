@@ -12,6 +12,7 @@ This guide walks through the pieces you need to wire the single-page app on `www
 - Apache on cPanel with `mod_proxy`, `mod_proxy_http`, and `mod_proxy_wstunnel` enabled. If those modules are missing, ask your host or enable them under **WHM > Software > EasyApache**.
 - Certificates already terminating at the Apache layer (`www.starvingartistsgame.com` is served over HTTPS).
 - The backend must remain authoritative; do **not** mirror game state in the client.
+ - Configure `ALLOWED_ORIGINS` in `server/.env` (comma-separated) so the API responds with `Access-Control-Allow-Origin` for the browser host(s) you serve. The default includes both `https://www.starvingartistsgame.com` and `https://starvingartistsgame.com`, and you can add `https://realtime.starvingartistsgame.com` if the websocket subdomain is separate.
 
 ## 3. Node backend deployment reminders
 1. Install dependencies from the monorepo root: `npm install`.
