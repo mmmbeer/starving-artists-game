@@ -1,0 +1,118 @@
+.paint-cube-layer {
+  background: var(--surface-bright);
+  border: 1px solid var(--border-muted);
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.paint-cube-layer__label {
+  margin: 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.paint-cube-layer__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(3.5rem, 1fr));
+  gap: 0.5rem;
+}
+
+.paint-cube-layer__empty {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.paint-cube {
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0;
+  width: 3.5rem;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: #fff;
+  cursor: grab;
+  position: relative;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.paint-cube:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.paint-cube--ghosted {
+  opacity: 0.5;
+}
+
+.paint-cube__label {
+  text-transform: capitalize;
+  pointer-events: none;
+}
+
+.paint-cube__wild-badge {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.2rem;
+  font-size: 0.55rem;
+  background: rgba(255, 255, 255, 0.35);
+  color: inherit;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.paint-cube--red {
+  background: var(--paint-red);
+}
+
+.paint-cube--orange {
+  background: var(--paint-orange);
+}
+
+.paint-cube--yellow {
+  background: var(--paint-yellow);
+}
+
+.paint-cube--green {
+  background: var(--paint-green);
+}
+
+.paint-cube--blue {
+  background: var(--paint-blue);
+}
+
+.paint-cube--purple {
+  background: var(--paint-purple);
+}
+
+.paint-cube--black {
+  background: var(--paint-black);
+}
+
+.paint-cube--wild {
+  background: var(--paint-wild);
+}
+
+.paint-drag-ghost {
+  position: fixed;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 50;
+}
+
+.paint-drag-ghost .paint-cube {
+  width: 3rem;
+  height: 3rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+}

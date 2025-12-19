@@ -34,7 +34,7 @@ function App() {
         <p>Phase 2 Lobby and multiplayer lifecycle</p>
       </header>
       <main>
-        {gameState ? (
+      {gameState ? (
         <GameView
           gameState={gameState}
           onReturn={resetGameState}
@@ -44,9 +44,10 @@ function App() {
           onPaint={onApplyPaint}
           onEndTurn={onEndTurn}
           playerId={playerId}
+          error={error}
         />
-        ) : (
-          <LobbyView
+      ) : (
+        <LobbyView
             lobby={lobby}
             gameId={gameId}
             playerId={playerId}

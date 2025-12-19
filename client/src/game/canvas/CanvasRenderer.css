@@ -1,0 +1,119 @@
+.canvas-card {
+  background: var(--surface-bright);
+  border: 1px solid var(--border-muted);
+  border-radius: 1rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.canvas-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.canvas-card__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.canvas-card__meta {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.canvas-card__wild-flag {
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-muted);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.canvas-card__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 0.85rem;
+  overflow: hidden;
+  background: var(--surface-muted);
+}
+
+.canvas-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.canvas-card__placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #e8e4dc, #d9d3c7);
+}
+
+.canvas-card__overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.canvas-square {
+  position: absolute;
+  top: var(--square-top);
+  left: var(--square-left);
+  width: clamp(12%, 10vw, 18%);
+  height: clamp(12%, 10vw, 18%);
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.7);
+  transform: translate(-50%, -50%) scale(1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.canvas-square--hovered {
+  transform: translate(-50%, -50%) scale(1.2);
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.canvas-square--hint-valid {
+  box-shadow: 0 0 0 3px rgba(67, 170, 111, 0.45);
+}
+
+.canvas-square--hint-invalid {
+  box-shadow: 0 0 0 3px rgba(209, 67, 67, 0.5);
+}
+
+.canvas-square__occupant {
+  width: 65%;
+  height: 65%;
+  border-radius: 50%;
+  border: 2px solid var(--surface-bright);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.canvas-square__hint {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px dashed;
+}
+
+.canvas-square__hint--valid {
+  border-color: rgba(67, 170, 111, 0.4);
+}
+
+.canvas-square__hint--invalid {
+  border-color: rgba(209, 67, 67, 0.4);
+}
