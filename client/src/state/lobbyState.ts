@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { LobbySnapshot } from '@shared/types/lobby';
 import type { GameState } from '@shared/types/game';
 import type { PaintCube } from '@shared/types/paint';
@@ -19,13 +19,32 @@ type StartGameResponse = {
   gameState: GameState;
 };
 
-const getRealtimeBase = () => {
-  const override = import.meta.env.VITE_REALTIME_URL;
-  if (override) {
-    return override.replace(/\/$/, '');
+const normalizeRealtimeBase = (value: string) => value.replace(/\/$/, '');
+
+const coerceWebsocketBase = (value: string) => {
+  if (value.startsWith('wss://') || value.startsWith('ws://')) {
+    return normalizeRealtimeBase(value);
   }
-  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  return `${protocol}//${window.location.host}`;
+
+  if (value.startsWith('https://')) {
+    return normalizeRealtimeBase(`wss://${value.slice('https://'.length)}`);
+  }
+
+  if (value.startsWith('http://')) {
+    return normalizeRealtimeBase(`ws://${value.slice('http://'.length)}`);
+  }
+
+  return null;
+};
+
+const getRealtimeBases = () => {
+  const defaultProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const fallbackBase = `${defaultProtocol}//${window.location.host}`;
+
+  const override = import.meta.env.VITE_REALTIME_URL;
+  const primaryBase = override ? coerceWebsocketBase(override) ?? fallbackBase : fallbackBase;
+
+  return { primaryBase, fallbackBase } as const;
 };
 
 const apiBase = import.meta.env.VITE_SITE_ORIGIN ? import.meta.env.VITE_SITE_ORIGIN.replace(/\/$/, '') : '';
@@ -50,6 +69,8 @@ const createJsonRequest = async (url: string, init: RequestInit) => {
 };
 
 export const useLobbyState = () => {
+  const { primaryBase, fallbackBase } = useMemo(getRealtimeBases, []);
+  const [realtimeBase, setRealtimeBase] = useState(primaryBase);
   const [lobby, setLobby] = useState<LobbySnapshot | null>(null);
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<LobbyConnectionStatus>('idle');
@@ -70,6 +91,14 @@ export const useLobbyState = () => {
     }
   }, []);
 
+  const tryFallbackRealtimeBase = useCallback(() => {
+    if (fallbackBase && realtimeBase !== fallbackBase) {
+      setRealtimeBase(fallbackBase);
+      return true;
+    }
+    return false;
+  }, [fallbackBase, realtimeBase]);
+
   const pushActionHistory = useCallback((entry: GameActionSummary) => {
     setActionHistory((previous) => [entry, ...previous].slice(0, 10));
   }, []);
@@ -82,8 +111,7 @@ export const useLobbyState = () => {
       return;
     }
 
-    const base = getRealtimeBase();
-    const wsUrl = `${base}/realtime/lobby?gameId=${encodeURIComponent(gameId)}&playerId=${encodeURIComponent(
+    const wsUrl = `${realtimeBase}/realtime/lobby?gameId=${encodeURIComponent(gameId)}&playerId=${encodeURIComponent(
       playerId
     )}`;
 
@@ -120,13 +148,18 @@ export const useLobbyState = () => {
     };
 
     socket.onerror = () => {
-      setConnectionStatus('error');
+      if (!tryFallbackRealtimeBase()) {
+        setConnectionStatus('error');
+      }
     };
 
     socket.onclose = () => {
+      if (tryFallbackRealtimeBase()) {
+        return;
+      }
       setConnectionStatus((previous) => (previous === 'error' ? previous : 'idle'));
     };
-  }, [gameId, playerId, updateLobby]);
+  }, [gameId, playerId, realtimeBase, tryFallbackRealtimeBase, updateLobby]);
 
   const connectGameRealtime = useCallback(() => {
     if (!gameId || !playerId || !gameState) {
@@ -135,8 +168,7 @@ export const useLobbyState = () => {
       return;
     }
 
-    const base = getRealtimeBase();
-    const wsUrl = `${base}/realtime/game?gameId=${encodeURIComponent(gameId)}&playerId=${encodeURIComponent(
+    const wsUrl = `${realtimeBase}/realtime/game?gameId=${encodeURIComponent(gameId)}&playerId=${encodeURIComponent(
       playerId
     )}`;
 
@@ -170,15 +202,20 @@ export const useLobbyState = () => {
     };
 
     socket.onerror = () => {
-      setError('Realtime game connection failed');
+      if (!tryFallbackRealtimeBase()) {
+        setError('Realtime game connection failed');
+      }
     };
 
     socket.onclose = () => {
+      if (tryFallbackRealtimeBase()) {
+        return;
+      }
       if (gameSocketRef.current === socket) {
         gameSocketRef.current = null;
       }
     };
-  }, [gameId, playerId, gameState, pushActionHistory]);
+  }, [gameId, playerId, gameState, pushActionHistory, realtimeBase, tryFallbackRealtimeBase]);
 
   const sendGameAction = useCallback((intent: GameActionIntent) => {
     const socket = gameSocketRef.current;
