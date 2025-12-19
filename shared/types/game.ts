@@ -54,4 +54,4 @@ export interface GameState {
   updatedAt: string;
 }
 
-export { GameId, PlayerId, PaintColor, PAINT_COLOR_PALETTE };
+export { GameId, PlayerId, PaintColor, PAINT_COLOR_PALETTE, GamePhase };
