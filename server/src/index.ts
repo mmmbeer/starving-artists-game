@@ -13,8 +13,17 @@ const server = app.listen(config.port, () => {
   console.log(`Server listening on port ${config.port}`);
 });
 
-const { stop: stopLobbyRealtime } = startLobbyRealtime(server);
-const { stop: stopGameRealtime } = startGameRealtime(server);
+const { stop: stopLobbyRealtime, getStats: getLobbyHealth } = startLobbyRealtime(server);
+const { stop: stopGameRealtime, getStats: getGameHealth } = startGameRealtime(server);
+
+app.get('/realtime/health', (_req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    lobby: getLobbyHealth(),
+    game: getGameHealth()
+  });
+});
 
 const gracefulShutdown = async () => {
   // eslint-disable-next-line no-console

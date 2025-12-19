@@ -2,6 +2,8 @@ import type { Server as HttpServer } from 'http';
 import WebSocket, { WebSocketServer } from 'ws';
 import { lobbySessionManager, GameStartedEvent, LobbyEvent, LobbyEventReason } from '../game';
 import type { LobbySnapshot } from '../../../shared/types/lobby';
+import type { RealtimeHealthSnapshot } from './health';
+import { countWebSocketConnections } from './health';
 
 const ROOM_PATH = '/realtime/lobby';
 
@@ -32,6 +34,7 @@ const send = (socket: WebSocket, message: RealtimeMessage) => {
 export const startLobbyRealtime = (server: HttpServer) => {
   const rooms = new Map<string, Set<WebSocket>>();
   const socketToRoom = new Map<WebSocket, string>();
+  let lastBroadcastAt: string | null = null;
 
   const wss = new WebSocketServer({
     server,
@@ -75,6 +78,7 @@ export const startLobbyRealtime = (server: HttpServer) => {
       payload: event.snapshot,
       reason: event.reason
     });
+    lastBroadcastAt = new Date().toISOString();
   };
 
   const gameStartedListener = (event: GameStartedEvent) => {
@@ -82,6 +86,7 @@ export const startLobbyRealtime = (server: HttpServer) => {
       type: 'GAME_STARTED',
       payload: event.state
     });
+    lastBroadcastAt = new Date().toISOString();
   };
 
   lobbySessionManager.on('lobby-updated', lobbyListener);
@@ -125,5 +130,11 @@ export const startLobbyRealtime = (server: HttpServer) => {
     wss.close();
   };
 
-  return { stop };
+  const getStats = (): RealtimeHealthSnapshot => ({
+    activeGames: rooms.size,
+    activeConnections: countWebSocketConnections(rooms),
+    lastBroadcastAt
+  });
+
+  return { stop, getStats };
 };

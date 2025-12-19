@@ -6,6 +6,8 @@ import type { GameActionIntent } from '../../../shared/types/gameActions';
 import type { GameRealtimeClientMessage, GameRealtimeServerMessage } from '../../../shared/types/realtime';
 import type { GameState } from '../../../shared/types/game';
 import type { PlayerId } from '../../../shared/types/common';
+import type { RealtimeHealthSnapshot } from './health';
+import { countWebSocketConnections } from './health';
 
 const ROOM_PATH = '/realtime/game';
 
@@ -75,6 +77,7 @@ const removeFromRoom = (rooms: Map<string, Set<WebSocket>>, socketToRoom: Map<We
 export const startGameRealtime = (server: HttpServer) => {
   const rooms = new Map<string, Set<WebSocket>>();
   const socketToRoom = new Map<WebSocket, string>();
+  let lastBroadcastAt: string | null = null;
 
   const wss = new WebSocketServer({
     server,
@@ -97,6 +100,7 @@ export const startGameRealtime = (server: HttpServer) => {
         lastAction: event.action
       }
     });
+    lastBroadcastAt = new Date().toISOString();
   };
 
   lobbySessionManager.on('game-state-updated', gameStateListener);
@@ -166,5 +170,11 @@ export const startGameRealtime = (server: HttpServer) => {
     wss.close();
   };
 
-  return { stop };
+  const getStats = (): RealtimeHealthSnapshot => ({
+    activeGames: rooms.size,
+    activeConnections: countWebSocketConnections(rooms),
+    lastBroadcastAt
+  });
+
+  return { stop, getStats };
 };
