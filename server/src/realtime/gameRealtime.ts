@@ -1,24 +1,29 @@
 import type { Server as HttpServer } from 'http';
 import WebSocket, { WebSocketServer } from 'ws';
+import type { Socket, Server as SocketIOServer } from 'socket.io';
 import { lobbySessionManager, GameStateUpdatedEvent } from '../game';
 import type { GameAction } from '../game/actions';
 import type { GameActionIntent } from '../../../shared/types/gameActions';
 import type { GameRealtimeClientMessage, GameRealtimeServerMessage } from '../../../shared/types/realtime';
-import type { GameState } from '../../../shared/types/game';
 import type { PlayerId } from '../../../shared/types/common';
 import type { RealtimeHealthSnapshot } from './health';
-import { countWebSocketConnections } from './health';
+import { countConnections, countActiveGamesAcrossRooms } from './health';
+import { createRoomRegistry } from './roomRegistry';
+import type { RealtimeConfig } from '../config/env';
 
 const ROOM_PATH = '/realtime/game';
 
 type RealtimeMessage = GameRealtimeServerMessage;
-
 type GameActionMessage = GameRealtimeClientMessage;
 
-const send = (socket: WebSocket, message: RealtimeMessage) => {
+const sendWebSocketMessage = (socket: WebSocket, message: RealtimeMessage) => {
   if (socket.readyState === WebSocket.OPEN) {
     socket.send(JSON.stringify(message));
   }
+};
+
+const sendSocketIoMessage = (socket: Socket, message: RealtimeMessage) => {
+  socket.emit('realtime_message', message);
 };
 
 const assertNever = (value: never): never => {
@@ -50,46 +55,61 @@ const buildGameAction = (intent: GameActionIntent, playerId: PlayerId): GameActi
   }
 };
 
-const addToRoom = (rooms: Map<string, Set<WebSocket>>, gameId: string, socket: WebSocket) => {
-  const set = rooms.get(gameId) ?? new Set();
-  set.add(socket);
-  rooms.set(gameId, set);
+const parseQueryParam = (value: string | string[] | undefined): string | null => {
+  if (Array.isArray(value)) {
+    return value[0] ?? null;
+  }
+  return value ?? null;
 };
 
-const removeFromRoom = (rooms: Map<string, Set<WebSocket>>, socketToRoom: Map<WebSocket, string>, socket: WebSocket) => {
-  const roomId = socketToRoom.get(socket);
-  if (!roomId) {
-    return;
-  }
-
-  const sockets = rooms.get(roomId);
-  if (!sockets) {
-    return;
-  }
-
-  sockets.delete(socket);
-  socketToRoom.delete(socket);
-  if (sockets.size === 0) {
-    rooms.delete(roomId);
-  }
+const handleSocketIoError = (socket: Socket, message: string) => {
+  sendSocketIoMessage(socket, { type: 'ERROR', payload: { message } });
+  socket.disconnect(true);
 };
 
-export const startGameRealtime = (server: HttpServer) => {
-  const rooms = new Map<string, Set<WebSocket>>();
-  const socketToRoom = new Map<WebSocket, string>();
+export const startGameRealtime = (
+  server: HttpServer,
+  realtimeConfig: RealtimeConfig,
+  socketIoServer: SocketIOServer | null
+) => {
+  const websocketRegistry = createRoomRegistry<WebSocket>();
+  const socketIoRegistry = createRoomRegistry<Socket>();
   let lastBroadcastAt: string | null = null;
 
-  const wss = new WebSocketServer({
-    server,
-    path: ROOM_PATH
-  });
+  const wss = realtimeConfig.enableWebSocket
+    ? new WebSocketServer({
+        server,
+        path: ROOM_PATH
+      })
+    : null;
 
-  const broadcast = (gameId: string, message: RealtimeMessage) => {
-    const sockets = rooms.get(gameId);
+  const gameNamespace =
+    realtimeConfig.enableSocketIo && socketIoServer ? socketIoServer.of('/game') : null;
+
+  if (realtimeConfig.enableSocketIo && !socketIoServer) {
+    throw new Error('Socket.IO server required when socket.io realtime is enabled');
+  }
+
+  const broadcastToWebSockets = (gameId: string, message: RealtimeMessage) => {
+    const sockets = websocketRegistry.rooms.get(gameId);
     if (!sockets) {
       return;
     }
-    sockets.forEach((socket) => send(socket, message));
+    sockets.forEach((socket) => sendWebSocketMessage(socket, message));
+  };
+
+  const broadcastToSocketIo = (gameId: string, message: RealtimeMessage) => {
+    const sockets = socketIoRegistry.rooms.get(gameId);
+    if (!sockets) {
+      return;
+    }
+    sockets.forEach((socket) => sendSocketIoMessage(socket, message));
+  };
+
+  const broadcast = (gameId: string, message: RealtimeMessage) => {
+    broadcastToWebSockets(gameId, message);
+    broadcastToSocketIo(gameId, message);
+    lastBroadcastAt = new Date().toISOString();
   };
 
   const gameStateListener = (event: GameStateUpdatedEvent) => {
@@ -100,18 +120,17 @@ export const startGameRealtime = (server: HttpServer) => {
         lastAction: event.action
       }
     });
-    lastBroadcastAt = new Date().toISOString();
   };
 
   lobbySessionManager.on('game-state-updated', gameStateListener);
 
-  wss.on('connection', (socket, request) => {
-    const url = request.url ? new URL(request.url, 'http://localhost') : null;
+  const handleWebSocketConnection = (socket: WebSocket, requestUrl: string | null) => {
+    const url = requestUrl ? new URL(requestUrl, 'http://localhost') : null;
     const gameId = url?.searchParams.get('gameId');
     const playerId = url?.searchParams.get('playerId');
 
     if (!gameId || !playerId) {
-      send(socket, { type: 'ERROR', payload: { message: 'gameId and playerId are required' } });
+      sendWebSocketMessage(socket, { type: 'ERROR', payload: { message: 'gameId and playerId are required' } });
       socket.close();
       return;
     }
@@ -119,22 +138,21 @@ export const startGameRealtime = (server: HttpServer) => {
     try {
       const hasSession = lobbySessionManager.hasSession(gameId);
       if (!hasSession || !lobbySessionManager.isPlayerInGame(gameId, playerId)) {
-        send(socket, { type: 'ERROR', payload: { message: 'Player not registered for this game' } });
+        sendWebSocketMessage(socket, { type: 'ERROR', payload: { message: 'Player not registered for this game' } });
         socket.close();
         return;
       }
 
-      addToRoom(rooms, gameId, socket);
-      socketToRoom.set(socket, gameId);
+      websocketRegistry.add(gameId, socket);
       const state = lobbySessionManager.fetchGameState(gameId);
-      send(socket, {
+      sendWebSocketMessage(socket, {
         type: 'GAME_STATE_UPDATED',
         payload: {
           state
         }
       });
     } catch (error) {
-      send(socket, { type: 'ERROR', payload: { message: (error as Error).message } });
+      sendWebSocketMessage(socket, { type: 'ERROR', payload: { message: (error as Error).message } });
       socket.close();
       return;
     }
@@ -150,31 +168,102 @@ export const startGameRealtime = (server: HttpServer) => {
           const action = buildGameAction(data.payload, playerId);
           lobbySessionManager.applyAction(gameId, action, playerId);
         } catch (actionError) {
-          send(socket, {
+          sendWebSocketMessage(socket, {
             type: 'ERROR',
             payload: { message: (actionError as Error).message }
           });
         }
       } catch {
-        send(socket, { type: 'ERROR', payload: { message: 'Invalid message format' } });
+        sendWebSocketMessage(socket, { type: 'ERROR', payload: { message: 'Invalid message format' } });
       }
     });
 
     socket.on('close', () => {
-      removeFromRoom(rooms, socketToRoom, socket);
+      websocketRegistry.remove(socket);
     });
-  });
+  };
+
+  if (wss) {
+    wss.on('connection', (socket, request) => {
+      handleWebSocketConnection(socket, request.url ?? null);
+    });
+  }
+
+  const handleSocketIoConnection = (socket: Socket) => {
+    const gameId = parseQueryParam(socket.handshake.query.gameId);
+    const playerId = parseQueryParam(socket.handshake.query.playerId);
+
+    if (!gameId || !playerId) {
+      handleSocketIoError(socket, 'gameId and playerId are required');
+      return;
+    }
+
+    try {
+      const hasSession = lobbySessionManager.hasSession(gameId);
+      if (!hasSession || !lobbySessionManager.isPlayerInGame(gameId, playerId)) {
+        handleSocketIoError(socket, 'Player not registered for this game');
+        return;
+      }
+
+      socketIoRegistry.add(gameId, socket);
+      const state = lobbySessionManager.fetchGameState(gameId);
+      sendSocketIoMessage(socket, {
+        type: 'GAME_STATE_UPDATED',
+        payload: {
+          state
+        }
+      });
+    } catch (error) {
+      handleSocketIoError(socket, (error as Error).message);
+      return;
+    }
+
+    socket.on('game_action', (data: GameActionMessage | unknown) => {
+      if ((data as GameRealtimeClientMessage).type !== 'GAME_ACTION') {
+        return;
+      }
+
+      try {
+        const action = buildGameAction((data as GameRealtimeClientMessage).payload, playerId);
+        lobbySessionManager.applyAction(gameId, action, playerId);
+      } catch (actionError) {
+        sendSocketIoMessage(socket, {
+          type: 'ERROR',
+          payload: { message: (actionError as Error).message }
+        });
+      }
+    });
+
+    socket.on('disconnect', () => {
+      socketIoRegistry.remove(socket);
+    });
+  };
+
+  if (gameNamespace) {
+    gameNamespace.on('connection', handleSocketIoConnection);
+  }
 
   const stop = () => {
     lobbySessionManager.off('game-state-updated', gameStateListener);
-    wss.close();
+    wss?.close();
+    if (gameNamespace) {
+      gameNamespace.off('connection', handleSocketIoConnection);
+    }
   };
 
-  const getStats = (): RealtimeHealthSnapshot => ({
-    activeGames: rooms.size,
-    activeConnections: countWebSocketConnections(rooms),
-    lastBroadcastAt
-  });
+  const getStats = (): RealtimeHealthSnapshot => {
+    const activeGames = countActiveGamesAcrossRooms(
+      websocketRegistry.rooms,
+      socketIoRegistry.rooms
+    );
+    const activeConnections =
+      countConnections(websocketRegistry.rooms) + countConnections(socketIoRegistry.rooms);
+    return {
+      activeGames,
+      activeConnections,
+      lastBroadcastAt
+    };
+  };
 
   return { stop, getStats };
 };

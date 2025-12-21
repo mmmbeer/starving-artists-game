@@ -3,18 +3,9 @@ import fs from 'fs';
 import path from 'path';
 import lobbyRouter from './lobby/lobbyRoutes';
 import { getRealtimeHealth } from './realtime/health';
+import { getAllowedOrigins } from './config/origins';
 
-const parseOrigins = (value?: string) =>
-  value
-    ? value
-        .split(',')
-        .map((origin) => origin.trim())
-        .filter((origin) => origin.length > 0)
-    : [];
-
-const allowedOrigins = parseOrigins(process.env.ALLOWED_ORIGINS).length
-  ? parseOrigins(process.env.ALLOWED_ORIGINS)
-  : ['https://www.starvingartistsgame.com', 'https://starvingartistsgame.com'];
+const allowedOrigins = getAllowedOrigins();
 
 const applyCorsHeaders = (req: Request, res: Response) => {
   const origin = req.headers.origin;

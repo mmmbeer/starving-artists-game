@@ -10,10 +10,25 @@ export interface DatabaseConfig {
   database: string;
 }
 
+export interface RealtimeConfig {
+  enableWebSocket: boolean;
+  enableSocketIo: boolean;
+  socketIoPath: string;
+}
+
 export interface AppConfig {
   port: number;
   database: DatabaseConfig;
+  realtime: RealtimeConfig;
 }
+
+const parseBoolean = (value: string | undefined, fallback: boolean) => {
+  if (!value) {
+    return fallback;
+  }
+  const normalized = value.toLowerCase();
+  return normalized !== 'false' && normalized !== '0';
+};
 
 const requiredEnv = ['DB_HOST', 'DB_USER', 'DB_PORT', 'DB_PASSWORD', 'DB_NAME'];
 
@@ -29,6 +44,12 @@ export const getConfig = (): AppConfig => {
     throw new Error('PORT must be a valid number');
   }
 
+  const realtime: RealtimeConfig = {
+    enableWebSocket: parseBoolean(process.env.REALTIME_WSS_ENABLED, true),
+    enableSocketIo: parseBoolean(process.env.REALTIME_SOCKET_IO_ENABLED, true),
+    socketIoPath: process.env.REALTIME_SOCKET_IO_PATH ?? '/realtime/socket.io'
+  };
+
   return {
     port,
     database: {
@@ -37,6 +58,7 @@ export const getConfig = (): AppConfig => {
       password: process.env.DB_PASSWORD!,
       port: Number(process.env.DB_PORT!),
       database: process.env.DB_NAME!
-    }
+    },
+    realtime
   };
 };

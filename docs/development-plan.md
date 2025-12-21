@@ -54,6 +54,7 @@ Lobby logic enforces per-player order, reconnect support, and host-only start pr
 
 ### Observations
 Every real-time action now originates from a server-validated reducer action, and the deck formation is deterministic even without client participation.
+The realtime layer now ships both websocket and socket.io channels, documented in `docs/realtime-socket-io.md`, so hosts that block `wss://` can flip `REALTIME_WSS_ENABLED=false` while leaving `realtime.starvingartistsgame.com` as the authoritative gateway for both lobby and game interactions.
 
 ## Roadmap for Phases 4+
 With Phases 0–3 done, future work should build atop the solid rules engine and realtime backbone. Adjustments to earlier plans are noted here so future teams work with the current reality:

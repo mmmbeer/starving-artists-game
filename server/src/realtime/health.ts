@@ -1,5 +1,3 @@
-import type WebSocket from 'ws';
-
 export type RealtimeHealthSnapshot = {
   activeGames: number;
   activeConnections: number;
@@ -32,10 +30,18 @@ export const getRealtimeHealth = () => ({
   game: gameHealthProvider()
 });
 
-export const countWebSocketConnections = (rooms: Map<string, Set<WebSocket>>) => {
+export const countConnections = (rooms: Map<string, Set<unknown>>) => {
   let total = 0;
   rooms.forEach((sockets) => {
     total += sockets.size;
   });
   return total;
+};
+
+export const countActiveGamesAcrossRooms = (...rooms: Map<string, Set<unknown>>[]) => {
+  const uniqueGames = new Set<string>();
+  rooms.forEach((roomMap) => {
+    roomMap.forEach((_value, gameId) => uniqueGames.add(gameId));
+  });
+  return uniqueGames.size;
 };
