@@ -577,7 +577,7 @@ export const useLobbyState = () => {
 
     setError(null);
     try {
-      const payload = await createJsonRequest(`/lobby/${gameId}/start`, {
+      const payload = await createJsonRequest(`/api/lobby/${gameId}/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
