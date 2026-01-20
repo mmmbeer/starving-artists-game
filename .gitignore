@@ -12,3 +12,7 @@ dist/-e
 # Environment files
 *.env
 *.env.*
+
+## build output
+client/dist
+dist
