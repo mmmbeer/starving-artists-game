@@ -97,11 +97,42 @@ websocket.send(JSON.stringify({
 
 The server treats both identically - the only difference is the transport envelope.
 
-## Environment configuration
+## Environment Configuration
 
-- `REALTIME_WSS_ENABLED` (`true` by default) lets you disable the websocket servers entirely (set it to `false` on hosts that strip `Upgrade` headers).  
-- `REALTIME_SOCKET_IO_ENABLED` (`true` by default) keeps the socket.io listeners registered so the SPA can fall back automatically.  
-- `REALTIME_SOCKET_IO_PATH` (`/realtime/socket.io` by default) is the HTTP path that Apache rewrites to `127.0.0.1:4000` for the socket.io engine; keep the client `VITE_REALTIME_SOCKET_IO_PATH` in sync with this value.
+### Server Configuration (`server/.env`)
+
+```bash
+# Realtime Transport Settings
+REALTIME_SOCKET_IO_ENABLED=true    # Enable Socket.IO (primary transport)
+REALTIME_WSS_ENABLED=true          # Enable WebSocket (fallback transport)
+SOCKET_IO_PATH=/socket.io          # Standard Socket.IO path
+
+# Server Port
+PORT=4000
+
+# CORS Origins (comma-separated)
+ALLOWED_ORIGINS=https://www.starvingartistsgame.com,https://starvingartistsgame.com
+```
+
+**Key Changes from Previous Architecture**:
+- `SOCKET_IO_PATH` changed from `/realtime/socket.io` to `/socket.io` (standard, better Apache compatibility)
+- Order reversed: Socket.IO is now primary, WebSocket is fallback
+- No subdomain configuration needed
+
+### Client Configuration
+
+The client automatically detects the current domain and uses it for all connections. No environment variables required for production!
+
+**Optional Development Override** (`client/.env`):
+```bash
+# Only needed for local development against remote server
+VITE_API_BASE=http://localhost:4000
+```
+
+**How it works**:
+- Production: Client uses `window.location.host` (same domain)
+- Development: Falls back to `VITE_API_BASE` if specified
+- Fully domain-agnostic - works with any domain name
 
 ## Client fallback strategy
 
