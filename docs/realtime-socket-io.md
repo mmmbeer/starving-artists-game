@@ -358,3 +358,55 @@ curl http://localhost:4000/health
 2. SSL certificate is valid
 3. Firewall allows port 4000 (for internal proxy)
 4. `.htaccess` rules are being applied
+
+## Implementation Reference
+
+### Server Implementation
+- **Realtime Setup**: `server/src/index.ts` - Initializes both Socket.IO and WebSocket servers
+- **Socket.IO Lobby**: `server/src/realtime/lobbyRealtime.ts` - Handles lobby synchronization
+- **Socket.IO Game**: `server/src/realtime/gameRealtime.ts` - Handles game state and actions
+- **Configuration**: `server/src/config/env.ts` - Environment variable management
+
+### Client Implementation
+- **Connection Management**: `client/src/state/lobbyState.ts` - Handles transport selection and fallback
+- **Transport Priority**: Socket.IO first, then WebSocket
+- **Domain Detection**: Automatic based on `window.location.host`
+
+### Configuration Files
+- **Server Config**: `server/.env.example` - Server environment variables
+- **Client Config**: `client/.env.example` - Optional client overrides
+- **Apache Config**: `.htaccess` - Reverse proxy rules for shared hosting
+
+### Documentation
+- **Deployment Guide**: `docs/shared-hosting-deployment.md` - Complete deployment instructions
+- **Server Setup**: `docs/server-setup.md` - Server configuration details (legacy, prefer shared-hosting-deployment.md)
+- **Development Plan**: `docs/development-plan.md` - Project phases and architecture
+
+## Key Differences from Previous Architecture
+
+| Aspect | Old (Subdomain) | New (Single Domain) |
+|--------|----------------|---------------------|
+| **Primary Transport** | WebSocket | Socket.IO |
+| **Fallback Transport** | Socket.IO | WebSocket |
+| **Domain** | realtime.starvingartistsgame.com | Same as main site |
+| **Socket.IO Path** | `/realtime/socket.io` | `/socket.io` |
+| **Configuration** | Multiple env vars | Simplified, domain-agnostic |
+| **Hosting** | Requires subdomain | Works on any domain |
+| **Apache Setup** | Complex rewrites | Standard proxy rules |
+| **Client Config** | Domain-specific | Automatic detection |
+
+## Benefits of New Architecture
+
+1. **Shared Hosting Friendly**: Works on restrictive hosting environments
+2. **Simplified Configuration**: No subdomain DNS or SSL needed
+3. **Better Compatibility**: Socket.IO handles more edge cases
+4. **Domain Agnostic**: Works with any domain name
+5. **Easier Deployment**: Standard cPanel Node.js app setup
+6. **Graceful Degradation**: Multiple fallback layers
+7. **Single SSL Certificate**: No need for wildcard or multiple certs
+
+---
+
+**Last Updated**: January 2025  
+**Architecture Version**: 2.0 (Single Domain with Socket.IO Primary)
+
