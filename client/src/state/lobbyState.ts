@@ -28,7 +28,7 @@ type GameTransport =
   | { type: 'websocket'; socket: WebSocket }
   | { type: 'socketio'; socket: Socket };
 
-const SOCKET_IO_PATH = import.meta.env.VITE_REALTIME_SOCKET_IO_PATH ?? '/realtime/socket.io';
+const SOCKET_IO_PATH = '/socket.io'; // Standard Socket.IO path for shared hosting
 
 const normalizeRealtimeBase = (value: string) => value.replace(/\/$/, '');
 
