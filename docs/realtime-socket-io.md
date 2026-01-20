@@ -1,6 +1,15 @@
-# Real-time Socket.IO Fallback for Starving Artists Online
+# Real-time Communication for Starving Artists Online (Shared Hosting)
 
-This document explains how the backend and the SPA coordinate on `realtime.starvingartistsgame.com` to cover both websocket (`wss://.../realtime/*`) and socket.io transports. The socket.io path takes over whenever the shared host blocks `wss`, so every lobby snapshot, player action, and game state update is still served deterministically by the server.
+This document explains how the backend and frontend coordinate realtime communication on a single domain using Socket.IO (primary) and WebSocket (fallback) for shared hosting environments.
+
+## Architecture Overview
+
+The application now uses a **single-domain architecture** optimized for traditional shared hosting (Apache/cPanel):
+
+- **Primary Transport**: Socket.IO (better compatibility with shared hosting, works through HTTP polling when WebSocket is blocked)
+- **Fallback Transport**: WebSocket (if Socket.IO fails and hosting supports WebSocket upgrades)
+- **Single Domain**: All communication happens through the same domain (e.g., `www.starvingartistsgame.com`)
+- **No Subdomain Required**: Removed dependency on `realtime.starvingartistsgame.com`
 
 ## Transport layout
 
