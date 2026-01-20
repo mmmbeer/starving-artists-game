@@ -251,14 +251,21 @@ export const useLobbyState = () => {
 
   const handleSocketIoFailure = useCallback(
     (context: 'lobby' | 'game') => {
+      // Fallback to WebSocket if Socket.IO fails
+      if (transportMode === 'socketio') {
+        setTransportMode('websocket');
+        return;
+      }
+      
+      // Both transports failed
       if (context === 'lobby') {
         setConnectionStatus('error');
-        setError('Realtime lobby connection failed');
+        setError('Realtime lobby connection failed - both Socket.IO and WebSocket unavailable');
       } else {
-        setError('Realtime game connection failed');
+        setError('Realtime game connection failed - both Socket.IO and WebSocket unavailable');
       }
     },
-    [setConnectionStatus, setError]
+    [transportMode, setConnectionStatus, setError]
   );
 
   const connectLobbyWebSocket = useCallback(() => {
