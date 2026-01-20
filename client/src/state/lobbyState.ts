@@ -160,18 +160,15 @@ export const useLobbyState = () => {
 
   const handleWebSocketFailure = useCallback(
     (context: 'lobby' | 'game') => {
-      if (tryFallbackRealtimeBase()) {
-        return;
-      }
-      setTransportMode('socketio');
+      // WebSocket is already the fallback, so we've exhausted all options
       if (context === 'lobby') {
         setConnectionStatus('error');
-        setError('Realtime lobby connection failed');
+        setError('Realtime lobby connection failed - WebSocket unavailable');
       } else {
-        setError('Realtime game connection failed');
+        setError('Realtime game connection failed - WebSocket unavailable');
       }
     },
-    [setConnectionStatus, setError, tryFallbackRealtimeBase]
+    [setConnectionStatus, setError]
   );
 
   const closeLobbyTransport = useCallback(() => {
