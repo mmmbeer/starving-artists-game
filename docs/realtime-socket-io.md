@@ -11,17 +11,32 @@ The application now uses a **single-domain architecture** optimized for traditio
 - **Single Domain**: All communication happens through the same domain (e.g., `www.starvingartistsgame.com`)
 - **No Subdomain Required**: Removed dependency on `realtime.starvingartistsgame.com`
 
-## Transport layout
+## Transport Layout
 
-- **Primary websocket endpoints**  
-  - `/realtime/lobby` streams lobby snapshots and `GAME_STARTED` events.  
-  - `/realtime/game` streams authoritative `GAME_STATE_UPDATED` frames and accepts `GAME_ACTION` intents.  
-  These endpoints are proxied directly to the Node backend when `REALTIME_WSS_ENABLED=true`.
+### Primary: Socket.IO
+- **Path**: `/socket.io` (standard Socket.IO path)
+- **Namespaces**: 
+  - `/lobby` - Lobby state synchronization
+  - `/game` - Game state and player actions
+- **Transports**: Attempts WebSocket first, falls back to HTTP long-polling automatically
+- **Connection**: Same domain as web application
+  ```javascript
+  io('/lobby', {
+    path: '/socket.io',
+    query: { gameId: 'game-123', playerId: 'player-1' }
+  })
+  ```
 
-- **Socket.IO fallback namespace**  
-  - Clients connect to `https://realtime.starvingartistsgame.com/lobby` or `/game` with `io()` while pointing `path` at the backend `REALTIME_SOCKET_IO_PATH` (default `/realtime/socket.io`).  
-  - Each namespace (`/lobby` and `/game`) requires the same query parameters (`gameId` and `playerId`) as the websocket version to authorize the session.
-  - The backend emits every realtime payload over `'realtime_message'` and listens for `'game_action'` events from authorized players.
+### Fallback: WebSocket
+- **Lobby Path**: `/realtime/lobby`
+- **Game Path**: `/realtime/game`
+- **Protocol**: `wss://` (HTTPS) or `ws://` (HTTP)
+- **Connection**: Same domain as web application
+  ```javascript
+  new WebSocket('wss://yourdomain.com/realtime/lobby?gameId=game-123&playerId=player-1')
+  ```
+
+Both transports require `gameId` and `playerId` query parameters for authorization.
 
 ## Message contracts
 
