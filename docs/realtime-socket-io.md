@@ -191,9 +191,67 @@ The client seamlessly handles:
 - Reconnection attempts
 - Error reporting
 
-## Monitoring
+## Shared Hosting Compatibility
 
-The `/realtime/health` endpoint reports `[lobby, game]` snapshots regardless of transport. Query it through whichever hostname you proxy (`https://www.starvingartistsgame.com/realtime/health` or `https://realtime.starvingartistsgame.com/realtime/health`) to verify both websocket and socket.io lanes are alive.
+### Apache Configuration (.htaccess)
+
+The application includes a comprehensive `.htaccess` file for Apache shared hosting:
+
+```apache
+# Socket.IO (primary transport)
+ProxyPass "/socket.io" "http://127.0.0.1:4000/socket.io" retry=0
+ProxyPassReverse "/socket.io" "http://127.0.0.1:4000/socket.io"
+
+# WebSocket fallback (requires mod_proxy_wstunnel)
+ProxyPass "/realtime/lobby" "ws://127.0.0.1:4000/realtime/lobby" retry=0
+ProxyPass "/realtime/game" "ws://127.0.0.1:4000/realtime/game" retry=0
+
+# REST API
+ProxyPass "/api/lobby" "http://127.0.0.1:4000/api/lobby" retry=0
+```
+
+### cPanel Node.js Setup
+
+1. **Create Node.js Application** (cPanel > Setup Node.js App)
+   - Application root: `/home/username/starving-artists`
+   - Application URL: `yourdomain.com`
+   - Application startup file: `server/dist/server/src/index.js`
+   - Node.js version: 18.x or higher
+
+2. **Set Environment Variables** in cPanel interface:
+   ```
+   PORT=4000
+   DB_HOST=localhost
+   DB_USER=your_user
+   DB_PASSWORD=your_password
+   DB_NAME=your_database
+   REALTIME_SOCKET_IO_ENABLED=true
+   REALTIME_WSS_ENABLED=true
+   SOCKET_IO_PATH=/socket.io
+   ```
+
+3. **Start Application** via cPanel interface
+
+### Why This Works on Shared Hosting
+
+**Socket.IO Advantages**:
+- Uses standard HTTP/HTTPS first
+- Falls back to long-polling (no special Apache modules needed)
+- Works even when `mod_proxy_wstunnel` is unavailable
+- Automatic reconnection and heartbeat
+
+**Single Domain Benefits**:
+- No DNS configuration for subdomains
+- Single SSL certificate needed
+- Simpler Apache proxy rules
+- Works with most shared hosting plans
+
+**Graceful Degradation**:
+1. Client tries Socket.IO via `/socket.io` → Usually succeeds
+2. Socket.IO tries WebSocket upgrade → May fail on restrictive hosts
+3. Socket.IO falls back to polling → Always works
+4. If Socket.IO completely blocked → Client tries native WebSocket
+5. If WebSocket also blocked → Clear error message to user
 
 ## Reference
 
