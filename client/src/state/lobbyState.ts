@@ -427,14 +427,15 @@ export const useLobbyState = () => {
       return;
     }
 
-    if (transportMode === 'websocket') {
-      connectGameWebSocket();
+    // Socket.IO is primary (better for shared hosting), WebSocket is fallback
+    if (transportMode === 'socketio') {
+      connectGameSocketIo();
       return () => {
         closeGameTransport();
       };
     }
 
-    connectGameSocketIo();
+    connectGameWebSocket();
     return () => {
       closeGameTransport();
     };
