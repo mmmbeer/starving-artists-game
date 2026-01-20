@@ -54,7 +54,17 @@ Lobby logic enforces per-player order, reconnect support, and host-only start pr
 
 ### Observations
 Every real-time action now originates from a server-validated reducer action, and the deck formation is deterministic even without client participation.
-The realtime layer now ships both websocket and socket.io channels, documented in `docs/realtime-socket-io.md`, so hosts that block `wss://` can flip `REALTIME_WSS_ENABLED=false` while leaving `realtime.starvingartistsgame.com` as the authoritative gateway for both lobby and game interactions.
+
+**Architecture Updated (January 2025)**: The realtime layer has been redesigned for shared hosting compatibility:
+- **Socket.IO is now primary** transport (better compatibility with Apache/cPanel shared hosting)
+- **WebSocket is now fallback** (used only if Socket.IO fails)
+- **Single domain architecture**: Removed dependency on `realtime.starvingartistsgame.com` subdomain
+- **Domain-agnostic**: Works with any domain name, automatically detects current host
+- **Standard Socket.IO path**: Changed from `/realtime/socket.io` to `/socket.io` for better Apache compatibility
+- **Simplified configuration**: Client automatically uses same domain, no environment variables needed for production
+- **Apache/.htaccess support**: Includes reverse proxy configuration for shared hosting
+
+See `docs/realtime-socket-io.md` for updated transport details and `docs/shared-hosting-deployment.md` for deployment instructions.
 
 ## Roadmap for Phases 4+
 With Phases 0–3 done, future work should build atop the solid rules engine and realtime backbone. Adjustments to earlier plans are noted here so future teams work with the current reality:
