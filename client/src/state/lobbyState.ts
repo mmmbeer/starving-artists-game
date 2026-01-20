@@ -82,7 +82,7 @@ const getRealtimeBases = () => {
   } as const;
 };
 
-const apiBase = import.meta.env.VITE_SITE_ORIGIN ? import.meta.env.VITE_SITE_ORIGIN.replace(/\/$/, '') : '';
+const apiBase = import.meta.env.VITE_API_BASE ? import.meta.env.VITE_API_BASE.replace(/\/$/, '') : '';
 
 const samplePaintBag = (): PaintCube[] => [
   { id: 'bag-red', color: 'red' },
