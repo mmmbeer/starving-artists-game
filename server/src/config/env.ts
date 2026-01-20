@@ -46,9 +46,11 @@ export const getConfig = (): AppConfig => {
   }
 
   const realtime: RealtimeConfig = {
-    enableWebSocket: parseBoolean(process.env.REALTIME_WSS_ENABLED, true),
+    // Socket.IO is primary for shared hosting compatibility
     enableSocketIo: parseBoolean(process.env.REALTIME_SOCKET_IO_ENABLED, true),
-    socketIoPath: process.env.REALTIME_SOCKET_IO_PATH ?? '/realtime/socket.io'
+    enableWebSocket: parseBoolean(process.env.REALTIME_WSS_ENABLED, true),
+    // Standard Socket.IO path for better Apache/shared hosting support
+    socketIoPath: process.env.SOCKET_IO_PATH ?? '/socket.io'
   };
 
   return {
