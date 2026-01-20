@@ -127,7 +127,7 @@ export const useLobbyState = () => {
     return null;
   }, [fallbackHttpBase, fallbackWsBase, primaryWsBase]);
 
-  const [transportMode, setTransportMode] = useState<'websocket' | 'socketio'>('websocket');
+  const [transportMode, setTransportMode] = useState<'websocket' | 'socketio'>('socketio'); // Socket.IO primary for shared hosting
 
   const lobbyTransportRef = useRef<LobbyTransport | null>(null);
   const gameTransportRef = useRef<GameTransport | null>(null);
