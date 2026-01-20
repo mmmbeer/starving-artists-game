@@ -51,7 +51,7 @@ export const createApp = () => {
     res.status(200).json(getRealtimeHealth());
   });
 
-  app.use('/lobby', lobbyRouter);
+  app.use('/api/lobby', lobbyRouter);
 
   app.use(express.static(clientDist));
   app.get('*', (_req: Request, res: Response) => {
