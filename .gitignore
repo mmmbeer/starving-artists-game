@@ -8,4 +8,7 @@ node_modules
 
 *.zip
 
-dist/
+dist/-e 
+# Environment files
+*.env
+*.env.*
