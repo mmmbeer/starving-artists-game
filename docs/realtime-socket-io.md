@@ -38,29 +38,64 @@ The application now uses a **single-domain architecture** optimized for traditio
 
 Both transports require `gameId` and `playerId` query parameters for authorization.
 
-## Message contracts
+## Message Contracts
 
-- **Lobby messages (both transports)**  
-  ```
-  { type: 'LOBBY_STATE', payload: LobbySnapshot, reason?: LobbyEventReason }
-  { type: 'GAME_STARTED', payload: GameState }
-  { type: 'ERROR', payload: { message: string } }
-  ```
-  The client immediately applies `LOBBY_STATE`, resets the local game state when the phase returns to `LOBBY`, and surfaces `ERROR` messages if the connection becomes invalid.
+All messages use the same structure regardless of transport:
 
-- **Game messages**  
-  ```
-  { type: 'GAME_STATE_UPDATED', payload: { state: GameState, lastAction?: GameActionSummary } }
-  { type: 'ERROR', payload: { message: string } }
-  ```
-  Clients append the optional `lastAction` to their history and throw when they receive `ERROR` while issuing in-game commands.
+### Lobby Messages (Both Transports)
+```json
+{
+  "type": "LOBBY_STATE",
+  "payload": { /* LobbySnapshot */ },
+  "reason": "PLAYER_JOINED" // optional
+}
 
-- **Client-to-server actions**  
-  ```
-  io.emit('game_action', { type: 'GAME_ACTION', payload: GameActionIntent })
-  websocket.send(JSON.stringify({ type: 'GAME_ACTION', payload: GameActionIntent }))
-  ```
-  The reducer treats both transports identically, so the only difference is the envelope used to exchange JSON.
+{
+  "type": "GAME_STARTED",
+  "payload": { /* GameState */ }
+}
+
+{
+  "type": "ERROR",
+  "payload": { "message": "Error description" }
+}
+```
+
+### Game Messages (Both Transports)
+```json
+{
+  "type": "GAME_STATE_UPDATED",
+  "payload": {
+    "state": { /* GameState */ },
+    "lastAction": { /* GameActionSummary */ } // optional
+  }
+}
+
+{
+  "type": "ERROR",
+  "payload": { "message": "Error description" }
+}
+```
+
+### Client-to-Server Actions
+
+**Socket.IO**:
+```javascript
+socket.emit('game_action', {
+  type: 'GAME_ACTION',
+  payload: { /* GameActionIntent */ }
+})
+```
+
+**WebSocket**:
+```javascript
+websocket.send(JSON.stringify({
+  type: 'GAME_ACTION',
+  payload: { /* GameActionIntent */ }
+}))
+```
+
+The server treats both identically - the only difference is the transport envelope.
 
 ## Environment configuration
 
