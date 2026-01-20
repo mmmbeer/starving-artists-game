@@ -143,7 +143,8 @@ export const useLobbyState = () => {
   }, [fallbackPair, realtimeBase]);
 
   useEffect(() => {
-    setTransportMode('websocket');
+    // Start with Socket.IO (primary for shared hosting)
+    setTransportMode('socketio');
   }, [realtimeBase]);
 
   const updateLobby = useCallback((snapshot: LobbySnapshot) => {
