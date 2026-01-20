@@ -338,13 +338,14 @@ export const useLobbyState = () => {
   }, [gameId, playerId, realtimeHttpBase, handleLobbyMessage, handleSocketIoFailure, closeLobbyTransport]);
 
   useEffect(() => {
-    if (transportMode === 'websocket') {
-      connectLobbyWebSocket();
+    // Socket.IO is primary (better for shared hosting), WebSocket is fallback
+    if (transportMode === 'socketio') {
+      connectLobbySocketIo();
       return () => {
         closeLobbyTransport();
       };
     }
-    connectLobbySocketIo();
+    connectLobbyWebSocket();
     return () => {
       closeLobbyTransport();
     };
