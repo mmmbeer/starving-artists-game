@@ -253,8 +253,108 @@ ProxyPass "/api/lobby" "http://127.0.0.1:4000/api/lobby" retry=0
 4. If Socket.IO completely blocked → Client tries native WebSocket
 5. If WebSocket also blocked → Clear error message to user
 
-## Reference
+## Health Monitoring
 
-- Server implementation: `server/src/realtime/{lobbyRealtime.ts,gameRealtime.ts}` and `server/src/index.ts` spawn both `ws` and socket.io listeners and share the same event streams (`lobbySessionManager`, `GameStateUpdatedEvent`).  
-- Client implementation: `client/src/state/lobbyState.ts` prefers websockets, tracks fallback state, and uses `SOCKET_IO_PATH` + `.env` overrides when requiring the socket.io transport.  
-- The new doc `docs/server-setup.md` outlines how to reverse proxy `/realtime/*` plus `/realtime/socket.io` so the fallback never sees a stale host.
+### Health Check Endpoint
+
+```bash
+# Check overall application health
+curl https://yourdomain.com/health
+
+# Response
+{
+  "status": "ok"
+}
+```
+
+### Realtime Health Endpoint
+
+```bash
+# Check realtime transport status
+curl https://yourdomain.com/realtime/health
+
+# Response
+{
+  "status": "ok",
+  "timestamp": "2025-01-20T...",
+  "lobby": {
+    "activeGames": 2,
+    "activeConnections": 5,
+    "lastBroadcastAt": "2025-01-20T..."
+  },
+  "game": {
+    "activeGames": 1,
+    "activeConnections": 4,
+    "lastBroadcastAt": "2025-01-20T..."
+  }
+}
+```
+
+### Browser Console Testing
+
+Test Socket.IO connection:
+```javascript
+const socket = io('/lobby', {
+  path: '/socket.io',
+  query: { gameId: 'test-123', playerId: 'player-1' }
+});
+
+socket.on('connect', () => console.log('✓ Socket.IO connected'));
+socket.on('connect_error', (err) => console.error('✗ Socket.IO error:', err));
+socket.on('realtime_message', (msg) => console.log('Message:', msg));
+```
+
+Test WebSocket connection:
+```javascript
+const ws = new WebSocket('wss://yourdomain.com/realtime/lobby?gameId=test-123&playerId=player-1');
+ws.onopen = () => console.log('✓ WebSocket connected');
+ws.onerror = (err) => console.error('✗ WebSocket error:', err);
+ws.onmessage = (event) => console.log('Message:', JSON.parse(event.data));
+```
+
+## Troubleshooting
+
+### Socket.IO Connection Fails
+
+**Check 1: Apache Proxy**
+```bash
+# Verify proxy is active
+curl -I http://localhost:4000/socket.io/
+# Should return Socket.IO handshake response
+```
+
+**Check 2: Node.js Running**
+```bash
+# Check if Node.js is listening
+netstat -tulpn | grep :4000
+# or
+curl http://localhost:4000/health
+```
+
+**Check 3: CORS Headers**
+- Verify `ALLOWED_ORIGINS` includes your domain
+- Check browser console for CORS errors
+
+### WebSocket Upgrade Fails (101)
+
+**Cause**: `mod_proxy_wstunnel` not enabled
+
+**Solution**: This is OK! Socket.IO will use polling instead. If you need WebSocket:
+1. Contact hosting provider to enable `mod_proxy_wstunnel`
+2. Or use Socket.IO polling (no action needed - it's automatic)
+
+### "Connection Refused" Errors
+
+**Check**:
+1. Node.js application is running (`/health` endpoint works)
+2. `.htaccess` file is in public_html directory
+3. Apache has proxy modules enabled
+4. PORT environment variable is 4000
+
+### Connection Works Locally But Not on Server
+
+**Check**:
+1. Domain DNS is pointing to server
+2. SSL certificate is valid
+3. Firewall allows port 4000 (for internal proxy)
+4. `.htaccess` rules are being applied
