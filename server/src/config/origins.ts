@@ -9,7 +9,8 @@ const parseOrigins = (value?: string): string[] =>
 const DEFAULT_ALLOWED_ORIGINS = [
   'https://www.starvingartistsgame.com',
   'https://starvingartistsgame.com',
-  'https://realtime.starvingartistsgame.com'
+  'http://localhost:5173', // Development
+  'http://localhost:4000'  // Development API
 ];
 
 export const getAllowedOrigins = () => {
