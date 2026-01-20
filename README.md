@@ -1,3 +1,34 @@
+
+## Contributing
+
+This project follows the guidelines in [AGENTS.md](AGENTS.md). Key principles:
+
+- **Server is authoritative** for all game state
+- **Deterministic behavior** - identical inputs produce identical results
+- **No partial deliverables** - all code must be production-ready
+- **Explicit state transitions** - no hidden mutations
+- **Zero regression policy** - existing tests must pass
+
+## Support
+
+- **Issues**: [GitHub Issues](https://github.com/yourusername/starving-artists-game/issues)
+- **Documentation**: See [docs/](docs/) directory
+- **Game Rules**: [docs/game-rules.md](docs/game-rules.md)
+
+## License
+
+[Your License Here]
+
+## Acknowledgments
+
+Based on the Starving Artists board game © 2016 Fairway 3 Games, LLC
+
+---
+
+**Current Status**: Phase 3 Complete (Turn System + Real-time Sync)  
+**Next Phase**: Phase 4 - Drag-and-Drop Painting Engine  
+**Architecture Version**: 2.0 (Single Domain with Socket.IO Primary)
+
 # Starving Artists Online
 
 An online multiplayer implementation of the Starving Artists board game with real-time synchronization.
