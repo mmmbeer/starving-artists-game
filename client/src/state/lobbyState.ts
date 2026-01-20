@@ -65,19 +65,20 @@ const convertWebsocketToHttp = (value: string) => {
 };
 
 const getRealtimeBases = () => {
-  const defaultProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const fallbackBase = normalizeRealtimeBase(`${defaultProtocol}//${window.location.host}`);
-
-  const override = import.meta.env.VITE_REALTIME_URL;
-  const primaryBase = override ? coerceWebsocketBase(override) ?? fallbackBase : fallbackBase;
-  const primaryHttpBase = convertWebsocketToHttp(primaryBase);
-  const fallbackHttpBase = convertWebsocketToHttp(fallbackBase);
+  // For shared hosting: use same domain for all connections (domain-agnostic)
+  const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
+  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const host = window.location.host;
+  
+  // All connections go to the same domain
+  const httpBase = normalizeRealtimeBase(`${protocol}//${host}`);
+  const wsBase = normalizeRealtimeBase(`${wsProtocol}//${host}`);
 
   return {
-    primaryWsBase: primaryBase,
-    fallbackWsBase: fallbackBase,
-    primaryHttpBase,
-    fallbackHttpBase
+    primaryHttpBase: httpBase,    // Socket.IO uses HTTP/HTTPS
+    fallbackWsBase: wsBase,        // WebSocket fallback uses WS/WSS
+    primaryWsBase: wsBase,         // For compatibility
+    fallbackHttpBase: httpBase     // For compatibility
   } as const;
 };
 
