@@ -134,13 +134,62 @@ VITE_API_BASE=http://localhost:4000
 - Development: Falls back to `VITE_API_BASE` if specified
 - Fully domain-agnostic - works with any domain name
 
-## Client fallback strategy
+## Client Connection Strategy
 
-1. The SPA constructs `primary` and `fallback` websocket bases using `VITE_REALTIME_URL` and the current host.  
-2. It tries to open `/realtime/lobby` + `/realtime/game` over websocket while tracking `gameId`+`playerId`.  
-3. If the websocket handshake fails on both bases, it switches to socket.io by connecting to `https://realtime.starvingartistsgame.com/lobby` or `/game` (the same host) and passing `path=VITE_REALTIME_SOCKET_IO_PATH`.  
-4. Socket.io connections send `"realtime_message"` events to update lobby/game state and emit `"game_action"` when the player works, paints, or ends their turn.  
-5. The SPA exposes a unified API (`setError`, `connectionStatus`, `resetGameState`, etc.) so UI components never need to know which transport is active.
+The frontend automatically handles transport selection and fallback:
+
+### 1. Connection Initialization
+```javascript
+// Client detects current domain automatically
+const protocol = window.location.protocol; // 'https:' or 'http:'
+const host = window.location.host;         // 'www.starvingartistsgame.com'
+```
+
+### 2. Primary: Socket.IO Connection
+```javascript
+// Attempt Socket.IO first (better shared hosting support)
+const socket = io('/lobby', {
+  path: '/socket.io',
+  transports: ['websocket', 'polling'], // Try WebSocket, fall back to polling
+  query: { gameId, playerId }
+});
+```
+
+**Socket.IO Benefits**:
+- Works through HTTP proxies
+- Automatic reconnection
+- Falls back to long-polling if WebSocket blocked
+- Better compatibility with Apache shared hosting
+
+### 3. Fallback: WebSocket Connection
+```javascript
+// If Socket.IO fails completely, try native WebSocket
+const ws = new WebSocket(`wss://${host}/realtime/lobby?gameId=${gameId}&playerId=${playerId}`);
+```
+
+**WebSocket Benefits**:
+- Lower latency (when available)
+- Less overhead than Socket.IO
+- Direct connection without HTTP polling
+
+### 4. Error Handling
+```javascript
+// Socket.IO connection error
+socket.on('connect_error', () => {
+  // Automatically tries WebSocket fallback
+});
+
+// WebSocket connection error
+ws.onerror = () => {
+  // Reports: "Both Socket.IO and WebSocket unavailable"
+};
+```
+
+The client seamlessly handles:
+- Transport selection
+- Automatic fallback
+- Reconnection attempts
+- Error reporting
 
 ## Monitoring
 
