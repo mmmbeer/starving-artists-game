@@ -11,9 +11,10 @@ export interface DatabaseConfig {
 }
 
 export interface RealtimeConfig {
-  enableWebSocket: boolean;
   enableSocketIo: boolean;
+  enableWebSocket: boolean;
   socketIoPath: string;
+  // Priority order: Socket.IO first (better for shared hosting), WebSocket as fallback
 }
 
 export interface AppConfig {
