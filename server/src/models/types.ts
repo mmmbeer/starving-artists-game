@@ -15,6 +15,10 @@ export interface Game {
   started_at: Date | null;
   finished_at: Date | null;
   winner_id: string | null;
+  // Selling phase tracking
+  selling_order?: string[]; // Player IDs in paint value order
+  selling_current_index?: number;
+  selling_remaining_cubes?: { [playerId: string]: number };
 }
 
 export interface Player {
@@ -37,10 +41,14 @@ export interface PaintCube {
   is_wild: boolean;
 }
 
+export interface CanvasSquarePosition {
+  x: number; // Pixel position
+  y: number; // Pixel position
+}
+
 export interface CanvasSquare {
   id: string;
-  x: number;
-  y: number;
+  position: CanvasSquarePosition;
   allowedColors: PaintColor[];
   paintedWith?: {
     cubeId: string;
@@ -48,16 +56,26 @@ export interface CanvasSquare {
   };
 }
 
+export interface CanvasLayoutJson {
+  id?: string;
+  orientation?: 'portrait' | 'landscape';
+  squares: Array<{
+    id: string;
+    position: CanvasSquarePosition;
+    allowedColors: PaintColor[];
+  }>;
+}
+
 export interface CanvasDefinition {
   id: number;
   name: string;
-  layout_json: {
-    squares: Omit<CanvasSquare, 'paintedWith'>[];
-  };
+  artist?: string;
+  year?: string;
+  layout_json: CanvasLayoutJson;
   star_value: number;
   paint_value: number;
   food_value: number;
-  image_filename: string | null;
+  filename: string | null;
 }
 
 export interface PlayerCanvas {
@@ -84,10 +102,26 @@ export interface GameState {
   canvas_market: Array<CanvasDefinition | null>; // null = empty slot
   canvas_deck: number[]; // IDs of canvas_definitions
   actions_taken: number;
+  // Selling phase state
+  selling_phase_data?: SellingPhaseData;
+}
+
+export interface SellingPhaseData {
+  order: Array<{
+    playerId: string;
+    paintValue: number;
+    rank: 'first' | 'second' | 'other';
+    cubesPerAction: number;
+    remainingCubes: number;
+    completedCanvasId?: string;
+  }>;
+  currentIndex: number;
+  paintMarketAtStart: PaintCube[];
+  isActive: boolean;
 }
 
 export interface GameAction {
-  type: 'work' | 'buy_canvas' | 'paint' | 'end_turn' | 'sell';
+  type: 'work' | 'buy_canvas' | 'paint' | 'end_turn' | 'sell' | 'collect_paint';
   playerId: string;
   data?: any;
 }
@@ -98,4 +132,16 @@ export interface FullGameState {
   gameState: GameState;
   playerCanvases: { [playerId: string]: PlayerCanvas[] };
   playerPaintCubes: { [playerId: string]: PaintCube[] };
+}
+
+// Admin types
+export interface CanvasFileInfo {
+  filename: string;
+  artist: string;
+  title: string;
+  year: string | null;
+  extension: string;
+  fullPath: string;
+  inDatabase: boolean;
+  canvasId?: number;
 }
