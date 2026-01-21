@@ -101,19 +101,20 @@ function registerGameSocketHandlers(io) {
         socket.on('action:paint', async (data) => {
             try {
                 const { gameId, playerId, paintings } = data;
-                const gameState = await actionHandler.performPaintAction(gameId, playerId, paintings);
+                const result = await actionHandler.performPaintAction(gameId, playerId, paintings);
                 // Broadcast updated state
-                io.to(`game:${gameId}`).emit('game-state', gameState);
+                io.to(`game:${gameId}`).emit('game-state', result.gameState);
                 io.to(`game:${gameId}`).emit('action-performed', {
                     action: 'paint',
                     playerId,
                     paintingsCount: paintings.length,
+                    completions: result.completions,
                 });
                 // Check if game ended
-                if (gameState.game.status === 'finished') {
+                if (result.gameState.game.status === 'finished') {
                     io.to(`game:${gameId}`).emit('game-ended', {
-                        winner: gameState.players.find(p => p.id === gameState.game.winner_id),
-                        finalScores: gameState.players,
+                        winner: result.gameState.players.find((p) => p.id === result.gameState.game.winner_id),
+                        finalScores: result.gameState.players,
                     });
                 }
             }
@@ -126,20 +127,65 @@ function registerGameSocketHandlers(io) {
         socket.on('action:end-turn', async (data) => {
             try {
                 const { gameId, playerId } = data;
-                const gameState = await actionHandler.performEndTurnAction(gameId, playerId);
+                const result = await actionHandler.performEndTurnAction(gameId, playerId);
                 // Broadcast updated state
-                io.to(`game:${gameId}`).emit('game-state', gameState);
+                io.to(`game:${gameId}`).emit('game-state', result.gameState);
                 io.to(`game:${gameId}`).emit('turn-changed', {
-                    currentPlayerId: gameState.game.current_player_id,
-                    currentPhase: gameState.game.current_phase,
+                    currentPlayerId: result.gameState.game.current_player_id,
+                    currentPhase: result.gameState.game.current_phase,
                 });
+                // If phase changed, notify
+                if (result.phaseResult) {
+                    io.to(`game:${gameId}`).emit('phase-changed', result.phaseResult);
+                }
             }
             catch (error) {
                 console.error('End turn error:', error);
                 socket.emit('action-error', { message: error.message });
             }
         });
-        // Selling phase - submit sell intent
+        // Collect paint during selling phase
+        socket.on('action:collect-paint', async (data) => {
+            try {
+                const { gameId, playerId, cubeIds } = data;
+                const result = await actionHandler.performCollectPaintAction(gameId, playerId, cubeIds);
+                // Broadcast updated state
+                io.to(`game:${gameId}`).emit('game-state', result.gameState);
+                io.to(`game:${gameId}`).emit('action-performed', {
+                    action: 'collect-paint',
+                    playerId,
+                    cubesCollected: result.cubesCollected.length,
+                });
+                if (result.sellingComplete) {
+                    io.to(`game:${gameId}`).emit('selling-complete', { gameId });
+                }
+            }
+            catch (error) {
+                console.error('Collect paint error:', error);
+                socket.emit('action-error', { message: error.message });
+            }
+        });
+        // Skip collection during selling phase
+        socket.on('action:skip-collection', async (data) => {
+            try {
+                const { gameId, playerId } = data;
+                const result = await actionHandler.performSkipCollectionAction(gameId, playerId);
+                // Broadcast updated state
+                io.to(`game:${gameId}`).emit('game-state', result.gameState);
+                io.to(`game:${gameId}`).emit('action-performed', {
+                    action: 'skip-collection',
+                    playerId,
+                });
+                if (result.sellingComplete) {
+                    io.to(`game:${gameId}`).emit('selling-complete', { gameId });
+                }
+            }
+            catch (error) {
+                console.error('Skip collection error:', error);
+                socket.emit('action-error', { message: error.message });
+            }
+        });
+        // Selling phase - submit sell intent (legacy)
         socket.on('action:sell', async (data) => {
             try {
                 const { gameId, playerId, canvasIds } = data;
