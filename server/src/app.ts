@@ -40,10 +40,15 @@ export function createApp(): Express {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
-  // Routes will be added here
-  // app.use('/', indexRoutes);
-  // app.use('/lobby', lobbyRoutes);
-  // app.use('/game', gameRoutes);
+  // Import routes
+  const indexRoutes = require('./routes/index.routes').default;
+  const lobbyRoutes = require('./routes/lobby.routes').default;
+  const gameRoutes = require('./routes/game.routes').default;
+
+  // Register routes
+  app.use('/', indexRoutes);
+  app.use('/lobby', lobbyRoutes);
+  app.use('/game', gameRoutes);
 
   // 404 handler
   app.use((_req: Request, res: Response) => {
