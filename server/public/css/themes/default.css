@@ -1,0 +1,62 @@
+/* Default Theme - Modern Art Gallery */
+:root {
+  /* Primary Colors - Sophisticated neutrals */
+  --color-primary: #2C3E50;
+  --color-primary-dark: #1A252F;
+  --color-primary-light: #4A5F7F;
+  
+  /* Accent - Warm gold for highlights */
+  --color-accent: #D4AF37;
+  --color-accent-dark: #B8941F;
+  --color-accent-light: #E6C84F;
+  
+  /* Background */
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #F8F9FA;
+  --color-bg-tertiary: #E9ECEF;
+  
+  /* Text */
+  --color-text-primary: #212529;
+  --color-text-secondary: #6C757D;
+  --color-text-muted: #ADB5BD;
+  --color-text-inverse: #FFFFFF;
+  
+  /* Borders */
+  --color-border-light: #DEE2E6;
+  --color-border-medium: #CED4DA;
+  --color-border-dark: #ADB5BD;
+  
+  /* Status Colors */
+  --color-success: #28A745;
+  --color-success-light: #D4EDDA;
+  --color-warning: #FFC107;
+  --color-warning-light: #FFF3CD;
+  --color-danger: #DC3545;
+  --color-danger-light: #F8D7DA;
+  --color-info: #17A2B8;
+  --color-info-light: #D1ECF1;
+  
+  /* Paint Colors (matching game) */
+  --paint-red: #E63946;
+  --paint-orange: #F77F00;
+  --paint-yellow: #FCBF49;
+  --paint-green: #06A77D;
+  --paint-blue: #457B9D;
+  --paint-purple: #9D4EDD;
+  --paint-black: #2B2D42;
+  --paint-wild: linear-gradient(135deg, 
+    var(--paint-red) 0%, 
+    var(--paint-orange) 16%, 
+    var(--paint-yellow) 32%, 
+    var(--paint-green) 48%, 
+    var(--paint-blue) 64%, 
+    var(--paint-purple) 80%, 
+    var(--paint-black) 100%);
+  
+  /* Game UI */
+  --color-canvas-bg: #FFFEF7;
+  --color-canvas-border: #D4AF37;
+  --color-market-bg: rgba(255, 255, 255, 0.95);
+  --color-turn-active: #D4AF37;
+  --color-turn-inactive: #ADB5BD;
+}

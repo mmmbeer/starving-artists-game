@@ -1,0 +1,33 @@
+/* Dark Theme - Modern Art Gallery */
+:root[data-theme="dark"] {
+  /* Primary Colors */
+  --color-primary: #E6C84F;
+  --color-primary-dark: #D4AF37;
+  --color-primary-light: #F0D76B;
+  
+  /* Accent */
+  --color-accent: #D4AF37;
+  --color-accent-dark: #B8941F;
+  --color-accent-light: #E6C84F;
+  
+  /* Background */
+  --color-bg-primary: #1A1A1A;
+  --color-bg-secondary: #2A2A2A;
+  --color-bg-tertiary: #3A3A3A;
+  
+  /* Text */
+  --color-text-primary: #F8F9FA;
+  --color-text-secondary: #ADB5BD;
+  --color-text-muted: #6C757D;
+  --color-text-inverse: #212529;
+  
+  /* Borders */
+  --color-border-light: #3A3A3A;
+  --color-border-medium: #4A4A4A;
+  --color-border-dark: #5A5A5A;
+  
+  /* Game UI */
+  --color-canvas-bg: #2A2A2A;
+  --color-canvas-border: #D4AF37;
+  --color-market-bg: rgba(42, 42, 42, 0.95);
+}
