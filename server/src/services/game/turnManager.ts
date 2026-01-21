@@ -1,8 +1,8 @@
 // Turn management service
-import * as gameDb from '../database/gameDb';
-import * as playerDb from '../database/playerDb';
-import { Game, Player } from '../models/types';
-import { GAME_PHASES } from '../utils/constants';
+import * as gameDb from '../../database/gameDb';
+import * as playerDb from '../../database/playerDb';
+import { Game, Player } from '../../models/types';
+import { GAME_PHASES } from '../../utils/constants';
 
 export async function initializeTurnOrder(
   gameId: string,
