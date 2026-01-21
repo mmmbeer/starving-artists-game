@@ -1,1 +1,141 @@
-// Game Socket Event Handlers\n\nfunction setupGameSocket(socket, gameId, playerId) {\n  // Join game room\n  socket.emit('join-game', { gameId, playerId });\n\n  // Game state updates\n  socket.on('game-state', (gameState) => {\n    console.log('Game state received:', gameState);\n    \n    if (window.gameUI) {\n      window.gameUI.updateGameState(gameState);\n    }\n  });\n\n  // Action performed by any player\n  socket.on('action-performed', (data) => {\n    console.log('Action performed:', data);\n    \n    const actionMessages = {\n      work: `${getPlayerName(data.playerId)} drew ${data.cubesDrawn} paint cubes`,\n      'buy-canvas': `${getPlayerName(data.playerId)} bought a canvas`,\n      paint: `${getPlayerName(data.playerId)} painted ${data.paintingsCount} square(s)`,\n      'end-turn': `${getPlayerName(data.playerId)} ended their turn`\n    };\n    \n    const message = actionMessages[data.action] || 'Action performed';\n    \n    // Don't show toast for own actions\n    if (data.playerId !== playerId) {\n      showToast('Player Action', message, 'info', 3000);\n    }\n  });\n\n  // Turn changed\n  socket.on('turn-changed', (data) => {\n    console.log('Turn changed:', data);\n    \n    const isMyTurn = data.currentPlayerId === playerId;\n    \n    if (isMyTurn) {\n      showToast('Your Turn!', \"It's your turn to act\", 'success');\n      \n      // Play sound or visual effect\n      if (window.gameUI) {\n        document.body.classList.add('bounce');\n        setTimeout(() => document.body.classList.remove('bounce'), 500);\n      }\n    }\n    \n    // Update UI\n    if (window.gameUI) {\n      window.gameUI.currentPlayerId = data.currentPlayerId;\n      window.gameUI.updateTurnIndicator();\n      window.gameUI.updateActionButtons();\n    }\n  });\n\n  // Game ended\n  socket.on('game-ended', (data) => {\n    console.log('Game ended:', data);\n    showWinModal(data.winner, data.finalScores);\n  });\n\n  // Player connected/disconnected\n  socket.on('player-connected', (data) => {\n    console.log('Player connected:', data.playerId);\n  });\n\n  socket.on('player-disconnected', (data) => {\n    console.log('Player disconnected:', data.playerId);\n    showToast('Player Disconnected', getPlayerName(data.playerId) + ' disconnected', 'warning');\n  });\n\n  // Action errors\n  socket.on('action-error', (data) => {\n    console.error('Action error:', data);\n    showToast('Action Failed', data.message, 'danger');\n  });\n\n  // Ping/pong for keep-alive\n  setInterval(() => {\n    if (socket.connected) {\n      socket.emit('ping');\n    }\n  }, 30000);\n\n  socket.on('pong', () => {\n    // Connection is alive\n  });\n}\n\nfunction getPlayerName(playerId) {\n  if (!window.gameUI || !window.gameUI.gameState) return 'A player';\n  \n  const player = window.gameUI.gameState.players.find(p => p.id === playerId);\n  return player ? player.name : 'A player';\n}\n\nfunction showWinModal(winner, finalScores) {\n  const modal = document.createElement('div');\n  modal.className = 'win-modal';\n  \n  let scoresHTML = '';\n  finalScores.sort((a, b) => {\n    if (a.score !== b.score) return b.score - a.score;\n    return b.paintings_completed - a.paintings_completed;\n  }).forEach((player, index) => {\n    scoresHTML += `\n      <div class=\"score-item ${player.id === winner.id ? 'winner' : ''}\">\n        <span>\n          ${index === 0 ? '\ud83e\udd47' : index === 1 ? '\ud83e\udd48' : index === 2 ? '\ud83e\udd49' : ''}\n          ${player.name}\n        </span>\n        <span>\n          \u2b50 ${player.score} points | \ud83c\udfa8 ${player.paintings_completed} paintings\n        </span>\n      </div>\n    `;\n  });\n  \n  modal.innerHTML = `\n    <div class=\"win-content\">\n      <div class=\"win-icon\">\ud83c\udfc6</div>\n      <h2 class=\"win-title\">${winner.name} Wins!</h2>\n      <p class=\"lead\">\n        Final Score: ${winner.score} points<br>\n        Completed Paintings: ${winner.paintings_completed}\n      </p>\n      <div class=\"final-scores\">\n        <h4>Final Standings</h4>\n        ${scoresHTML}\n      </div>\n      <div class=\"mt-4\">\n        <a href=\"/\" class=\"btn btn-primary btn-lg\">New Game</a>\n      </div>\n    </div>\n  `;\n  \n  document.body.appendChild(modal);\n}\n
+// Game Socket Event Handlers
+
+function setupGameSocket(socket, gameId, playerId) {
+  // Join game room
+  socket.emit('join-game', { gameId, playerId });
+
+  // Game state updates
+  socket.on('game-state', (gameState) => {
+    console.log('Game state received:', gameState);
+    
+    if (window.gameUI) {
+      window.gameUI.updateGameState(gameState);
+    }
+  });
+
+  // Action performed by any player
+  socket.on('action-performed', (data) => {
+    console.log('Action performed:', data);
+    
+    const actionMessages = {
+      work: `${getPlayerName(data.playerId)} drew ${data.cubesDrawn || 3} paint cubes`,
+      'buy-canvas': `${getPlayerName(data.playerId)} bought a canvas`,
+      paint: `${getPlayerName(data.playerId)} painted ${data.paintingsCount || 'some'} square(s)`,
+      'end-turn': `${getPlayerName(data.playerId)} ended their turn`
+    };
+    
+    const message = actionMessages[data.action] || 'Action performed';
+    
+    // Don't show toast for own actions
+    if (data.playerId !== playerId) {
+      showToast('Player Action', message, 'info', 3000);
+    }
+  });
+
+  // Turn changed
+  socket.on('turn-changed', (data) => {
+    console.log('Turn changed:', data);
+    
+    const isMyTurn = data.currentPlayerId === playerId;
+    
+    if (isMyTurn) {
+      showToast('Your Turn!', "It's your turn to act", 'success');
+      
+      // Play sound or visual effect
+      if (window.gameUI) {
+        document.body.classList.add('bounce');
+        setTimeout(() => document.body.classList.remove('bounce'), 500);
+      }
+    }
+    
+    // Update UI
+    if (window.gameUI) {
+      window.gameUI.currentPlayerId = data.currentPlayerId;
+      window.gameUI.updateTurnIndicator();
+      window.gameUI.updateActionButtons();
+    }
+  });
+
+  // Game ended
+  socket.on('game-ended', (data) => {
+    console.log('Game ended:', data);
+    showWinModal(data.winner, data.finalScores);
+  });
+
+  // Player connected/disconnected
+  socket.on('player-connected', (data) => {
+    console.log('Player connected:', data.playerId);
+  });
+
+  socket.on('player-disconnected', (data) => {
+    console.log('Player disconnected:', data.playerId);
+    showToast('Player Disconnected', getPlayerName(data.playerId) + ' disconnected', 'warning');
+  });
+
+  // Action errors
+  socket.on('action-error', (data) => {
+    console.error('Action error:', data);
+    showToast('Action Failed', data.message, 'danger');
+  });
+
+  // Ping/pong for keep-alive
+  setInterval(() => {
+    if (socket.connected) {
+      socket.emit('ping');
+    }
+  }, 30000);
+
+  socket.on('pong', () => {
+    // Connection is alive
+  });
+}
+
+function getPlayerName(playerId) {
+  if (!window.gameUI || !window.gameUI.gameState) return 'A player';
+  
+  const player = window.gameUI.gameState.players.find(p => p.id === playerId);
+  return player ? player.name : 'A player';
+}
+
+function showWinModal(winner, finalScores) {
+  const modal = document.createElement('div');
+  modal.className = 'win-modal';
+  
+  let scoresHTML = '';
+  finalScores.sort((a, b) => {
+    if (a.score !== b.score) return b.score - a.score;
+    return b.paintings_completed - a.paintings_completed;
+  }).forEach((player, index) => {
+    scoresHTML += `
+      <div class="score-item ${player.id === winner.id ? 'winner' : ''}">
+        <span>
+          ${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : ''}
+          ${player.name}
+        </span>
+        <span>
+          ⭐ ${player.score} points | 🎨 ${player.paintings_completed} paintings
+        </span>
+      </div>
+    `;
+  });
+  
+  modal.innerHTML = `
+    <div class="win-content">
+      <div class="win-icon">🏆</div>
+      <h2 class="win-title">${winner.name} Wins!</h2>
+      <p class="lead">
+        Final Score: ${winner.score} points<br>
+        Completed Paintings: ${winner.paintings_completed}
+      </p>
+      <div class="final-scores">
+        <h4>Final Standings</h4>
+        ${scoresHTML}
+      </div>
+      <div class="mt-4">
+        <a href="/" class="btn btn-primary btn-lg">New Game</a>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+}
