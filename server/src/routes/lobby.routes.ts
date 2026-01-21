@@ -60,6 +60,21 @@ router.post('/join/:gameId', async (req: Request, res: Response) => {
     req.session.playerId = newPlayer.id;
     req.session.gameId = gameId;
     
+    // Emit Socket.IO event for real-time updates
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`lobby:${gameId}`).emit('player-joined', {
+        player: newPlayer,
+        players: lobbyInfo.players,
+        canStart: lobbyInfo.canStart,
+      });
+      io.to(`lobby:${gameId}`).emit('lobby-state', {
+        game: lobbyInfo.game,
+        players: lobbyInfo.players,
+        canStart: lobbyInfo.canStart,
+      });
+    }
+    
     res.json({
       success: true,
       gameId,
