@@ -1,59 +1,67 @@
-import { createApp } from './app';
-import { initDbPool } from './db/pool';
-import { getConfig } from './config/env';
-import { startLobbyRealtime } from './realtime/lobbyRealtime';
-import { startGameRealtime } from './realtime/gameRealtime';
-import { getRealtimeHealth, setRealtimeHealthProviders } from './realtime/health';
+// Application entry point
+import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
-import { getAllowedOrigins } from './config/origins';
-
-const config = getConfig();
-initDbPool();
+import { createApp } from './app';
+import { config } from './config/env';
+import { getPool, closePool } from './config/database';
 
 const app = createApp();
-const server = app.listen(config.port, () => {
-  // eslint-disable-next-line no-console
-  console.log(`Server listening on port ${config.port}`);
+const server = http.createServer(app);
+
+// Socket.IO setup
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: '*', // Configure properly for production
+    methods: ['GET', 'POST'],
+  },
+  path: '/socket.io',
 });
 
-const socketIoServer = config.realtime.enableSocketIo
-  ? new SocketIOServer(server, {
-      cors: {
-        origin: getAllowedOrigins(),
-        methods: ['GET', 'POST'],
-        credentials: true
-      },
-      path: config.realtime.socketIoPath
-    })
-  : null;
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+  console.log('Client connected:', socket.id);
 
-const { stop: stopLobbyRealtime, getStats: getLobbyHealth } = startLobbyRealtime(
-  server,
-  config.realtime,
-  socketIoServer
-);
-const { stop: stopGameRealtime, getStats: getGameHealth } = startGameRealtime(
-  server,
-  config.realtime,
-  socketIoServer
-);
-setRealtimeHealthProviders(getLobbyHealth, getGameHealth);
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+  });
 
-const gracefulShutdown = async () => {
-  // eslint-disable-next-line no-console
-  console.log('Shutting down server');
-  stopLobbyRealtime();
-  stopGameRealtime();
-  socketIoServer?.close();
-  server.close((err) => {
-    if (err) {
-      // eslint-disable-next-line no-console
-      console.error('Error during shutdown', err);
-      process.exit(1);
-    }
+  // Socket handlers will be registered here
+});
+
+// Make io available globally for routes
+app.set('io', io);
+
+// Test database connection
+getPool()
+  .getConnection()
+  .then((connection) => {
+    console.log('Database connected successfully');
+    connection.release();
+  })
+  .catch((err) => {
+    console.error('Database connection failed:', err);
+    process.exit(1);
+  });
+
+// Start server
+server.listen(config.port, () => {
+  console.log(`Server running on port ${config.port}`);
+  console.log(`Environment: ${config.nodeEnv}`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(async () => {
+    await closePool();
     process.exit(0);
   });
-};
+});
 
-process.on('SIGINT', gracefulShutdown);
-process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', async () => {
+  console.log('SIGINT received, shutting down gracefully');
+  server.close(async () => {
+    await closePool();
+    process.exit(0);
+  });
+});

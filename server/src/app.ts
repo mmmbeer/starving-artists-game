@@ -1,64 +1,64 @@
-import express, { Request, Response } from 'express';
-import fs from 'fs';
+// Express application setup
+import express, { Express, Request, Response, NextFunction } from 'express';
 import path from 'path';
-import lobbyRouter from './lobby/lobbyRoutes';
-import { getRealtimeHealth } from './realtime/health';
-import { getAllowedOrigins } from './config/origins';
+import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
+import session from 'express-session';
+import compression from 'compression';
+import { config } from './config/env';
 
-const allowedOrigins = getAllowedOrigins();
-
-const applyCorsHeaders = (req: Request, res: Response) => {
-  const origin = req.headers.origin;
-  if (origin && allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-    res.setHeader(
-      'Access-Control-Allow-Headers',
-      'Content-Type,Authorization,X-Requested-With,Accept'
-    );
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-  }
-};
-
-const clientDistCandidates = [
-  path.resolve(__dirname, '..', '..', '..', '..', 'client', 'dist'),
-  path.resolve(__dirname, '..', '..', 'client', 'dist'),
-];
-
-const clientDist = clientDistCandidates.find((candidate) => fs.existsSync(candidate));
-
-if (!clientDist) {
-  throw new Error(`client dist directory not found; checked ${clientDistCandidates.join(', ')}`);
-}
-
-export const createApp = () => {
+export function createApp(): Express {
   const app = express();
-  app.use(express.json());
-  app.use((req, res, next) => {
-    applyCorsHeaders(req, res);
-    if (req.method === 'OPTIONS') {
-      res.sendStatus(204);
-      return;
-    }
-    next();
-  });
 
+  // View engine setup
+  app.set('views', path.join(__dirname, '..', 'views'));
+  app.set('view engine', 'ejs');
+
+  // Middleware
+  app.use(compression());
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(cookieParser());
+  app.use(
+    session({
+      secret: config.sessionSecret,
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        secure: config.nodeEnv === 'production',
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      },
+    })
+  );
+
+  // Static files
+  app.use(express.static(path.join(__dirname, '..', 'public')));
+
+  // Health check
   app.get('/health', (_req: Request, res: Response) => {
-    res.status(200).json({ status: 'ok' });
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
-  app.get('/realtime/health', (_req: Request, res: Response) => {
-    res.status(200).json(getRealtimeHealth());
+  // Routes will be added here
+  // app.use('/', indexRoutes);
+  // app.use('/lobby', lobbyRoutes);
+  // app.use('/game', gameRoutes);
+
+  // 404 handler
+  app.use((_req: Request, res: Response) => {
+    res.status(404).render('pages/404', { title: 'Page Not Found' });
   });
 
-  app.use('/api/lobby', lobbyRouter);
-
-  app.use(express.static(clientDist));
-  app.get('*', (_req: Request, res: Response) => {
-    res.sendFile(path.join(clientDist, 'index.html'));
+  // Error handler
+  app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+    console.error('Error:', err);
+    res.status(500).render('pages/error', {
+      title: 'Error',
+      message: config.nodeEnv === 'development' ? err.message : 'Something went wrong',
+      error: config.nodeEnv === 'development' ? err : {},
+    });
   });
 
   return app;
-};
-
-export default createApp;
+}
