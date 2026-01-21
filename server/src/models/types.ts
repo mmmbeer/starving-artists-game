@@ -1,6 +1,8 @@
 // Core type definitions
 import { PaintColor } from '../utils/constants';
 
+export { PaintColor };
+
 export interface Game {
   id: string;
   status: 'lobby' | 'playing' | 'finished';
