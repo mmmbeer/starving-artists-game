@@ -4,11 +4,13 @@ import * as playerDb from '../../database/playerDb';
 import * as canvasDb from '../../database/canvasDb';
 import { drawPaintCubes } from '../paint/paintBag';
 import { refillMarketSlot, getCanvasCost, shiftMarketLeft } from '../canvas/canvasMarket';
-import { canPaintSquare, paintSquare, isCanvasComplete } from '../canvas/canvasManager';
-import { canPlayerAct, advanceToNextPlayer, advancePhase } from './turnManager';
-import { checkWinCondition, updatePlayerScore, declareWinner } from '../score/scoreTracker';
+import { canPlayerAct, advanceToNextPlayer } from './turnManager';
+import { checkWinCondition, declareWinner } from '../score/scoreTracker';
 import { getFullGameState } from './gameEngine';
-import { FullGameState, PaintCube } from '../../models/types';
+import { checkAndProcessCompletion, validatePaintPlacement } from './canvasCompletion';
+import { handleEndTurn } from './dayNightCycle';
+import { collectPaintCubes, skipCollection, canCollectPaint, getCurrentCollector } from './sellingPhase';
+import { FullGameState, PaintCube, PlayerCanvas } from '../../models/types';
 import { CUBES_PER_WORK_ACTION, MAX_PAINT_CUBES_PER_ACTION } from '../../utils/constants';
 
 export async function performWorkAction(
@@ -123,7 +125,7 @@ export async function performPaintAction(
   gameId: string,
   playerId: string,
   paintings: Array<{ canvasId: string; squareId: string; cubeId: string }>
-): Promise<FullGameState> {
+): Promise<{ gameState: FullGameState; completions: Array<{ canvasId: string; rewards: any }> }> {
   // Verify player can act
   const canAct = await canPlayerAct(gameId, playerId);
   if (!canAct) throw new Error('Not your turn');
@@ -135,47 +137,78 @@ export async function performPaintAction(
   // Get player's paint cubes
   const playerCubes = await playerDb.getPlayerPaintCubes(playerId);
   const cubesUsed: string[] = [];
+  const canvasUpdates: Map<string, PlayerCanvas> = new Map();
+  const completions: Array<{ canvasId: string; rewards: any }> = [];
   
-  // Process each painting
-  for (const { canvasId, squareId, cubeId } of paintings) {
+  // Group paintings by canvas
+  const paintingsByCanvas = new Map<string, Array<{ squareId: string; cubeId: string }>>();
+  for (const painting of paintings) {
+    if (!paintingsByCanvas.has(painting.canvasId)) {
+      paintingsByCanvas.set(painting.canvasId, []);
+    }
+    paintingsByCanvas.get(painting.canvasId)!.push({
+      squareId: painting.squareId,
+      cubeId: painting.cubeId,
+    });
+  }
+  
+  // Process each canvas
+  for (const [canvasId, canvasPaintings] of paintingsByCanvas) {
     // Get canvas
-    const canvas = await canvasDb.getPlayerCanvas(canvasId);
+    let canvas = canvasUpdates.get(canvasId) || await canvasDb.getPlayerCanvas(canvasId);
     if (!canvas) throw new Error('Canvas not found');
     
     if (canvas.player_id !== playerId) {
       throw new Error('Not your canvas');
     }
     
-    // Get cube
-    const cube = playerCubes.find(c => c.id === cubeId);
-    if (!cube) throw new Error('Paint cube not found');
-    
-    if (cubesUsed.includes(cubeId)) {
-      throw new Error('Cannot use same cube twice');
+    // Process each painting on this canvas
+    for (const { squareId, cubeId } of canvasPaintings) {
+      // Get cube
+      const cube = playerCubes.find(c => c.id === cubeId);
+      if (!cube) throw new Error('Paint cube not found');
+      
+      if (cubesUsed.includes(cubeId)) {
+        throw new Error('Cannot use same cube twice');
+      }
+      
+      // Validate painting
+      const validation = validatePaintPlacement(canvas, squareId, cube.color, cube.is_wild);
+      if (!validation.valid) {
+        throw new Error(validation.reason || 'Cannot paint square');
+      }
+      
+      // Add to painted squares
+      canvas = {
+        ...canvas,
+        painted_squares: [
+          ...canvas.painted_squares,
+          { squareId, cubeId, color: cube.color },
+        ],
+      };
+      
+      cubesUsed.push(cubeId);
     }
     
-    // Validate painting
-    const validation = canPaintSquare(canvas, squareId, cube);
-    if (!validation.valid) {
-      throw new Error(validation.error || 'Cannot paint square');
+    // Update canvas in database
+    await canvasDb.updateCanvasPaintedSquares(canvasId, canvas.painted_squares);
+    canvasUpdates.set(canvasId, canvas);
+    
+    // Check completion
+    const players = await playerDb.getGamePlayers(gameId);
+    const completionResult = await checkAndProcessCompletion(playerId, canvasId, players.length);
+    
+    if (completionResult.isComplete && completionResult.rewardsAwarded) {
+      completions.push({
+        canvasId,
+        rewards: completionResult.rewardsAwarded,
+      });
+      
+      // Check if player won
+      if (completionResult.isWinner) {
+        await declareWinner(gameId, playerId);
+      }
     }
-    
-    // Paint the square
-    const updatedCanvas = paintSquare(canvas, squareId, cube);
-    
-    // Update in database
-    await canvasDb.updateCanvasPaintedSquares(
-      canvasId,
-      updatedCanvas.painted_squares
-    );
-    
-    // Check if canvas is complete
-    if (isCanvasComplete(updatedCanvas)) {
-      await canvasDb.markCanvasCompleted(canvasId);
-      await playerDb.incrementPaintingsCompleted(playerId);
-    }
-    
-    cubesUsed.push(cubeId);
   }
   
   // Remove used cubes from player
@@ -187,39 +220,146 @@ export async function performPaintAction(
   // Advance to next player
   await advanceToNextPlayer(gameId);
   
-  // Check win condition
-  const winCheck = await checkWinCondition(gameId);
-  if (winCheck.won && winCheck.winner) {
-    await declareWinner(gameId, winCheck.winner.id);
-  }
-  
-  return getFullGameState(gameId);
+  return {
+    gameState: await getFullGameState(gameId),
+    completions,
+  };
 }
 
 export async function performEndTurnAction(
   gameId: string,
   playerId: string
-): Promise<FullGameState> {
+): Promise<{ gameState: FullGameState; phaseResult?: any }> {
   // Verify player can act
   const canAct = await canPlayerAct(gameId, playerId);
   if (!canAct) throw new Error('Not your turn');
   
+  const result = await handleEndTurn(gameId, playerId);
+  
+  return {
+    gameState: await getFullGameState(gameId),
+    phaseResult: result.phaseResult,
+  };
+}
+
+/**
+ * Collect paint cubes during selling phase
+ */
+export async function performCollectPaintAction(
+  gameId: string,
+  playerId: string,
+  selectedCubeIds: string[]
+): Promise<{ gameState: FullGameState; cubesCollected: PaintCube[]; sellingComplete: boolean }> {
   const game = await gameDb.getGame(gameId);
-  if (!game) throw new Error('Game not found');
-  
-  const players = await playerDb.getGamePlayers(gameId);
-  
-  // Check if all players have acted in this phase
-  const gameState = await gameDb.getGameState(gameId);
-  if (!gameState) throw new Error('Game state not found');
-  
-  // Advance to next player
-  const nextPlayer = await advanceToNextPlayer(gameId);
-  
-  // If we've cycled back to first player, advance phase
-  if (nextPlayer.turn_order === 0) {
-    await advancePhase(gameId);
+  if (!game || game.current_phase !== 'selling') {
+    throw new Error('Not in selling phase');
   }
   
-  return getFullGameState(gameId);
+  const result = await collectPaintCubes(gameId, playerId, selectedCubeIds);
+  
+  // Check if selling phase is complete
+  const sellingComplete = !result.sellingData.isActive;
+  
+  if (sellingComplete) {
+    // Advance to next day
+    const { handleEndTurn: advanceFromSelling } = await import('./dayNightCycle');
+    // We need to trigger phase advancement
+    const gameState = await gameDb.getGameState(gameId);
+    if (gameState) {
+      await gameDb.updateGameState(gameId, {
+        selling_phase_data: undefined,
+      });
+    }
+  }
+  
+  return {
+    gameState: await getFullGameState(gameId),
+    cubesCollected: result.cubesCollected,
+    sellingComplete,
+  };
+}
+
+/**
+ * Skip collecting paint during selling phase
+ */
+export async function performSkipCollectionAction(
+  gameId: string,
+  playerId: string
+): Promise<{ gameState: FullGameState; sellingComplete: boolean }> {
+  const game = await gameDb.getGame(gameId);
+  if (!game || game.current_phase !== 'selling') {
+    throw new Error('Not in selling phase');
+  }
+  
+  const sellingData = await skipCollection(gameId, playerId);
+  const sellingComplete = !sellingData.isActive;
+  
+  return {
+    gameState: await getFullGameState(gameId),
+    sellingComplete,
+  };
+}
+
+/**
+ * Get current action availability for a player
+ */
+export async function getAvailableActions(
+  gameId: string,
+  playerId: string
+): Promise<{
+  canAct: boolean;
+  availableActions: string[];
+  reason?: string;
+}> {
+  const game = await gameDb.getGame(gameId);
+  if (!game) {
+    return { canAct: false, availableActions: [], reason: 'Game not found' };
+  }
+  
+  if (game.status !== 'playing') {
+    return { canAct: false, availableActions: [], reason: 'Game not active' };
+  }
+  
+  // During selling phase
+  if (game.current_phase === 'selling') {
+    const gameState = await gameDb.getGameState(gameId);
+    if (gameState?.selling_phase_data) {
+      const collector = getCurrentCollector(gameState.selling_phase_data);
+      if (collector && collector.playerId === playerId) {
+        return {
+          canAct: true,
+          availableActions: ['collect_paint', 'skip_collection'],
+        };
+      }
+    }
+    return { canAct: false, availableActions: [], reason: 'Not your turn to collect' };
+  }
+  
+  // Regular phases
+  if (game.current_player_id !== playerId) {
+    return { canAct: false, availableActions: [], reason: 'Not your turn' };
+  }
+  
+  const gameState = await gameDb.getGameState(gameId);
+  const playerCubes = await playerDb.getPlayerPaintCubes(playerId);
+  const playerCanvases = await canvasDb.getPlayerCanvases(playerId);
+  
+  const actions: string[] = ['end_turn'];
+  
+  // Work: always available if bag not empty
+  if (gameState && gameState.paint_bag.length > 0) {
+    actions.push('work');
+  }
+  
+  // Buy canvas: if player has enough cubes
+  if (gameState && playerCubes.length >= 1) {
+    actions.push('buy_canvas');
+  }
+  
+  // Paint: if player has cubes and incomplete canvases
+  if (playerCubes.length > 0 && playerCanvases.some(c => !c.completed)) {
+    actions.push('paint');
+  }
+  
+  return { canAct: true, availableActions: actions };
 }
