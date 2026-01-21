@@ -27,7 +27,7 @@ export async function startGame(gameId: string): Promise<FullGameState> {
   for (let i = 0; i < shuffledPlayers.length; i++) {
     const player = shuffledPlayers[i];
     // Update turn order in database
-    await gameDb.execute(
+    await execute(
       'UPDATE players SET turn_order = ? WHERE id = ?',
       [i, player.id]
     );
