@@ -1,7 +1,7 @@
 // Selling phase - round robin canvas selling
-import * as gameDb from '../database/gameDb';
-import * as playerDb from '../database/playerDb';
-import * as canvasDb from '../database/canvasDb';
+import * as gameDb from '../../database/gameDb';
+import * as playerDb from '../../database/playerDb';
+import * as canvasDb from '../../database/canvasDb';
 import { Player, PlayerCanvas, FullGameState } from '../../models/types';
 import { updatePlayerScore } from '../score/scoreTracker';
 import { getFullGameState } from './gameEngine';
