@@ -11,7 +11,7 @@ export const PAINT_COLORS = [
   'wild',
 ] as const;
 
-export type PaintColor = typeof PAINT_COLORS[number];
+export type PaintColor = (typeof PAINT_COLORS)[number];
 
 export const GAME_PHASES = {
   MORNING: 'morning',
