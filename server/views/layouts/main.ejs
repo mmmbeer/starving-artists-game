@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="default">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Starving Artists - Online Multiplayer Board Game">
+  <title><%= title %></title>
+  
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/themes/default.css">
+  <link rel="stylesheet" href="/css/overrides.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/components.css">
+  
+  <!-- Page-specific CSS -->
+  <%- typeof pageCSS !== 'undefined' ? pageCSS : '' %>
+</head>
+<body>
+  <!-- Header -->
+  <header class="app-header">
+    <div class="container">
+      <a href="/" class="app-logo">
+        🎨 <span>Starving Artists</span>
+      </a>
+      <nav class="header-nav">
+        <a href="/rules" class="btn btn-sm btn-outline-primary">Rules</a>
+        <a href="/about" class="btn btn-sm btn-outline-primary">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="app-main">
+    <%- body %>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="container">
+      <p>&copy; 2025 Starving Artists Online. Based on the board game by Fairway 3 Games, LLC.</p>
+    </div>
+  </footer>
+
+  <!-- Toast Container for Notifications -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Socket.IO Client -->
+  <script src="/socket.io/socket.io.js"></script>
+  
+  <!-- Core Utilities -->
+  <script src="/js/utils/dom-helpers.js"></script>
+  <script src="/js/utils/ui-helpers.js"></script>
+  
+  <!-- Page-specific JS -->
+  <%- typeof pageJS !== 'undefined' ? pageJS : '' %>
+</body>
+</html>
