@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="default">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/themes/default.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .admin-header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: white;
+      padding: 1rem 0;
+    }
+    .canvas-thumb {
+      width: 80px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    .table th { 
+      background: #f8f9fa; 
+      position: sticky;
+      top: 0;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .status-dot.configured { background: #10B981; }
+    .status-dot.missing { background: #F59E0B; }
+    .search-box {
+      max-width: 300px;
+    }
+    .filter-tabs .nav-link {
+      color: #6b7280;
+    }
+    .filter-tabs .nav-link.active {
+      color: #3B82F6;
+      border-bottom: 2px solid #3B82F6;
+    }
+  </style>
+</head>
+<body>
+  <header class="admin-header">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <a href="/admin" class="text-white-50 text-decoration-none">← Admin</a>
+          <h1 class="h3 mb-0 mt-1">All Canvases</h1>
+        </div>
+        <a href="/" class="btn btn-outline-light btn-sm">← Back to Game</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-4">
+    <div class="container-fluid">
+      <!-- Filters -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-4">
+              <input 
+                type="text" 
+                id="searchInput" 
+                class="form-control search-box" 
+                placeholder="Search by title or artist..."
+              >
+            </div>
+            <div class="col-md-8">
+              <ul class="nav filter-tabs">
+                <li class="nav-item">
+                  <a class="nav-link active" href="#" data-filter="all">
+                    All (<%= canvasFiles.length %>)
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#" data-filter="configured">
+                    Configured (<%= canvasFiles.filter(f => f.inDatabase).length %>)
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#" data-filter="missing">
+                    Needs Setup (<%= canvasFiles.filter(f => !f.inDatabase).length %>)
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas Table -->
+      <div class="card">
+        <div class="table-responsive" style="max-height: calc(100vh - 280px); overflow-y: auto;">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th style="width: 100px;">Preview</th>
+                <th>Title</th>
+                <th>Artist</th>
+                <th>Year</th>
+                <th style="width: 100px;">Status</th>
+                <th style="width: 120px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="canvasTableBody">
+              <% canvasFiles.forEach(file => { %>
+                <tr 
+                  class="canvas-row" 
+                  data-title="<%= file.title.toLowerCase() %>"
+                  data-artist="<%= file.artist.toLowerCase() %>"
+                  data-status="<%= file.inDatabase ? 'configured' : 'missing' %>"
+                >
+                  <td>
+                    <img 
+                      src="<%= file.fullPath %>" 
+                      alt="<%= file.title %>"
+                      class="canvas-thumb"
+                      onerror="this.src='/images/placeholder.png'"
+                    >
+                  </td>
+                  <td>
+                    <strong><%= file.title %></strong>
+                    <div class="small text-muted text-truncate" style="max-width: 300px;">
+                      <%= file.filename %>
+                    </div>
+                  </td>
+                  <td><%= file.artist %></td>
+                  <td><%= file.year || '-' %></td>
+                  <td>
+                    <% if (file.inDatabase) { %>
+                      <span class="status-dot configured"></span>
+                      <span class="small text-success">Configured</span>
+                    <% } else { %>
+                      <span class="status-dot missing"></span>
+                      <span class="small text-warning">Needs Setup</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <a 
+                      href="/admin/canvas/edit/<%= encodeURIComponent(file.filename) %>" 
+                      class="btn btn-sm btn-primary"
+                    >
+                      Edit
+                    </a>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const tableBody = document.getElementById('canvasTableBody');
+    const rows = tableBody.querySelectorAll('.canvas-row');
+    const filterTabs = document.querySelectorAll('.filter-tabs .nav-link');
+    
+    let currentFilter = 'all';
+    
+    function filterRows() {
+      const searchTerm = searchInput.value.toLowerCase();
+      
+      rows.forEach(row => {
+        const title = row.dataset.title;
+        const artist = row.dataset.artist;
+        const status = row.dataset.status;
+        
+        const matchesSearch = title.includes(searchTerm) || artist.includes(searchTerm);
+        const matchesFilter = currentFilter === 'all' || status === currentFilter;
+        
+        row.style.display = matchesSearch && matchesFilter ? '' : 'none';
+      });
+    }
+    
+    searchInput.addEventListener('input', filterRows);
+    
+    filterTabs.forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        e.preventDefault();
+        filterTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentFilter = tab.dataset.filter;
+        filterRows();
+      });
+    });
+  </script>
+</body>
+</html>
