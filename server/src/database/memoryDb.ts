@@ -18,25 +18,28 @@ function initCanvasDefinitions() {
   const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'black'];
   
   const canvasTemplates = [
-    { name: 'Sunset', star_value: 3, paint_value: 2, food_value: 1, squares: 4 },
-    { name: 'Portrait', star_value: 4, paint_value: 3, food_value: 2, squares: 6 },
-    { name: 'Landscape', star_value: 5, paint_value: 4, food_value: 3, squares: 8 },
-    { name: 'Still Life', star_value: 3, paint_value: 2, food_value: 1, squares: 4 },
-    { name: 'Abstract', star_value: 4, paint_value: 3, food_value: 2, squares: 5 },
-    { name: 'Seascape', star_value: 5, paint_value: 4, food_value: 2, squares: 7 },
-    { name: 'Cityscape', star_value: 6, paint_value: 5, food_value: 3, squares: 9 },
-    { name: 'Wildlife', star_value: 4, paint_value: 3, food_value: 2, squares: 5 },
-    { name: 'Flowers', star_value: 3, paint_value: 2, food_value: 1, squares: 4 },
-    { name: 'Mountains', star_value: 5, paint_value: 4, food_value: 2, squares: 6 },
+    { name: 'Sunset', artist: 'Unknown', star_value: 3, paint_value: 2, food_value: 1, squares: 4, orientation: 'landscape' },
+    { name: 'Portrait', artist: 'Unknown', star_value: 4, paint_value: 3, food_value: 2, squares: 6, orientation: 'portrait' },
+    { name: 'Landscape', artist: 'Unknown', star_value: 5, paint_value: 4, food_value: 3, squares: 8, orientation: 'landscape' },
+    { name: 'Still Life', artist: 'Unknown', star_value: 3, paint_value: 2, food_value: 1, squares: 4, orientation: 'landscape' },
+    { name: 'Abstract', artist: 'Unknown', star_value: 4, paint_value: 3, food_value: 2, squares: 5, orientation: 'landscape' },
+    { name: 'Seascape', artist: 'Unknown', star_value: 5, paint_value: 4, food_value: 2, squares: 7, orientation: 'landscape' },
+    { name: 'Cityscape', artist: 'Unknown', star_value: 6, paint_value: 5, food_value: 3, squares: 9, orientation: 'landscape' },
+    { name: 'Wildlife', artist: 'Unknown', star_value: 4, paint_value: 3, food_value: 2, squares: 5, orientation: 'landscape' },
+    { name: 'Flowers', artist: 'Unknown', star_value: 3, paint_value: 2, food_value: 1, squares: 4, orientation: 'portrait' },
+    { name: 'Mountains', artist: 'Unknown', star_value: 5, paint_value: 4, food_value: 2, squares: 6, orientation: 'landscape' },
   ];
   
   canvasTemplates.forEach((template, index) => {
     const squares = [];
     const gridSize = Math.ceil(Math.sqrt(template.squares));
+    // Use pixel positions for proper rendering (each square ~40px)
+    const squareSize = 40;
+    const gap = 4;
     
     for (let i = 0; i < template.squares; i++) {
-      const x = i % gridSize;
-      const y = Math.floor(i / gridSize);
+      const col = i % gridSize;
+      const row = Math.floor(i / gridSize);
       const allowedColors = [colors[Math.floor(Math.random() * colors.length)]];
       // Add a second allowed color for variety
       if (Math.random() > 0.5) {
@@ -45,8 +48,10 @@ function initCanvasDefinitions() {
       
       squares.push({
         id: `sq-${index}-${i}`,
-        x,
-        y,
+        position: {
+          x: col * (squareSize + gap),
+          y: row * (squareSize + gap),
+        },
         allowedColors: [...new Set(allowedColors)], // Remove duplicates
       });
     }
@@ -54,11 +59,16 @@ function initCanvasDefinitions() {
     canvasDefinitions.push({
       id: index + 1,
       name: template.name,
+      artist: template.artist,
       star_value: template.star_value,
       paint_value: template.paint_value,
       food_value: template.food_value,
-      layout_json: { squares },
-      image_filename: null,
+      layout_json: { 
+        id: `canvas-${index + 1}`,
+        orientation: template.orientation,
+        squares,
+      },
+      filename: null,
     });
   });
 }
