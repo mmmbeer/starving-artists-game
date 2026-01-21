@@ -1,1 +1,328 @@
-// Drag and Drop functionality for painting\n\nclass DragDropManager {\n  constructor() {\n    this.draggedCube = null;\n    this.draggedCubeData = null;\n    this.dropZones = [];\n    this.pendingPaints = []; // Store paints before committing\n  }\n\n  initialize() {\n    this.setupDraggableCubes();\n    this.setupDropZones();\n  }\n\n  setupDraggableCubes() {\n    const cubes = document.querySelectorAll('.paint-cube:not(.in-canvas)');\n    \n    cubes.forEach(cube => {\n      cube.setAttribute('draggable', 'true');\n      \n      cube.addEventListener('dragstart', (e) => this.handleDragStart(e));\n      cube.addEventListener('dragend', (e) => this.handleDragEnd(e));\n    });\n  }\n\n  setupDropZones() {\n    const squares = document.querySelectorAll('.canvas-square:not(.painted)');\n    \n    squares.forEach(square => {\n      square.classList.add('drop-zone');\n      \n      square.addEventListener('dragover', (e) => this.handleDragOver(e));\n      square.addEventListener('dragenter', (e) => this.handleDragEnter(e));\n      square.addEventListener('dragleave', (e) => this.handleDragLeave(e));\n      square.addEventListener('drop', (e) => this.handleDrop(e));\n    });\n    \n    this.dropZones = Array.from(squares);\n  }\n\n  handleDragStart(e) {\n    this.draggedCube = e.target;\n    this.draggedCubeData = {\n      id: e.target.dataset.cubeId,\n      color: e.target.dataset.color,\n      isWild: e.target.dataset.isWild === 'true'\n    };\n    \n    e.target.classList.add('dragging');\n    e.dataTransfer.effectAllowed = 'move';\n    e.dataTransfer.setData('text/html', e.target.innerHTML);\n    \n    // Visual feedback\n    this.highlightValidDropZones();\n  }\n\n  handleDragEnd(e) {\n    e.target.classList.remove('dragging');\n    this.removeAllHighlights();\n    this.draggedCube = null;\n    this.draggedCubeData = null;\n  }\n\n  handleDragOver(e) {\n    e.preventDefault();\n    e.dataTransfer.dropEffect = 'move';\n    return false;\n  }\n\n  handleDragEnter(e) {\n    e.preventDefault();\n    \n    const square = e.target.closest('.canvas-square');\n    if (square && !square.classList.contains('painted')) {\n      if (this.canPaintSquare(square)) {\n        square.classList.add('drag-over');\n      }\n    }\n  }\n\n  handleDragLeave(e) {\n    const square = e.target.closest('.canvas-square');\n    if (square) {\n      square.classList.remove('drag-over');\n    }\n  }\n\n  handleDrop(e) {\n    e.preventDefault();\n    e.stopPropagation();\n    \n    const square = e.target.closest('.canvas-square');\n    if (!square || square.classList.contains('painted')) {\n      return false;\n    }\n    \n    // Validate the drop\n    if (!this.canPaintSquare(square)) {\n      showToast('Invalid Move', 'This cube color cannot be used on this square', 'warning');\n      return false;\n    }\n    \n    // Add to pending paints\n    this.addPendingPaint(square, this.draggedCubeData);\n    \n    // Visual update\n    this.paintSquare(square, this.draggedCubeData.color);\n    \n    // Remove cube from studio\n    if (this.draggedCube) {\n      this.draggedCube.remove();\n    }\n    \n    square.classList.remove('drag-over');\n    \n    // Check if we can commit (up to 4 cubes per action)\n    if (this.pendingPaints.length >= 4) {\n      this.promptCommitPaints();\n    }\n    \n    return false;\n  }\n\n  canPaintSquare(square) {\n    if (!this.draggedCubeData) return false;\n    \n    const allowedColors = square.dataset.allowedColors?.split(',') || [];\n    const canvasId = square.closest('.canvas-card').dataset.canvasId;\n    \n    // Wild cubes can go anywhere, but check if canvas already has a wild\n    if (this.draggedCubeData.isWild) {\n      const canvas = square.closest('.canvas-card');\n      const hasWild = canvas.querySelector('.canvas-square[data-cube-color=\"wild\"]');\n      if (hasWild) {\n        return false; // Canvas already has a wild cube\n      }\n      return true;\n    }\n    \n    // Regular cube - check if color is allowed\n    return allowedColors.includes(this.draggedCubeData.color);\n  }\n\n  paintSquare(square, color) {\n    square.classList.add('painted');\n    square.classList.remove('drop-zone', 'drag-over');\n    square.style.backgroundColor = getPaintColor(color);\n    square.dataset.cubeColor = color;\n    \n    // Add checkmark or indication\n    square.innerHTML = '<span style=\"color: white; font-size: 20px;\">✓</span>';\n    \n    // Update progress bar\n    this.updateCanvasProgress(square.closest('.canvas-card'));\n  }\n\n  addPendingPaint(square, cubeData) {\n    const canvasId = square.closest('.canvas-card').dataset.canvasId;\n    const squareId = square.dataset.squareId;\n    \n    this.pendingPaints.push({\n      canvasId,\n      squareId,\n      cubeId: cubeData.id\n    });\n    \n    // Update pending count display\n    this.updatePendingCount();\n  }\n\n  updatePendingCount() {\n    const countElement = document.getElementById('pendingPaintsCount');\n    if (countElement) {\n      countElement.textContent = this.pendingPaints.length;\n      \n      const commitBtn = document.getElementById('commitPaintsBtn');\n      if (commitBtn) {\n        commitBtn.disabled = this.pendingPaints.length === 0;\n        commitBtn.textContent = `Apply ${this.pendingPaints.length} Paint${this.pendingPaints.length !== 1 ? 's' : ''}`;\n      }\n    }\n  }\n\n  promptCommitPaints() {\n    if (this.pendingPaints.length > 0) {\n      showToast(\n        'Ready to Commit', \n        `You have ${this.pendingPaints.length} pending paint(s). Click \"Apply Paints\" to commit.`,\n        'info'\n      );\n    }\n  }\n\n  async commitPaints() {\n    if (this.pendingPaints.length === 0) {\n      showToast('No Paints', 'No paints to apply', 'warning');\n      return;\n    }\n    \n    try {\n      const response = await api.post(`/game/${window.gameId}/action/paint`, {\n        paintings: this.pendingPaints\n      });\n      \n      if (response.success) {\n        showToast('Success', 'Paints applied successfully!', 'success');\n        this.pendingPaints = [];\n        this.updatePendingCount();\n        \n        // Emit socket event\n        if (window.socket) {\n          window.socket.emit('action:paint', {\n            gameId: window.gameId,\n            playerId: window.playerId,\n            paintings: this.pendingPaints\n          });\n        }\n      }\n    } catch (error) {\n      showToast('Error', error.message, 'danger');\n      // Revert paints\n      this.revertPendingPaints();\n    }\n  }\n\n  revertPendingPaints() {\n    // Remove visual paints and restore cubes\n    this.pendingPaints.forEach(paint => {\n      const canvas = document.querySelector(`[data-canvas-id=\"${paint.canvasId}\"]`);\n      const square = canvas?.querySelector(`[data-square-id=\"${paint.squareId}\"]`);\n      \n      if (square) {\n        square.classList.remove('painted');\n        square.classList.add('drop-zone');\n        square.style.backgroundColor = '';\n        square.innerHTML = '';\n        delete square.dataset.cubeColor;\n      }\n    });\n    \n    this.pendingPaints = [];\n    this.updatePendingCount();\n    \n    // Refresh cubes\n    if (window.gameUI) {\n      window.gameUI.refreshPlayerStudio();\n    }\n  }\n\n  updateCanvasProgress(canvasCard) {\n    const squares = canvasCard.querySelectorAll('.canvas-square');\n    const painted = canvasCard.querySelectorAll('.canvas-square.painted');\n    const percentage = (painted.length / squares.length) * 100;\n    \n    const progressBar = canvasCard.querySelector('.progress-bar');\n    if (progressBar) {\n      progressBar.style.width = percentage + '%';\n    }\n    \n    const progressText = canvasCard.querySelector('.progress-text');\n    if (progressText) {\n      progressText.textContent = `${painted.length}/${squares.length}`;\n    }\n    \n    // Check if completed\n    if (painted.length === squares.length) {\n      canvasCard.classList.add('completed');\n      showToast('Canvas Complete!', 'You completed a painting!', 'success');\n    }\n  }\n\n  highlightValidDropZones() {\n    if (!this.draggedCubeData) return;\n    \n    this.dropZones.forEach(square => {\n      if (this.canPaintSquare(square)) {\n        square.style.borderColor = 'var(--color-accent)';\n      } else {\n        square.style.opacity = '0.5';\n      }\n    });\n  }\n\n  removeAllHighlights() {\n    this.dropZones.forEach(square => {\n      square.style.borderColor = '';\n      square.style.opacity = '';\n      square.classList.remove('drag-over');\n    });\n  }\n\n  reset() {\n    this.pendingPaints = [];\n    this.updatePendingCount();\n    this.removeAllHighlights();\n  }\n\n  refresh() {\n    this.setupDraggableCubes();\n    this.setupDropZones();\n  }\n}\n\n// Create global instance\nconst dragDropManager = new DragDropManager();\n
+// Drag and Drop functionality for painting
+
+class DragDropManager {
+  constructor() {
+    this.draggedCube = null;
+    this.draggedCubeData = null;
+    this.dropZones = [];
+    this.pendingPaints = []; // Store paints before committing
+  }
+
+  initialize() {
+    this.setupDraggableCubes();
+    this.setupDropZones();
+  }
+
+  setupDraggableCubes() {
+    const cubes = document.querySelectorAll('.paint-cube:not(.in-market):not(.in-canvas)');
+    
+    cubes.forEach(cube => {
+      cube.setAttribute('draggable', 'true');
+      
+      cube.addEventListener('dragstart', (e) => this.handleDragStart(e));
+      cube.addEventListener('dragend', (e) => this.handleDragEnd(e));
+    });
+  }
+
+  setupDropZones() {
+    const squares = document.querySelectorAll('.canvas-square.drop-zone:not(.painted)');
+    
+    squares.forEach(square => {
+      square.addEventListener('dragover', (e) => this.handleDragOver(e));
+      square.addEventListener('dragenter', (e) => this.handleDragEnter(e));
+      square.addEventListener('dragleave', (e) => this.handleDragLeave(e));
+      square.addEventListener('drop', (e) => this.handleDrop(e));
+    });
+    
+    this.dropZones = Array.from(squares);
+  }
+
+  handleDragStart(e) {
+    this.draggedCube = e.target;
+    this.draggedCubeData = {
+      id: e.target.dataset.cubeId,
+      color: e.target.dataset.color,
+      isWild: e.target.dataset.isWild === 'true'
+    };
+    
+    e.target.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', e.target.dataset.cubeId);
+    
+    // Visual feedback
+    this.highlightValidDropZones();
+  }
+
+  handleDragEnd(e) {
+    e.target.classList.remove('dragging');
+    this.removeAllHighlights();
+    this.draggedCube = null;
+    this.draggedCubeData = null;
+  }
+
+  handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+  }
+
+  handleDragEnter(e) {
+    e.preventDefault();
+    
+    const square = e.target.closest('.canvas-square');
+    if (square && !square.classList.contains('painted')) {
+      if (this.canPaintSquare(square)) {
+        square.classList.add('drag-over');
+      }
+    }
+  }
+
+  handleDragLeave(e) {
+    const square = e.target.closest('.canvas-square');
+    if (square) {
+      square.classList.remove('drag-over');
+    }
+  }
+
+  handleDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const square = e.target.closest('.canvas-square');
+    if (!square || square.classList.contains('painted')) {
+      return false;
+    }
+    
+    // Validate the drop
+    if (!this.canPaintSquare(square)) {
+      showToast('Invalid Move', 'This cube color cannot be used on this square', 'warning');
+      return false;
+    }
+    
+    // Add to pending paints
+    this.addPendingPaint(square, this.draggedCubeData);
+    
+    // Visual update
+    this.paintSquare(square, this.draggedCubeData.color);
+    
+    // Remove cube from studio
+    if (this.draggedCube) {
+      this.draggedCube.remove();
+    }
+    
+    square.classList.remove('drag-over');
+    
+    // Check if we can commit (up to 4 cubes per action)
+    if (this.pendingPaints.length >= 4) {
+      this.promptCommitPaints();
+    }
+    
+    return false;
+  }
+
+  canPaintSquare(square) {
+    if (!this.draggedCubeData) return false;
+    
+    const allowedColors = square.dataset.allowedColors?.split(',') || [];
+    
+    // Wild cubes can go anywhere, but check if canvas already has a wild
+    if (this.draggedCubeData.isWild) {
+      const canvas = square.closest('.canvas-card');
+      if (canvas) {
+        const hasWild = canvas.querySelector('.canvas-square[data-cube-color="wild"]');
+        if (hasWild) {
+          return false; // Canvas already has a wild cube
+        }
+      }
+      return true;
+    }
+    
+    // Regular cube - check if color is allowed
+    return allowedColors.includes(this.draggedCubeData.color);
+  }
+
+  paintSquare(square, color) {
+    square.classList.add('painted');
+    square.classList.remove('drop-zone', 'drag-over');
+    square.style.backgroundColor = getPaintColor(color);
+    square.dataset.cubeColor = color;
+    
+    // Add checkmark or indication
+    square.innerHTML = '<span style="color: white; font-size: 16px;">✓</span>';
+    
+    // Update progress bar
+    this.updateCanvasProgress(square.closest('.canvas-card'));
+  }
+
+  addPendingPaint(square, cubeData) {
+    const canvasCard = square.closest('.canvas-card');
+    if (!canvasCard) return;
+    
+    const canvasId = canvasCard.dataset.canvasId;
+    const squareId = square.dataset.squareId;
+    
+    this.pendingPaints.push({
+      canvasId,
+      squareId,
+      cubeId: cubeData.id
+    });
+    
+    // Update pending count display
+    this.updatePendingCount();
+  }
+
+  updatePendingCount() {
+    const countElement = document.getElementById('pendingPaintsCount');
+    if (countElement) {
+      countElement.textContent = this.pendingPaints.length;
+    }
+    
+    const commitBtn = document.getElementById('commitPaintsBtn');
+    if (commitBtn) {
+      commitBtn.disabled = this.pendingPaints.length === 0;
+      if (this.pendingPaints.length > 0) {
+        commitBtn.textContent = `Apply ${this.pendingPaints.length} Paint${this.pendingPaints.length !== 1 ? 's' : ''}`;
+      } else {
+        commitBtn.textContent = 'Apply Paints';
+      }
+    }
+  }
+
+  promptCommitPaints() {
+    if (this.pendingPaints.length > 0) {
+      showToast(
+        'Ready to Commit', 
+        `You have ${this.pendingPaints.length} pending paint(s). Click "Apply Paints" to commit.`,
+        'info'
+      );
+    }
+  }
+
+  async commitPaints() {
+    if (this.pendingPaints.length === 0) {
+      showToast('No Paints', 'No paints to apply', 'warning');
+      return;
+    }
+
+    // Check if it's our turn
+    if (window.gameUI && !window.gameUI.isMyTurn()) {
+      showToast('Not Your Turn', 'Wait for your turn to paint', 'warning');
+      return;
+    }
+    
+    try {
+      const gameId = window.gameId;
+      const playerId = window.playerId;
+      
+      const response = await api.post(`/game/${gameId}/action/paint`, {
+        paintings: this.pendingPaints
+      });
+      
+      if (response.success) {
+        showToast('Success', 'Paints applied successfully!', 'success');
+        
+        // Emit socket event for real-time update
+        if (window.socket) {
+          window.socket.emit('action:paint', {
+            gameId: gameId,
+            playerId: playerId,
+            paintings: this.pendingPaints
+          });
+        }
+        
+        this.pendingPaints = [];
+        this.updatePendingCount();
+      }
+    } catch (error) {
+      showToast('Error', error.message, 'danger');
+      // Revert paints
+      this.revertPendingPaints();
+    }
+  }
+
+  revertPendingPaints() {
+    // Remove visual paints and restore cubes
+    this.pendingPaints.forEach(paint => {
+      const canvas = document.querySelector(`[data-canvas-id="${paint.canvasId}"]`);
+      const square = canvas?.querySelector(`[data-square-id="${paint.squareId}"]`);
+      
+      if (square) {
+        square.classList.remove('painted');
+        square.classList.add('drop-zone');
+        square.style.backgroundColor = '';
+        square.innerHTML = '';
+        delete square.dataset.cubeColor;
+      }
+    });
+    
+    this.pendingPaints = [];
+    this.updatePendingCount();
+    
+    // Refresh cubes
+    if (window.gameUI) {
+      window.gameUI.refreshPlayerStudio();
+    }
+  }
+
+  updateCanvasProgress(canvasCard) {
+    if (!canvasCard) return;
+    
+    const squares = canvasCard.querySelectorAll('.canvas-square');
+    const painted = canvasCard.querySelectorAll('.canvas-square.painted');
+    const percentage = (painted.length / squares.length) * 100;
+    
+    const progressBar = canvasCard.querySelector('.progress-bar');
+    if (progressBar) {
+      progressBar.style.width = percentage + '%';
+    }
+    
+    const progressText = canvasCard.querySelector('.progress-text');
+    if (progressText) {
+      progressText.textContent = `${painted.length}/${squares.length} painted`;
+    }
+    
+    // Check if completed
+    if (painted.length === squares.length) {
+      canvasCard.classList.add('completed');
+      showToast('Canvas Complete!', 'You completed a painting!', 'success');
+    }
+  }
+
+  highlightValidDropZones() {
+    if (!this.draggedCubeData) return;
+    
+    this.dropZones.forEach(square => {
+      if (this.canPaintSquare(square)) {
+        square.style.borderColor = 'var(--color-accent)';
+        square.style.boxShadow = '0 0 8px var(--color-accent)';
+      } else {
+        square.style.opacity = '0.5';
+      }
+    });
+  }
+
+  removeAllHighlights() {
+    this.dropZones.forEach(square => {
+      square.style.borderColor = '';
+      square.style.boxShadow = '';
+      square.style.opacity = '';
+      square.classList.remove('drag-over');
+    });
+  }
+
+  reset() {
+    this.pendingPaints = [];
+    this.updatePendingCount();
+    this.removeAllHighlights();
+  }
+
+  refresh() {
+    this.dropZones = [];
+    this.setupDraggableCubes();
+    this.setupDropZones();
+  }
+}
+
+// Create global instance
+const dragDropManager = new DragDropManager();
+window.dragDropManager = dragDropManager;
