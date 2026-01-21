@@ -1,7 +1,7 @@
 // Canvas market management
-import { CanvasDefinition } from '../models/types';
-import { shuffleArray } from '../utils/helpers';
-import * as canvasDb from '../database/canvasDb';
+import { CanvasDefinition } from '../../models/types';
+import { shuffleArray } from '../../utils/helpers';
+import * as canvasDb from '../../database/canvasDb';
 
 export async function createCanvasDeck(): Promise<number[]> {
   const allCanvases = await canvasDb.getAllCanvasDefinitions();
