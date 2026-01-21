@@ -1,7 +1,7 @@
 // Game action handler - processes player actions
-import * as gameDb from '../database/gameDb';
-import * as playerDb from '../database/playerDb';
-import * as canvasDb from '../database/canvasDb';
+import * as gameDb from '../../database/gameDb';
+import * as playerDb from '../../database/playerDb';
+import * as canvasDb from '../../database/canvasDb';
 import { drawPaintCubes } from '../paint/paintBag';
 import { refillMarketSlot, getCanvasCost, shiftMarketLeft } from '../canvas/canvasMarket';
 import { canPaintSquare, paintSquare, isCanvasComplete } from '../canvas/canvasManager';
