@@ -1,5 +1,5 @@
 // Canvas painting logic
-import { PlayerCanvas, PaintCube, CanvasSquare } from '../models/types';
+import { PlayerCanvas, PaintCube, CanvasSquare } from '../../models/types';
 
 export function canPaintSquare(
   canvas: PlayerCanvas,
