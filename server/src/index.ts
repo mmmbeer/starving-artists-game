@@ -17,16 +17,12 @@ const io = new SocketIOServer(server, {
   path: '/socket.io',
 });
 
-// Socket.IO connection handling
-io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
+// Register Socket.IO handlers
+import { registerLobbySocketHandlers } from './socket/lobby.socket';
+import { registerGameSocketHandlers } from './socket/game.socket';
 
-  socket.on('disconnect', () => {
-    console.log('Client disconnected:', socket.id);
-  });
-
-  // Socket handlers will be registered here
-});
+registerLobbySocketHandlers(io);
+registerGameSocketHandlers(io);
 
 // Make io available globally for routes
 app.set('io', io);
