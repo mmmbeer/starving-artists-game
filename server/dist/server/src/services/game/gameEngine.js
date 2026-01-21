@@ -38,9 +38,9 @@ exports.getFullGameState = getFullGameState;
 exports.isGameActive = isGameActive;
 exports.endGame = endGame;
 // Main game engine - game initialization and state management
-const gameDb = __importStar(require("../database/gameDb"));
-const playerDb = __importStar(require("../database/playerDb"));
-const canvasDb = __importStar(require("../database/canvasDb"));
+const gameDb = __importStar(require("../../database/gameDb"));
+const playerDb = __importStar(require("../../database/playerDb"));
+const canvasDb = __importStar(require("../../database/canvasDb"));
 const paintBag_1 = require("../paint/paintBag");
 const canvasMarket_1 = require("../canvas/canvasMarket");
 const turnManager_1 = require("./turnManager");

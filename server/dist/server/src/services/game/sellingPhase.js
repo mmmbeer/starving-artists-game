@@ -37,9 +37,9 @@ exports.collectSellIntents = collectSellIntents;
 exports.sellCanvas = sellCanvas;
 exports.completeSelling = completeSelling;
 // Selling phase - round robin canvas selling
-const gameDb = __importStar(require("../database/gameDb"));
-const playerDb = __importStar(require("../database/playerDb"));
-const canvasDb = __importStar(require("../database/canvasDb"));
+const gameDb = __importStar(require("../../database/gameDb"));
+const playerDb = __importStar(require("../../database/playerDb"));
+const canvasDb = __importStar(require("../../database/canvasDb"));
 const scoreTracker_1 = require("../score/scoreTracker");
 const gameEngine_1 = require("./gameEngine");
 const constants_1 = require("../../utils/constants");
