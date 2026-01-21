@@ -20,17 +20,64 @@
     <div class="container-fluid">
       <a href="/" class="app-logo">🎨 <span>Starving Artists</span></a>
       <div class="header-game-info">
-        <span id="phaseIndicator" class="phase-indicator <%= game.current_phase %>">
+        <span class="day-indicator">Day <span id="dayNumber"><%= game.day_number %></span></span>
+        <span id="phaseIndicator" class="phase-indicator <%= game.current_phase %>" data-testid="phase-indicator">
           <%= game.current_phase === 'morning' ? '☀️ Morning' : 
               game.current_phase === 'day' ? '🌤️ Day' : 
               game.current_phase === 'night' ? '🌙 Night' : '💰 Selling' %>
         </span>
-        <span id="turnIndicator" class="turn-indicator <%= isCurrentTurn ? 'your-turn' : 'not-your-turn' %>">
+        <span id="turnIndicator" class="turn-indicator <%= isCurrentTurn ? 'your-turn' : 'not-your-turn' %>" data-testid="turn-indicator">
           <%= isCurrentTurn ? '✨ Your Turn!' : (players.find(p => p.id === game.current_player_id)?.name || 'Unknown') + "'s Turn" %>
         </span>
       </div>
     </div>
   </header>
+
+  <!-- Waiting Overlay -->
+  <div id="waitingOverlay" class="waiting-overlay <%= isCurrentTurn ? 'd-none' : '' %>" data-testid="waiting-overlay">
+    <div class="waiting-content">
+      <div class="waiting-spinner"></div>
+      <div class="waiting-text">
+        Waiting for <span id="waitingPlayerName"><%= players.find(p => p.id === game.current_player_id)?.name || 'other player' %></span>...
+      </div>
+    </div>
+  </div>
+
+  <!-- Selling Phase Modal -->
+  <div id="sellingPhaseModal" class="selling-modal <%= game.current_phase === 'selling' ? '' : 'd-none' %>" data-testid="selling-modal">
+    <div class="selling-content">
+      <h3>💰 Selling Phase</h3>
+      <p class="selling-instructions">
+        Players collect paint cubes based on their completed paintings.<br>
+        <strong>Highest Paint Value:</strong> 4 cubes per turn<br>
+        <strong>Second Highest:</strong> 2 cubes per turn<br>
+        <strong>Others:</strong> 1 cube per turn
+      </p>
+      
+      <div id="sellingOrder" class="selling-order">
+        <!-- Populated by JS -->
+      </div>
+      
+      <div id="sellingMarket" class="selling-market">
+        <h5>Select Paint Cubes (<span id="sellingMaxCubes">0</span> max)</h5>
+        <div id="sellingPaintCubes" class="paint-cubes-selectable">
+          <!-- Populated by JS -->
+        </div>
+        <div class="selected-cubes-info mt-2">
+          Selected: <span id="selectedCubeCount">0</span> cubes
+        </div>
+      </div>
+      
+      <div class="selling-actions mt-3">
+        <button id="collectPaintBtn" class="btn btn-primary" disabled data-testid="collect-paint-btn">
+          Collect Selected Cubes
+        </button>
+        <button id="skipCollectionBtn" class="btn btn-secondary" data-testid="skip-collection-btn">
+          Skip (Pass)
+        </button>
+      </div>
+    </div>
+  </div>
 
   <main class="game-container">
     <div class="container-fluid">
@@ -55,6 +102,11 @@
                   <span title="Score">⭐ <%= player.score %></span>
                   <span title="Paintings">🎨 <%= player.paintings_completed %></span>
                 </div>
+                <% if (player.id !== currentPlayer.id && player.id === game.current_player_id) { %>
+                  <div class="player-waiting-indicator">
+                    <span class="waiting-dot"></span> Taking turn...
+                  </div>
+                <% } %>
               </div>
             <% }); %>
           </div>
@@ -73,22 +125,51 @@
                     <div class="canvas-cost">💎 <%= costs[index] %></div>
                     <div class="canvas-header">
                       <div class="canvas-name"><%= canvas.name %></div>
+                      <% if (canvas.artist) { %>
+                        <div class="canvas-artist"><%= canvas.artist %></div>
+                      <% } %>
                     </div>
                     <div class="canvas-values">
                       <span title="Stars">⭐ <%= canvas.star_value %></span>
                       <span title="Paint">🎨 <%= canvas.paint_value %></span>
                       <span title="Food">🍎 <%= canvas.food_value %></span>
                     </div>
-                    <% if (canvas.layout_json && canvas.layout_json.squares) { %>
-                      <div class="canvas-grid canvas-preview" style="grid-template-columns: repeat(<%= Math.max(...canvas.layout_json.squares.map(s => s.x)) + 1 %>, 24px);">
-                        <% canvas.layout_json.squares.forEach(square => { %>
-                          <div 
-                            class="canvas-square preview-square" 
-                            style="grid-column: <%= square.x + 1 %>; grid-row: <%= square.y + 1 %>;"
-                            data-allowed-colors="<%= square.allowedColors.join(',') %>"
-                            title="<%= square.allowedColors.join(', ') %>"
-                          ></div>
-                        <% }); %>
+                    <% if (canvas.filename) { %>
+                      <!-- Canvas with image -->
+                      <div class="canvas-image-container">
+                        <img src="/assets/canvases/<%= canvas.filename %>" alt="<%= canvas.name %>" class="canvas-thumbnail">
+                        <% if (canvas.layout_json && canvas.layout_json.squares) { %>
+                          <div class="canvas-squares-overlay preview">
+                            <% canvas.layout_json.squares.forEach(square => { %>
+                              <div 
+                                class="canvas-square-marker" 
+                                style="left: <%= (square.position?.x || 0) / 3 %>px; top: <%= (square.position?.y || 0) / 3 %>px;"
+                                data-allowed-colors="<%= square.allowedColors.join(',') %>"
+                                title="<%= square.allowedColors.join(', ') %>"
+                              ></div>
+                            <% }); %>
+                          </div>
+                        <% } %>
+                      </div>
+                    <% } else if (canvas.layout_json && canvas.layout_json.squares) { %>
+                      <!-- Canvas without image - grid preview -->
+                      <div class="canvas-grid canvas-preview">
+                        <% 
+                          const squares = canvas.layout_json.squares;
+                          const maxX = Math.max(...squares.map(s => s.position?.x || s.x || 0));
+                          const maxY = Math.max(...squares.map(s => s.position?.y || s.y || 0));
+                          const cols = Math.ceil((maxX + 40) / 44);
+                        %>
+                        <div style="display: grid; grid-template-columns: repeat(<%= cols %>, 24px); gap: 2px;">
+                          <% squares.forEach((square, idx) => { %>
+                            <div 
+                              class="canvas-square preview-square" 
+                              style="background: linear-gradient(135deg, <%= getColorStyle(square.allowedColors[0]) %>);"
+                              data-allowed-colors="<%= square.allowedColors.join(',') %>"
+                              title="<%= square.allowedColors.join(', ') %>"
+                            ></div>
+                          <% }); %>
+                        </div>
                       </div>
                     <% } %>
                   </div>
@@ -123,7 +204,7 @@
           <div class="studio-header">
             <div>
               <span class="studio-player-name"><%= currentPlayer.name %>'s Studio</span>
-              <div class="score-display">Score: <%= currentPlayer.score %> pts</div>
+              <div class="score-display">Score: <span id="playerScore"><%= currentPlayer.score %></span> pts</div>
             </div>
             <div class="nutrition-display">
               <span>❤️</span>
@@ -159,7 +240,7 @@
               <button 
                 id="workBtn" 
                 class="btn btn-primary action-btn" 
-                <%= !isCurrentTurn ? 'disabled' : '' %>
+                <%= !isCurrentTurn || game.current_phase === 'selling' ? 'disabled' : '' %>
                 data-testid="work-btn"
               >
                 <span class="btn-text">🖌️ Work</span>
@@ -168,7 +249,7 @@
               <button 
                 id="endTurnBtn" 
                 class="btn btn-secondary action-btn" 
-                <%= !isCurrentTurn ? 'disabled' : '' %>
+                <%= !isCurrentTurn || game.current_phase === 'selling' ? 'disabled' : '' %>
                 data-testid="end-turn-btn"
               >
                 <span class="btn-text">⏭️ End Turn</span>
@@ -203,38 +284,64 @@
                         <span>🍎 <%= canvas.definition?.food_value || 0 %></span>
                       </div>
                     </div>
-                    <% if (canvas.definition && canvas.definition.layout_json && canvas.definition.layout_json.squares) { %>
+                    <% if (canvas.definition && canvas.definition.filename) { %>
+                      <!-- Canvas with image - pixel perfect rendering -->
+                      <div class="canvas-painting-container" data-orientation="<%= canvas.definition.layout_json?.orientation || 'landscape' %>">
+                        <img src="/assets/canvases/<%= canvas.definition.filename %>" alt="<%= canvas.definition.name %>" class="canvas-painting-img">
+                        <% if (canvas.definition.layout_json && canvas.definition.layout_json.squares) { %>
+                          <div class="canvas-paint-overlay">
+                            <% 
+                              const paintedMap = new Map(canvas.painted_squares.map(ps => [ps.squareId, ps]));
+                            %>
+                            <% canvas.definition.layout_json.squares.forEach(square => { %>
+                              <% const painted = paintedMap.get(square.id); %>
+                              <div 
+                                class="paint-drop-zone <%= painted ? 'painted' : '' %>" 
+                                data-square-id="<%= square.id %>"
+                                data-allowed-colors="<%= square.allowedColors.join(',') %>"
+                                style="left: <%= square.position?.x || 0 %>px; top: <%= square.position?.y || 0 %>px;<%= painted ? ' background-color: var(--paint-' + painted.color + ');' : '' %>"
+                                title="<%= painted ? 'Painted: ' + painted.color : 'Allowed: ' + square.allowedColors.join(', ') %>"
+                              >
+                                <% if (painted) { %><span class="paint-check">✓</span><% } %>
+                              </div>
+                            <% }); %>
+                          </div>
+                        <% } %>
+                      </div>
+                    <% } else if (canvas.definition && canvas.definition.layout_json && canvas.definition.layout_json.squares) { %>
+                      <!-- Canvas without image - grid rendering -->
                       <% 
                         const squares = canvas.definition.layout_json.squares;
                         const paintedMap = new Map(canvas.painted_squares.map(ps => [ps.squareId, ps]));
-                        const maxX = Math.max(...squares.map(s => s.x));
+                        const maxX = Math.max(...squares.map(s => s.position?.x || s.x || 0));
+                        const cols = Math.ceil((maxX + 40) / 44);
                       %>
-                      <div class="canvas-grid" style="grid-template-columns: repeat(<%= maxX + 1 %>, 40px);">
+                      <div class="canvas-grid" style="grid-template-columns: repeat(<%= cols %>, 40px);">
                         <% squares.forEach(square => { %>
                           <% const painted = paintedMap.get(square.id); %>
                           <div 
                             class="canvas-square <%= painted ? 'painted' : 'drop-zone' %>" 
                             data-square-id="<%= square.id %>"
                             data-allowed-colors="<%= square.allowedColors.join(',') %>"
-                            style="grid-column: <%= square.x + 1 %>; grid-row: <%= square.y + 1 %>;<%= painted ? ' background-color: var(--paint-' + painted.color + ');' : '' %>"
+                            style="<%= painted ? 'background-color: var(--paint-' + painted.color + ');' : '' %>"
                             title="<%= painted ? 'Painted: ' + painted.color : 'Allowed: ' + square.allowedColors.join(', ') %>"
                           >
                             <% if (painted) { %><span style="color: white; font-size: 16px;">✓</span><% } %>
                           </div>
                         <% }); %>
                       </div>
-                      <% 
-                        const paintedCount = canvas.painted_squares.length;
-                        const totalSquares = squares.length;
-                        const percentage = (paintedCount / totalSquares) * 100;
-                      %>
-                      <div class="progress-bar-container">
-                        <div class="progress-bar" style="width: <%= percentage %>%"></div>
-                      </div>
-                      <div class="text-center mt-1">
-                        <small class="progress-text"><%= paintedCount %>/<%= totalSquares %> painted</small>
-                      </div>
                     <% } %>
+                    <% 
+                      const totalSquares = canvas.definition?.layout_json?.squares?.length || 1;
+                      const paintedCount = canvas.painted_squares.length;
+                      const percentage = (paintedCount / totalSquares) * 100;
+                    %>
+                    <div class="progress-bar-container">
+                      <div class="progress-bar" style="width: <%= percentage %>%"></div>
+                    </div>
+                    <div class="text-center mt-1">
+                      <small class="progress-text"><%= paintedCount %>/<%= totalSquares %> painted</small>
+                    </div>
                   </div>
                 <% }); %>
               <% } else { %>
@@ -271,7 +378,7 @@
     // Game configuration from server
     const gameId = '<%= game.id %>';
     const playerId = '<%= currentPlayer.id %>';
-    const isCurrentTurn = <%= isCurrentTurn %>;
+    let isCurrentTurn = <%= isCurrentTurn %>;
     
     // Initial game state
     const initialGameState = {
@@ -288,6 +395,7 @@
     let socket;
     let gameUI;
     let gameActions;
+    let selectedSellingCubes = [];
 
     // Initialize game
     document.addEventListener('DOMContentLoaded', () => {
@@ -324,21 +432,24 @@
       // Setup canvas market click handlers
       setupMarketHandlers();
       
+      // Setup selling phase handlers
+      setupSellingPhaseHandlers();
+      
       // Initialize drag and drop
       if (window.dragDropManager) {
         window.dragDropManager.initialize();
       }
       
+      // Update waiting overlay
+      updateWaitingOverlay();
+      
       console.log('Game initialized successfully');
     }
 
     function setupSocketHandlers() {
-      // Connection events
       socket.on('connect', () => {
         console.log('Connected to server');
         showToast('Connected', 'Real-time updates enabled', 'success', 2000);
-        
-        // Join game room
         socket.emit('join-game', { gameId, playerId });
       });
 
@@ -347,17 +458,27 @@
         showToast('Disconnected', 'Attempting to reconnect...', 'warning');
       });
 
-      socket.on('reconnect', () => {
-        console.log('Reconnected');
-        socket.emit('join-game', { gameId, playerId });
-      });
-
-      // Game state updates
       socket.on('game-state', (newState) => {
         console.log('Game state updated:', newState);
         
+        // Update local state
+        isCurrentTurn = newState.game.current_player_id === playerId;
+        
         if (gameUI) {
           gameUI.updateGameState(newState);
+        }
+        
+        // Update UI elements
+        updatePhaseIndicator(newState.game.current_phase);
+        updateTurnIndicator(newState);
+        updateWaitingOverlay();
+        updateDayNumber(newState.game.day_number);
+        
+        // Handle selling phase
+        if (newState.game.current_phase === 'selling') {
+          showSellingPhase(newState);
+        } else {
+          hideSellingPhase();
         }
         
         // Refresh drag and drop
@@ -366,55 +487,80 @@
         }
       });
 
-      // Action performed by any player
       socket.on('action-performed', (data) => {
         console.log('Action performed:', data);
         
-        const actionMessages = {
-          work: `drew paint cubes`,
-          'buy-canvas': `bought a canvas`,
-          paint: `painted ${data.paintingsCount || 'some'} square(s)`,
-          'end-turn': `ended their turn`
-        };
-        
-        const playerName = getPlayerName(data.playerId);
-        const message = actionMessages[data.action] || 'performed an action';
-        
-        // Don't show toast for own actions
         if (data.playerId !== playerId) {
-          showToast('Player Action', `${playerName} ${message}`, 'info', 3000);
+          const playerName = getPlayerName(data.playerId);
+          const messages = {
+            work: `drew paint cubes`,
+            'buy-canvas': `bought a canvas`,
+            paint: `painted ${data.paintingsCount || 'some'} square(s)`,
+            'end-turn': `ended their turn`,
+            'collect-paint': `collected ${data.cubesCollected || 'some'} paint cubes`,
+            'skip-collection': `passed on collecting`
+          };
+          showToast('Player Action', `${playerName} ${messages[data.action] || 'performed an action'}`, 'info', 3000);
+        }
+        
+        // Handle completions
+        if (data.completions && data.completions.length > 0) {
+          data.completions.forEach(completion => {
+            showToast('🎨 Painting Complete!', 
+              `${getPlayerName(data.playerId)} completed a painting! +${completion.rewards.stars}⭐`, 
+              'success', 5000);
+          });
         }
       });
 
-      // Turn changed
       socket.on('turn-changed', (data) => {
         console.log('Turn changed:', data);
+        isCurrentTurn = data.currentPlayerId === playerId;
         
-        const isMyTurn = data.currentPlayerId === playerId;
-        
-        if (isMyTurn) {
+        if (isCurrentTurn) {
           showToast('Your Turn!', "It's your turn to act", 'success');
-          
-          // Visual effect
           document.body.classList.add('bounce');
           setTimeout(() => document.body.classList.remove('bounce'), 500);
         }
         
-        // Update UI
-        if (gameUI) {
-          gameUI.currentPlayerId = data.currentPlayerId;
-          gameUI.updateTurnIndicator();
-          gameUI.updateActionButtons();
+        updateTurnIndicator({ game: { current_player_id: data.currentPlayerId } });
+        updateWaitingOverlay();
+        updateActionButtons();
+      });
+
+      socket.on('phase-changed', (data) => {
+        console.log('Phase changed:', data);
+        
+        if (data.newPhase === 'selling') {
+          showToast('💰 Selling Phase', 'Collect paint cubes for completed paintings!', 'info');
+        } else if (data.newPhase === 'morning' && data.newDay) {
+          showToast(`☀️ Day ${data.newDay}`, 'A new day begins!', 'info');
+          
+          if (data.nutritionChanges) {
+            const myChange = data.nutritionChanges.find(c => c.playerId === playerId);
+            if (myChange) {
+              showToast('❤️ Nutrition', `Your nutrition is now ${myChange.newNutrition}`, 'warning');
+            }
+          }
+        }
+        
+        if (data.eliminatedPlayers && data.eliminatedPlayers.length > 0) {
+          data.eliminatedPlayers.forEach(p => {
+            showToast('💀 Player Eliminated', `${p.name} has starved!`, 'danger');
+          });
         }
       });
 
-      // Game ended
+      socket.on('selling-complete', () => {
+        console.log('Selling phase complete');
+        hideSellingPhase();
+      });
+
       socket.on('game-ended', (data) => {
         console.log('Game ended:', data);
         showWinModal(data.winner, data.finalScores);
       });
 
-      // Player connection status
       socket.on('player-connected', (data) => {
         console.log('Player connected:', data.playerId);
       });
@@ -424,91 +570,267 @@
         showToast('Player Disconnected', getPlayerName(data.playerId) + ' disconnected', 'warning');
       });
 
-      // Action errors
       socket.on('action-error', (data) => {
         console.error('Action error:', data);
         showToast('Action Failed', data.message, 'danger');
       });
 
-      // Keep-alive ping
       setInterval(() => {
-        if (socket.connected) {
-          socket.emit('ping');
-        }
+        if (socket.connected) socket.emit('ping');
       }, 30000);
     }
 
     function setupActionButtons() {
-      // Work button
-      const workBtn = document.getElementById('workBtn');
-      if (workBtn) {
-        workBtn.addEventListener('click', () => {
-          if (gameActions) {
-            gameActions.performWork();
-          }
-        });
-      }
+      document.getElementById('workBtn')?.addEventListener('click', () => {
+        if (gameActions) gameActions.performWork();
+      });
 
-      // End turn button
-      const endTurnBtn = document.getElementById('endTurnBtn');
-      if (endTurnBtn) {
-        endTurnBtn.addEventListener('click', () => {
-          if (gameActions) {
-            gameActions.endTurn();
-          }
-        });
-      }
+      document.getElementById('endTurnBtn')?.addEventListener('click', () => {
+        if (gameActions) gameActions.endTurn();
+      });
 
-      // Commit paints button
-      const commitPaintsBtn = document.getElementById('commitPaintsBtn');
-      if (commitPaintsBtn) {
-        commitPaintsBtn.addEventListener('click', () => {
-          if (window.dragDropManager) {
-            window.dragDropManager.commitPaints();
-          }
-        });
-      }
+      document.getElementById('commitPaintsBtn')?.addEventListener('click', () => {
+        if (window.dragDropManager) window.dragDropManager.commitPaints();
+      });
     }
 
     function setupMarketHandlers() {
-      const canvasMarket = document.getElementById('canvasMarket');
-      if (canvasMarket) {
-        canvasMarket.addEventListener('click', (e) => {
-          const card = e.target.closest('.market-canvas-card:not(.empty)');
-          if (card) {
-            const slotIndex = parseInt(card.dataset.slotIndex);
-            handleCanvasPurchase(slotIndex);
+      document.getElementById('canvasMarket')?.addEventListener('click', (e) => {
+        const card = e.target.closest('.market-canvas-card:not(.empty)');
+        if (card) {
+          const slotIndex = parseInt(card.dataset.slotIndex);
+          handleCanvasPurchase(slotIndex);
+        }
+      });
+    }
+
+    function setupSellingPhaseHandlers() {
+      // Collect paint button
+      document.getElementById('collectPaintBtn')?.addEventListener('click', async () => {
+        if (selectedSellingCubes.length === 0) return;
+        
+        try {
+          const response = await fetch(`/game/${gameId}/action/collect-paint`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cubeIds: selectedSellingCubes })
+          });
+          const data = await response.json();
+          
+          if (data.success) {
+            showToast('Success', `Collected ${data.cubesCollected.length} paint cubes!`, 'success');
+            selectedSellingCubes = [];
+            updateSellingCubesUI();
+          } else {
+            showToast('Error', data.error, 'danger');
           }
-        });
-      }
+        } catch (error) {
+          showToast('Error', error.message, 'danger');
+        }
+      });
+
+      // Skip collection button
+      document.getElementById('skipCollectionBtn')?.addEventListener('click', async () => {
+        try {
+          const response = await fetch(`/game/${gameId}/action/skip-collection`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          const data = await response.json();
+          
+          if (data.success) {
+            showToast('Skipped', 'You passed on collecting', 'info');
+          } else {
+            showToast('Error', data.error, 'danger');
+          }
+        } catch (error) {
+          showToast('Error', error.message, 'danger');
+        }
+      });
     }
 
     function handleCanvasPurchase(slotIndex) {
-      if (!gameUI || !gameUI.isMyTurn()) {
+      if (!isCurrentTurn) {
         showToast('Not Your Turn', 'Wait for your turn to buy canvases', 'warning');
         return;
       }
 
-      const canvas = gameUI.gameState.gameState.canvas_market[slotIndex];
+      const canvas = gameUI?.gameState?.gameState?.canvas_market[slotIndex];
       if (!canvas) {
         showToast('Empty Slot', 'No canvas in this slot', 'warning');
         return;
       }
 
       const cost = [1, 2, 3][slotIndex];
-      
       if (confirm(`Buy "${canvas.name}" for ${cost} paint cube(s)?`)) {
-        if (gameActions) {
-          gameActions.buyCanvas(slotIndex);
+        if (gameActions) gameActions.buyCanvas(slotIndex);
+      }
+    }
+
+    function updatePhaseIndicator(phase) {
+      const indicator = document.getElementById('phaseIndicator');
+      if (!indicator) return;
+      
+      indicator.className = 'phase-indicator ' + phase;
+      const phaseText = {
+        morning: '☀️ Morning',
+        day: '🌤️ Day',
+        night: '🌙 Night',
+        selling: '💰 Selling'
+      };
+      indicator.textContent = phaseText[phase] || phase;
+    }
+
+    function updateTurnIndicator(state) {
+      const indicator = document.getElementById('turnIndicator');
+      if (!indicator) return;
+      
+      if (isCurrentTurn) {
+        indicator.className = 'turn-indicator your-turn';
+        indicator.textContent = '✨ Your Turn!';
+      } else {
+        indicator.className = 'turn-indicator not-your-turn';
+        indicator.textContent = getPlayerName(state.game.current_player_id) + "'s Turn";
+      }
+    }
+
+    function updateWaitingOverlay() {
+      const overlay = document.getElementById('waitingOverlay');
+      const waitingName = document.getElementById('waitingPlayerName');
+      
+      if (!overlay) return;
+      
+      if (isCurrentTurn || initialGameState.game.current_phase === 'selling') {
+        overlay.classList.add('d-none');
+      } else {
+        overlay.classList.remove('d-none');
+        const currentPlayerId = gameUI?.gameState?.game?.current_player_id || initialGameState.game.current_player_id;
+        if (waitingName) {
+          waitingName.textContent = getPlayerName(currentPlayerId);
         }
       }
     }
 
-    function getPlayerName(playerId) {
-      if (!gameUI || !gameUI.gameState) return 'A player';
+    function updateDayNumber(day) {
+      const el = document.getElementById('dayNumber');
+      if (el) el.textContent = day;
+    }
+
+    function updateActionButtons() {
+      const workBtn = document.getElementById('workBtn');
+      const endTurnBtn = document.getElementById('endTurnBtn');
+      const phase = gameUI?.gameState?.game?.current_phase || initialGameState.game.current_phase;
       
-      const player = gameUI.gameState.players.find(p => p.id === playerId);
-      return player ? player.name : 'A player';
+      const disabled = !isCurrentTurn || phase === 'selling';
+      
+      if (workBtn) workBtn.disabled = disabled;
+      if (endTurnBtn) endTurnBtn.disabled = disabled;
+    }
+
+    function showSellingPhase(state) {
+      const modal = document.getElementById('sellingPhaseModal');
+      if (!modal) return;
+      
+      modal.classList.remove('d-none');
+      
+      // Update selling order display
+      const sellingData = state.gameState.selling_phase_data;
+      if (sellingData) {
+        updateSellingOrder(sellingData, state.players);
+        updateSellingMarket(state.gameState.paint_market, sellingData);
+      }
+    }
+
+    function hideSellingPhase() {
+      const modal = document.getElementById('sellingPhaseModal');
+      if (modal) modal.classList.add('d-none');
+      selectedSellingCubes = [];
+    }
+
+    function updateSellingOrder(sellingData, players) {
+      const container = document.getElementById('sellingOrder');
+      if (!container) return;
+      
+      let html = '<div class="selling-order-list">';
+      sellingData.order.forEach((entry, index) => {
+        const player = players.find(p => p.id === entry.playerId);
+        const isActive = index === sellingData.currentIndex;
+        const isDone = index < sellingData.currentIndex || entry.remainingCubes <= 0;
+        
+        html += `
+          <div class="selling-order-item ${isActive ? 'active' : ''} ${isDone ? 'done' : ''}">
+            <span class="rank-badge rank-${entry.rank}">${entry.rank === 'first' ? '🥇' : entry.rank === 'second' ? '🥈' : '🎨'}</span>
+            <span class="player-name">${player?.name || 'Unknown'} ${entry.playerId === playerId ? '(You)' : ''}</span>
+            <span class="cubes-info">${entry.cubesPerAction}/turn, ${entry.remainingCubes} left</span>
+            ${isDone ? '<span class="done-badge">✓ Done</span>' : ''}
+          </div>
+        `;
+      });
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    function updateSellingMarket(paintMarket, sellingData) {
+      const container = document.getElementById('sellingPaintCubes');
+      const maxCubesEl = document.getElementById('sellingMaxCubes');
+      const collectBtn = document.getElementById('collectPaintBtn');
+      const skipBtn = document.getElementById('skipCollectionBtn');
+      
+      if (!container) return;
+      
+      // Check if it's our turn to collect
+      const currentCollector = sellingData.order[sellingData.currentIndex];
+      const isMyTurn = currentCollector?.playerId === playerId;
+      const maxCubes = isMyTurn ? Math.min(currentCollector.cubesPerAction, currentCollector.remainingCubes, paintMarket.length) : 0;
+      
+      if (maxCubesEl) maxCubesEl.textContent = maxCubes;
+      if (collectBtn) collectBtn.disabled = !isMyTurn || selectedSellingCubes.length === 0;
+      if (skipBtn) skipBtn.disabled = !isMyTurn;
+      
+      // Render cubes
+      container.innerHTML = paintMarket.map(cube => `
+        <div 
+          class="paint-cube selectable ${selectedSellingCubes.includes(cube.id) ? 'selected' : ''} ${!isMyTurn ? 'disabled' : ''}"
+          data-cube-id="${cube.id}"
+          data-color="${cube.color}"
+          data-is-wild="${cube.is_wild}"
+          title="${cube.color}${cube.is_wild ? ' (Wild)' : ''}"
+          onclick="toggleSellingCube('${cube.id}', ${maxCubes})"
+        ></div>
+      `).join('');
+    }
+
+    function toggleSellingCube(cubeId, maxCubes) {
+      const index = selectedSellingCubes.indexOf(cubeId);
+      if (index >= 0) {
+        selectedSellingCubes.splice(index, 1);
+      } else if (selectedSellingCubes.length < maxCubes) {
+        selectedSellingCubes.push(cubeId);
+      }
+      updateSellingCubesUI();
+    }
+
+    function updateSellingCubesUI() {
+      const countEl = document.getElementById('selectedCubeCount');
+      const collectBtn = document.getElementById('collectPaintBtn');
+      
+      if (countEl) countEl.textContent = selectedSellingCubes.length;
+      if (collectBtn) collectBtn.disabled = selectedSellingCubes.length === 0;
+      
+      // Update cube visual selection
+      document.querySelectorAll('#sellingPaintCubes .paint-cube').forEach(el => {
+        if (selectedSellingCubes.includes(el.dataset.cubeId)) {
+          el.classList.add('selected');
+        } else {
+          el.classList.remove('selected');
+        }
+      });
+    }
+
+    function getPlayerName(playerId) {
+      const players = gameUI?.gameState?.players || initialGameState.players;
+      const player = players.find(p => p.id === playerId);
+      return player?.name || 'A player';
     }
 
     function showWinModal(winner, finalScores) {
@@ -517,44 +839,42 @@
       modal.setAttribute('data-testid', 'win-modal');
       
       let scoresHTML = '';
-      finalScores.sort((a, b) => {
-        if (a.score !== b.score) return b.score - a.score;
-        return b.paintings_completed - a.paintings_completed;
-      }).forEach((player, index) => {
-        scoresHTML += `
-          <div class="score-item ${player.id === winner.id ? 'winner' : ''}">
-            <span>
-              ${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : ''}
-              ${player.name}
-              ${player.id === playerId ? '(You)' : ''}
-            </span>
-            <span>
-              ⭐ ${player.score} pts | 🎨 ${player.paintings_completed} paintings
-            </span>
-          </div>
-        `;
-      });
+      finalScores.sort((a, b) => b.score !== a.score ? b.score - a.score : b.paintings_completed - a.paintings_completed)
+        .forEach((player, index) => {
+          scoresHTML += `
+            <div class="score-item ${player.id === winner.id ? 'winner' : ''}">
+              <span>${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : ''} ${player.name} ${player.id === playerId ? '(You)' : ''}</span>
+              <span>⭐ ${player.score} pts | 🎨 ${player.paintings_completed} paintings</span>
+            </div>
+          `;
+        });
       
       modal.innerHTML = `
         <div class="win-content">
           <div class="win-icon">🏆</div>
-          <h2 class="win-title">${winner.name} Wins!</h2>
-          <p class="lead">
-            Final Score: ${winner.score} points<br>
-            Completed Paintings: ${winner.paintings_completed}
-          </p>
-          <div class="final-scores">
-            <h4>Final Standings</h4>
-            ${scoresHTML}
-          </div>
-          <div class="mt-4">
-            <a href="/" class="btn btn-primary btn-lg" data-testid="new-game-btn">New Game</a>
-          </div>
+          <h2 class="win-title">${winner.name} ${winner.id === playerId ? '(You) ' : ''}Wins!</h2>
+          <p class="lead">Final Score: ${winner.score} points<br>Completed Paintings: ${winner.paintings_completed}</p>
+          <div class="final-scores"><h4>Final Standings</h4>${scoresHTML}</div>
+          <div class="mt-4"><a href="/" class="btn btn-primary btn-lg" data-testid="new-game-btn">New Game</a></div>
         </div>
       `;
-      
       document.body.appendChild(modal);
     }
   </script>
+  
+  <%
+    function getColorStyle(color) {
+      const colors = {
+        red: '#EF4444, #DC2626',
+        orange: '#F97316, #EA580C',
+        yellow: '#EAB308, #CA8A04',
+        green: '#22C55E, #16A34A',
+        blue: '#3B82F6, #2563EB',
+        purple: '#A855F7, #9333EA',
+        black: '#1F2937, #111827'
+      };
+      return colors[color] || '#888, #666';
+    }
+  %>
 </body>
 </html>
