@@ -69,6 +69,7 @@ Build an online multiplayer version of the "Starving Artists" board game with:
 - Start game button (host only, 2+ players)
 - Leave lobby functionality
 - Online/offline status indicators
+- **Real-time updates when players join via HTTP API**
 
 ### ✅ Game Board UI
 - Phase indicator (Morning/Day/Night/Selling)
@@ -91,11 +92,16 @@ Build an online multiplayer version of the "Starving Artists" board game with:
 - Player join/leave notifications
 - Turn change notifications
 - Action broadcast to all players
+- **HTTP endpoints emit Socket.IO events for real-time lobby updates**
 
 ### ✅ Theming System
 - CSS variables for easy customization
 - Default theme with art-inspired colors
 - Responsive grid layouts
+
+### ✅ Static Pages
+- Rules page with game instructions
+- About page with game information
 
 ## Pending/In-Progress Features
 
