@@ -8,7 +8,6 @@ const http_1 = __importDefault(require("http"));
 const socket_io_1 = require("socket.io");
 const app_1 = require("./app");
 const env_1 = require("./config/env");
-const database_1 = require("./config/database");
 const app = (0, app_1.createApp)();
 const server = http_1.default.createServer(app);
 // Socket.IO setup
@@ -26,34 +25,24 @@ const game_socket_1 = require("./socket/game.socket");
 (0, game_socket_1.registerGameSocketHandlers)(io);
 // Make io available globally for routes
 app.set('io', io);
-// Test database connection
-(0, database_1.getPool)()
-    .getConnection()
-    .then((connection) => {
-    console.log('Database connected successfully');
-    connection.release();
-})
-    .catch((err) => {
-    console.error('Database connection failed:', err);
-    process.exit(1);
-});
+// Using in-memory database - no connection test needed
+console.log('Using in-memory database for development');
 // Start server
 server.listen(env_1.config.port, () => {
     console.log(`Server running on port ${env_1.config.port}`);
     console.log(`Environment: ${env_1.config.nodeEnv}`);
+    console.log(`URL: http://localhost:${env_1.config.port}`);
 });
 // Graceful shutdown
-process.on('SIGTERM', async () => {
+process.on('SIGTERM', () => {
     console.log('SIGTERM received, shutting down gracefully');
-    server.close(async () => {
-        await (0, database_1.closePool)();
+    server.close(() => {
         process.exit(0);
     });
 });
-process.on('SIGINT', async () => {
+process.on('SIGINT', () => {
     console.log('SIGINT received, shutting down gracefully');
-    server.close(async () => {
-        await (0, database_1.closePool)();
+    server.close(() => {
         process.exit(0);
     });
 });

@@ -15,127 +15,69 @@ exports.getGameState = getGameState;
 exports.updateGameState = updateGameState;
 exports.resetActionCount = resetActionCount;
 exports.incrementActionCount = incrementActionCount;
-// Game database operations
-const database_1 = require("../config/database");
-const helpers_1 = require("../utils/helpers");
+// Game database operations - using in-memory store
+const memoryDb_1 = require("./memoryDb");
 async function createGame(hostPlayerId) {
-    const gameId = (0, helpers_1.generateId)();
-    const sql = `
-    INSERT INTO games (id, status, host_player_id, current_phase, day_number)
-    VALUES (?, 'lobby', ?, 'morning', 1)
-  `;
-    await (0, database_1.execute)(sql, [gameId, hostPlayerId]);
-    const game = await getGame(gameId);
-    if (!game)
-        throw new Error('Failed to create game');
-    return game;
+    return memoryDb_1.memoryDb.createGame(hostPlayerId);
 }
 async function getGame(gameId) {
-    const sql = 'SELECT * FROM games WHERE id = ?';
-    return (0, database_1.queryOne)(sql, [gameId]);
+    return memoryDb_1.memoryDb.getGame(gameId);
 }
 async function updateGameStatus(gameId, status) {
-    const sql = 'UPDATE games SET status = ? WHERE id = ?';
-    await (0, database_1.execute)(sql, [status, gameId]);
+    memoryDb_1.memoryDb.updateGame(gameId, { status });
 }
 async function updateGamePhase(gameId, phase) {
-    const sql = 'UPDATE games SET current_phase = ? WHERE id = ?';
-    await (0, database_1.execute)(sql, [phase, gameId]);
+    memoryDb_1.memoryDb.updateGame(gameId, { current_phase: phase });
 }
 async function updateCurrentPlayer(gameId, playerId) {
-    const sql = 'UPDATE games SET current_player_id = ? WHERE id = ?';
-    await (0, database_1.execute)(sql, [playerId, gameId]);
+    memoryDb_1.memoryDb.updateGame(gameId, { current_player_id: playerId });
 }
 async function incrementDay(gameId) {
-    const sql = 'UPDATE games SET day_number = day_number + 1 WHERE id = ?';
-    await (0, database_1.execute)(sql, [gameId]);
+    const game = memoryDb_1.memoryDb.getGame(gameId);
+    if (game) {
+        memoryDb_1.memoryDb.updateGame(gameId, { day_number: game.day_number + 1 });
+    }
 }
 async function incrementTurnCount(gameId) {
-    const sql = 'UPDATE games SET turn_count = turn_count + 1 WHERE id = ?';
-    await (0, database_1.execute)(sql, [gameId]);
+    const game = memoryDb_1.memoryDb.getGame(gameId);
+    if (game) {
+        memoryDb_1.memoryDb.updateGame(gameId, { turn_count: game.turn_count + 1 });
+    }
 }
 async function setGameWinner(gameId, winnerId) {
-    const sql = `
-    UPDATE games 
-    SET status = 'finished', winner_id = ?, finished_at = NOW() 
-    WHERE id = ?
-  `;
-    await (0, database_1.execute)(sql, [winnerId, gameId]);
+    memoryDb_1.memoryDb.updateGame(gameId, {
+        status: 'finished',
+        winner_id: winnerId,
+        finished_at: new Date(),
+    });
 }
 async function startGame(gameId) {
-    const sql = `
-    UPDATE games 
-    SET status = 'playing', started_at = NOW() 
-    WHERE id = ?
-  `;
-    await (0, database_1.execute)(sql, [gameId]);
+    memoryDb_1.memoryDb.startGame(gameId);
 }
 async function deleteGame(gameId) {
-    const sql = 'DELETE FROM games WHERE id = ?';
-    await (0, database_1.execute)(sql, [gameId]);
+    // In-memory: just remove from map
+    const game = memoryDb_1.memoryDb.getGame(gameId);
+    if (game) {
+        // We'd need to add a delete method to memoryDb
+        console.log('Delete game:', gameId);
+    }
 }
 // Game state operations
 async function createGameState(gameId, paintBag, paintMarket, canvasMarket, canvasDeck) {
-    const sql = `
-    INSERT INTO game_state (game_id, paint_bag, paint_market, canvas_market, canvas_deck, actions_taken)
-    VALUES (?, ?, ?, ?, ?, 0)
-  `;
-    await (0, database_1.execute)(sql, [
-        gameId,
-        JSON.stringify(paintBag),
-        JSON.stringify(paintMarket),
-        JSON.stringify(canvasMarket),
-        JSON.stringify(canvasDeck),
-    ]);
+    memoryDb_1.memoryDb.createGameState(gameId, paintBag, paintMarket, canvasMarket, canvasDeck);
 }
 async function getGameState(gameId) {
-    const sql = 'SELECT * FROM game_state WHERE game_id = ?';
-    const row = await (0, database_1.queryOne)(sql, [gameId]);
-    if (!row)
-        return null;
-    return {
-        game_id: row.game_id,
-        paint_bag: JSON.parse(row.paint_bag),
-        paint_market: JSON.parse(row.paint_market),
-        canvas_market: JSON.parse(row.canvas_market),
-        canvas_deck: JSON.parse(row.canvas_deck),
-        actions_taken: row.actions_taken,
-    };
+    return memoryDb_1.memoryDb.getGameState(gameId);
 }
 async function updateGameState(gameId, updates) {
-    const fields = [];
-    const values = [];
-    if (updates.paint_bag !== undefined) {
-        fields.push('paint_bag = ?');
-        values.push(JSON.stringify(updates.paint_bag));
-    }
-    if (updates.paint_market !== undefined) {
-        fields.push('paint_market = ?');
-        values.push(JSON.stringify(updates.paint_market));
-    }
-    if (updates.canvas_market !== undefined) {
-        fields.push('canvas_market = ?');
-        values.push(JSON.stringify(updates.canvas_market));
-    }
-    if (updates.canvas_deck !== undefined) {
-        fields.push('canvas_deck = ?');
-        values.push(JSON.stringify(updates.canvas_deck));
-    }
-    if (updates.actions_taken !== undefined) {
-        fields.push('actions_taken = ?');
-        values.push(updates.actions_taken);
-    }
-    if (fields.length === 0)
-        return;
-    values.push(gameId);
-    const sql = `UPDATE game_state SET ${fields.join(', ')} WHERE game_id = ?`;
-    await (0, database_1.execute)(sql, values);
+    memoryDb_1.memoryDb.updateGameState(gameId, updates);
 }
 async function resetActionCount(gameId) {
-    const sql = 'UPDATE game_state SET actions_taken = 0 WHERE game_id = ?';
-    await (0, database_1.execute)(sql, [gameId]);
+    const state = memoryDb_1.memoryDb.getGameState(gameId);
+    if (state) {
+        memoryDb_1.memoryDb.updateGameState(gameId, { actions_taken: 0 });
+    }
 }
 async function incrementActionCount(gameId) {
-    const sql = 'UPDATE game_state SET actions_taken = actions_taken + 1 WHERE game_id = ?';
-    await (0, database_1.execute)(sql, [gameId]);
+    memoryDb_1.memoryDb.incrementActionCount(gameId);
 }

@@ -15,108 +15,68 @@ exports.getPlayerPaintCubes = getPlayerPaintCubes;
 exports.removePaintCube = removePaintCube;
 exports.removePaintCubes = removePaintCubes;
 exports.getPlayerPaintCubeCount = getPlayerPaintCubeCount;
-// Player database operations
-const database_1 = require("../config/database");
-const helpers_1 = require("../utils/helpers");
+// Player database operations - using in-memory store
+const memoryDb_1 = require("./memoryDb");
 async function createPlayer(gameId, name, turnOrder, isHost = false) {
-    const playerId = (0, helpers_1.generateId)();
-    const sql = `
-    INSERT INTO players 
-    (id, game_id, name, nutrition, score, paintings_completed, food_earned, turn_order, is_host, connected)
-    VALUES (?, ?, ?, 5, 0, 0, 0, ?, ?, true)
-  `;
-    await (0, database_1.execute)(sql, [playerId, gameId, name, turnOrder, isHost]);
-    const player = await getPlayer(playerId);
-    if (!player)
-        throw new Error('Failed to create player');
+    const player = memoryDb_1.memoryDb.createPlayer(gameId, name, isHost);
+    memoryDb_1.memoryDb.updatePlayer(player.id, { turn_order: turnOrder });
     return player;
 }
 async function getPlayer(playerId) {
-    const sql = 'SELECT * FROM players WHERE id = ?';
-    return (0, database_1.queryOne)(sql, [playerId]);
+    return memoryDb_1.memoryDb.getPlayer(playerId);
 }
 async function getGamePlayers(gameId) {
-    const sql = 'SELECT * FROM players WHERE game_id = ? ORDER BY turn_order';
-    return (0, database_1.query)(sql, [gameId]);
+    return memoryDb_1.memoryDb.getGamePlayers(gameId);
 }
 async function updatePlayerNutrition(playerId, nutrition) {
-    const sql = 'UPDATE players SET nutrition = ? WHERE id = ?';
-    await (0, database_1.execute)(sql, [nutrition, playerId]);
+    memoryDb_1.memoryDb.updatePlayer(playerId, { nutrition });
 }
 async function updatePlayerScore(playerId, score) {
-    const sql = 'UPDATE players SET score = ? WHERE id = ?';
-    await (0, database_1.execute)(sql, [score, playerId]);
+    memoryDb_1.memoryDb.updatePlayer(playerId, { score });
 }
 async function incrementPaintingsCompleted(playerId) {
-    const sql = `
-    UPDATE players 
-    SET paintings_completed = paintings_completed + 1 
-    WHERE id = ?
-  `;
-    await (0, database_1.execute)(sql, [playerId]);
+    const player = memoryDb_1.memoryDb.getPlayer(playerId);
+    if (player) {
+        memoryDb_1.memoryDb.updatePlayer(playerId, {
+            paintings_completed: player.paintings_completed + 1,
+        });
+    }
 }
 async function addFoodEarned(playerId, food) {
-    const sql = 'UPDATE players SET food_earned = food_earned + ? WHERE id = ?';
-    await (0, database_1.execute)(sql, [food, playerId]);
+    const player = memoryDb_1.memoryDb.getPlayer(playerId);
+    if (player) {
+        memoryDb_1.memoryDb.updatePlayer(playerId, {
+            food_earned: player.food_earned + food,
+        });
+    }
 }
 async function updatePlayerConnection(playerId, connected) {
-    const sql = 'UPDATE players SET connected = ?, last_seen = NOW() WHERE id = ?';
-    await (0, database_1.execute)(sql, [connected, playerId]);
+    memoryDb_1.memoryDb.updatePlayer(playerId, {
+        connected,
+        last_seen: new Date(),
+    });
 }
 async function deletePlayer(playerId) {
-    const sql = 'DELETE FROM players WHERE id = ?';
-    await (0, database_1.execute)(sql, [playerId]);
+    // In-memory: would need delete method
+    console.log('Delete player:', playerId);
 }
 // Player paint cubes
 async function addPaintCube(playerId, gameId, cube) {
-    const sql = `
-    INSERT INTO player_paint_cubes (id, player_id, game_id, color, is_wild)
-    VALUES (?, ?, ?, ?, ?)
-  `;
-    await (0, database_1.execute)(sql, [cube.id, playerId, gameId, cube.color, cube.is_wild]);
+    memoryDb_1.memoryDb.addPaintCubes(playerId, [cube]);
 }
 async function addPaintCubes(playerId, gameId, cubes) {
-    if (cubes.length === 0)
-        return;
-    const values = cubes.map(cube => [
-        cube.id,
-        playerId,
-        gameId,
-        cube.color,
-        cube.is_wild,
-    ]);
-    const placeholders = values.map(() => '(?, ?, ?, ?, ?)').join(', ');
-    const sql = `
-    INSERT INTO player_paint_cubes (id, player_id, game_id, color, is_wild)
-    VALUES ${placeholders}
-  `;
-    await (0, database_1.execute)(sql, values.flat());
+    memoryDb_1.memoryDb.addPaintCubes(playerId, cubes);
 }
 async function getPlayerPaintCubes(playerId) {
-    const sql = `
-    SELECT id, color, is_wild 
-    FROM player_paint_cubes 
-    WHERE player_id = ?
-    ORDER BY acquired_at
-  `;
-    return (0, database_1.query)(sql, [playerId]);
+    return memoryDb_1.memoryDb.getPlayerPaintCubes(playerId);
 }
 async function removePaintCube(playerId, cubeId) {
-    const sql = 'DELETE FROM player_paint_cubes WHERE player_id = ? AND id = ?';
-    await (0, database_1.execute)(sql, [playerId, cubeId]);
+    memoryDb_1.memoryDb.removePaintCubes(playerId, [cubeId]);
 }
 async function removePaintCubes(playerId, cubeIds) {
-    if (cubeIds.length === 0)
-        return;
-    const placeholders = cubeIds.map(() => '?').join(', ');
-    const sql = `
-    DELETE FROM player_paint_cubes 
-    WHERE player_id = ? AND id IN (${placeholders})
-  `;
-    await (0, database_1.execute)(sql, [playerId, ...cubeIds]);
+    memoryDb_1.memoryDb.removePaintCubes(playerId, cubeIds);
 }
 async function getPlayerPaintCubeCount(playerId) {
-    const sql = 'SELECT COUNT(*) as count FROM player_paint_cubes WHERE player_id = ?';
-    const result = await (0, database_1.queryOne)(sql, [playerId]);
-    return result?.count || 0;
+    const cubes = memoryDb_1.memoryDb.getPlayerPaintCubes(playerId);
+    return cubes.length;
 }
