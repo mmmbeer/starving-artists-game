@@ -1,8 +1,8 @@
 // Score tracking and win condition service
-import * as playerDb from '../database/playerDb';
-import * as gameDb from '../database/gameDb';
-import { Player } from '../models/types';
-import { WIN_CONDITIONS } from '../utils/constants';
+import * as playerDb from '../../database/playerDb';
+import * as gameDb from '../../database/gameDb';
+import { Player } from '../../models/types';
+import { WIN_CONDITIONS } from '../../utils/constants';
 
 export async function updatePlayerScore(
   playerId: string,
