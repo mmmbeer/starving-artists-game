@@ -1,7 +1,7 @@
 // Paint bag and market management
-import { PaintCube } from '../models/types';
-import { createPaintCube, drawFromBag } from '../utils/helpers';
-import { PAINT_COLORS } from '../utils/constants';
+import { PaintCube, PaintColor } from '../../models/types';
+import { createPaintCube, drawFromBag } from '../../utils/helpers';
+import { PAINT_COLORS } from '../../utils/constants';
 
 export function createPaintBag(): PaintCube[] {
   const cubes: PaintCube[] = [];
