@@ -1,1 +1,283 @@
-<!DOCTYPE html>\n<html lang=\"en\" data-theme=\"default\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title><%= title %></title>\n  \n  <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\">\n  <link rel=\"stylesheet\" href=\"/css/variables.css\">\n  <link rel=\"stylesheet\" href=\"/css/themes/default.css\">\n  <link rel=\"stylesheet\" href=\"/css/overrides.css\">\n  <link rel=\"stylesheet\" href=\"/css/main.css\">\n  <link rel=\"stylesheet\" href=\"/css/layout.css\">\n  <link rel=\"stylesheet\" href=\"/css/components.css\">\n</head>\n<body>\n  <header class=\"app-header\">\n    <div class=\"container\">\n      <a href=\"/\" class=\"app-logo\">\ud83c\udfa8 <span>Starving Artists</span></a>\n      <nav class=\"header-nav\">\n        <a href=\"/rules\" class=\"btn btn-sm btn-outline-primary\">Rules</a>\n        <a href=\"/about\" class=\"btn btn-sm btn-outline-primary\">About</a>\n      </nav>\n    </div>\n  </header>\n\n  <main class=\"app-main\">\n    <!-- Hero Section -->\n    <section class=\"hero-section\">\n      <div class=\"container\">\n        <div class=\"row align-items-center\">\n          <div class=\"col-lg-6\">\n            <h1 class=\"hero-title\">Starving Artists</h1>\n            <p class=\"hero-subtitle\">\n              Create masterpieces, manage your nutrition, and become the ultimate artist in this competitive multiplayer board game.\n            </p>\n            <div class=\"hero-stats\">\n              <div class=\"stat-item\">\n                <strong>2-4</strong>\n                <span>Players</span>\n              </div>\n              <div class=\"stat-item\">\n                <strong>30-60</strong>\n                <span>Minutes</span>\n              </div>\n              <div class=\"stat-item\">\n                <strong>Real-Time</strong>\n                <span>Multiplayer</span>\n              </div>\n            </div>\n          </div>\n          <div class=\"col-lg-6\">\n            <!-- Game Actions Card -->\n            <div class=\"card shadow-lg\">\n              <div class=\"card-body p-4\">\n                <h2 class=\"card-title text-center mb-4\">Start Playing</h2>\n                \n                <!-- Create Game Section -->\n                <div class=\"mb-4\">\n                  <h5 class=\"mb-3\">\ud83c\udfa8 Create New Game</h5>\n                  <form id=\"createGameForm\">\n                    <div class=\"mb-3\">\n                      <label for=\"createPlayerName\" class=\"form-label\">Your Name</label>\n                      <input \n                        type=\"text\" \n                        class=\"form-control\" \n                        id=\"createPlayerName\" \n                        placeholder=\"Enter your artist name\" \n                        required\n                        maxlength=\"50\"\n                        pattern=\"[a-zA-Z0-9\\s-_]+\"\n                      >\n                      <div class=\"form-text\">2-50 characters, alphanumeric only</div>\n                    </div>\n                    <button type=\"submit\" class=\"btn btn-primary w-100\" id=\"createGameBtn\">\n                      <span class=\"btn-text\">Create Game Lobby</span>\n                      <span class=\"spinner-border spinner-border-sm d-none\" role=\"status\"></span>\n                    </button>\n                  </form>\n                </div>\n\n                <div class=\"divider my-4\">\n                  <span>OR</span>\n                </div>\n\n                <!-- Join Game Section -->\n                <div>\n                  <h5 class=\"mb-3\">\ud83d\udd17 Join Existing Game</h5>\n                  <form id=\"joinGameForm\">\n                    <div class=\"mb-3\">\n                      <label for=\"joinPlayerName\" class=\"form-label\">Your Name</label>\n                      <input \n                        type=\"text\" \n                        class=\"form-control\" \n                        id=\"joinPlayerName\" \n                        placeholder=\"Enter your artist name\" \n                        required\n                        maxlength=\"50\"\n                        pattern=\"[a-zA-Z0-9\\s-_]+\"\n                      >\n                    </div>\n                    <div class=\"mb-3\">\n                      <label for=\"gameId\" class=\"form-label\">Game ID or URL</label>\n                      <input \n                        type=\"text\" \n                        class=\"form-control\" \n                        id=\"gameId\" \n                        placeholder=\"Paste game link or ID\" \n                        required\n                      >\n                      <div class=\"form-text\">Get this from your friend who created the game</div>\n                    </div>\n                    <button type=\"submit\" class=\"btn btn-accent w-100\" id=\"joinGameBtn\">\n                      <span class=\"btn-text\">Join Game</span>\n                      <span class=\"spinner-border spinner-border-sm d-none\" role=\"status\"></span>\n                    </button>\n                  </form>\n                </div>\n              </div>\n            </div>\n          </div>\n        </div>\n      </div>\n    </section>\n\n    <!-- Features Section -->\n    <section class=\"features-section py-5\">\n      <div class=\"container\">\n        <h2 class=\"text-center mb-5\">How to Play</h2>\n        <div class=\"row g-4\">\n          <div class=\"col-md-3\">\n            <div class=\"feature-card text-center\">\n              <div class=\"feature-icon\">\ud83c\udfa8</div>\n              <h4>Collect Paint</h4>\n              <p>Draw paint cubes from the bag to build your collection</p>\n            </div>\n          </div>\n          <div class=\"col-md-3\">\n            <div class=\"feature-card text-center\">\n              <div class=\"feature-icon\">\ud83d\uddbc\ufe0f</div>\n              <h4>Buy Canvases</h4>\n              <p>Purchase canvases from the market to paint on</p>\n            </div>\n          </div>\n          <div class=\"col-md-3\">\n            <div class=\"feature-card text-center\">\n              <div class=\"feature-icon\">\ud83d\udd8c\ufe0f</div>\n              <h4>Paint Masterpieces</h4>\n              <p>Match colors to complete your paintings</p>\n            </div>\n          </div>\n          <div class=\"col-md-3\">\n            <div class=\"feature-card text-center\">\n              <div class=\"feature-icon\">\ud83c\udfc6</div>\n              <h4>Win the Game</h4>\n              <p>Be the first to complete enough paintings or reach the point goal</p>\n            </div>\n          </div>\n        </div>\n      </div>\n    </section>\n  </main>\n\n  <footer class=\"app-footer\">\n    <div class=\"container text-center\">\n      <p>&copy; 2025 Starving Artists Online. Based on the board game by Fairway 3 Games, LLC.</p>\n    </div>\n  </footer>\n\n  <!-- Toast Container -->\n  <div class=\"toast-container position-fixed top-0 end-0 p-3\" id=\"toastContainer\"></div>\n\n  <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js\"></script>\n  <script src=\"/js/utils/ui-helpers.js\"></script>\n  <script>\n    // Create Game Form Handler\n    document.getElementById('createGameForm').addEventListener('submit', async (e) => {\n      e.preventDefault();\n      \n      const playerName = document.getElementById('createPlayerName').value.trim();\n      const btn = document.getElementById('createGameBtn');\n      const btnText = btn.querySelector('.btn-text');\n      const spinner = btn.querySelector('.spinner-border');\n      \n      // Disable button and show loading\n      btn.disabled = true;\n      btnText.textContent = 'Creating...';\n      spinner.classList.remove('d-none');\n      \n      try {\n        const response = await fetch('/lobby/create', {\n          method: 'POST',\n          headers: {\n            'Content-Type': 'application/json',\n          },\n          body: JSON.stringify({ playerName }),\n        });\n        \n        const data = await response.json();\n        \n        if (data.success) {\n          // Show success message\n          showToast('Success', 'Game created! Redirecting...', 'success');\n          \n          // Redirect to lobby\n          setTimeout(() => {\n            window.location.href = data.redirectUrl;\n          }, 500);\n        } else {\n          throw new Error(data.error || 'Failed to create game');\n        }\n      } catch (error) {\n        console.error('Create game error:', error);\n        showToast('Error', error.message, 'danger');\n        \n        // Re-enable button\n        btn.disabled = false;\n        btnText.textContent = 'Create Game Lobby';\n        spinner.classList.add('d-none');\n      }\n    });\n\n    // Join Game Form Handler\n    document.getElementById('joinGameForm').addEventListener('submit', async (e) => {\n      e.preventDefault();\n      \n      const playerName = document.getElementById('joinPlayerName').value.trim();\n      let gameId = document.getElementById('gameId').value.trim();\n      \n      // Extract game ID from URL if full URL is provided\n      if (gameId.includes('lobby/')) {\n        gameId = gameId.split('lobby/').pop().split('?')[0].split('#')[0];\n      } else if (gameId.includes('game/')) {\n        gameId = gameId.split('game/').pop().split('?')[0].split('#')[0];\n      }\n      \n      const btn = document.getElementById('joinGameBtn');\n      const btnText = btn.querySelector('.btn-text');\n      const spinner = btn.querySelector('.spinner-border');\n      \n      // Disable button and show loading\n      btn.disabled = true;\n      btnText.textContent = 'Joining...';\n      spinner.classList.remove('d-none');\n      \n      try {\n        const response = await fetch(`/lobby/join/${gameId}`, {\n          method: 'POST',\n          headers: {\n            'Content-Type': 'application/json',\n          },\n          body: JSON.stringify({ playerName }),\n        });\n        \n        const data = await response.json();\n        \n        if (data.success) {\n          // Show success message\n          showToast('Success', 'Joined game! Redirecting...', 'success');\n          \n          // Redirect to lobby\n          setTimeout(() => {\n            window.location.href = data.redirectUrl;\n          }, 500);\n        } else {\n          throw new Error(data.error || 'Failed to join game');\n        }\n      } catch (error) {\n        console.error('Join game error:', error);\n        showToast('Error', error.message, 'danger');\n        \n        // Re-enable button\n        btn.disabled = false;\n        btnText.textContent = 'Join Game';\n        spinner.classList.add('d-none');\n      }\n    });\n  </script>\n</body>\n</html>\n
+<!DOCTYPE html>
+<html lang="en" data-theme="default">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/themes/default.css">
+  <link rel="stylesheet" href="/css/overrides.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/components.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="container">
+      <a href="/" class="app-logo">🎨 <span>Starving Artists</span></a>
+      <nav class="header-nav">
+        <a href="/rules" class="btn btn-sm btn-outline-primary">Rules</a>
+        <a href="/about" class="btn btn-sm btn-outline-primary">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-lg-6">
+            <h1 class="hero-title">Starving Artists</h1>
+            <p class="hero-subtitle">
+              Create masterpieces, manage your nutrition, and become the ultimate artist in this competitive multiplayer board game.
+            </p>
+            <div class="hero-stats">
+              <div class="stat-item">
+                <strong>2-4</strong>
+                <span>Players</span>
+              </div>
+              <div class="stat-item">
+                <strong>30-60</strong>
+                <span>Minutes</span>
+              </div>
+              <div class="stat-item">
+                <strong>Real-Time</strong>
+                <span>Multiplayer</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <!-- Game Actions Card -->
+            <div class="card shadow-lg">
+              <div class="card-body p-4">
+                <h2 class="card-title text-center mb-4">Start Playing</h2>
+                
+                <!-- Create Game Section -->
+                <div class="mb-4">
+                  <h5 class="mb-3">🎨 Create New Game</h5>
+                  <form id="createGameForm">
+                    <div class="mb-3">
+                      <label for="createPlayerName" class="form-label">Your Name</label>
+                      <input 
+                        type="text" 
+                        class="form-control" 
+                        id="createPlayerName" 
+                        placeholder="Enter your artist name" 
+                        required
+                        maxlength="50"
+                        pattern="[a-zA-Z0-9\s\-_]+"
+                        data-testid="create-player-name"
+                      >
+                      <div class="form-text">2-50 characters, alphanumeric only</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100" id="createGameBtn" data-testid="create-game-btn">
+                      <span class="btn-text">Create Game Lobby</span>
+                      <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                    </button>
+                  </form>
+                </div>
+
+                <div class="divider my-4">
+                  <span>OR</span>
+                </div>
+
+                <!-- Join Game Section -->
+                <div>
+                  <h5 class="mb-3">🔗 Join Existing Game</h5>
+                  <form id="joinGameForm">
+                    <div class="mb-3">
+                      <label for="joinPlayerName" class="form-label">Your Name</label>
+                      <input 
+                        type="text" 
+                        class="form-control" 
+                        id="joinPlayerName" 
+                        placeholder="Enter your artist name" 
+                        required
+                        maxlength="50"
+                        pattern="[a-zA-Z0-9\s\-_]+"
+                        data-testid="join-player-name"
+                      >
+                    </div>
+                    <div class="mb-3">
+                      <label for="gameId" class="form-label">Game ID or URL</label>
+                      <input 
+                        type="text" 
+                        class="form-control" 
+                        id="gameId" 
+                        placeholder="Paste game link or ID" 
+                        required
+                        data-testid="game-id-input"
+                      >
+                      <div class="form-text">Get this from your friend who created the game</div>
+                    </div>
+                    <button type="submit" class="btn btn-accent w-100" id="joinGameBtn" data-testid="join-game-btn">
+                      <span class="btn-text">Join Game</span>
+                      <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section py-5">
+      <div class="container">
+        <h2 class="text-center mb-5">How to Play</h2>
+        <div class="row g-4">
+          <div class="col-md-3">
+            <div class="feature-card text-center">
+              <div class="feature-icon">🎨</div>
+              <h4>Collect Paint</h4>
+              <p>Draw paint cubes from the bag to build your collection</p>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="feature-card text-center">
+              <div class="feature-icon">🖼️</div>
+              <h4>Buy Canvases</h4>
+              <p>Purchase canvases from the market to paint on</p>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="feature-card text-center">
+              <div class="feature-icon">🖌️</div>
+              <h4>Paint Masterpieces</h4>
+              <p>Match colors to complete your paintings</p>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="feature-card text-center">
+              <div class="feature-icon">🏆</div>
+              <h4>Win the Game</h4>
+              <p>Be the first to complete enough paintings or reach the point goal</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container text-center">
+      <p>&copy; 2025 Starving Artists Online. Based on the board game by Fairway 3 Games, LLC.</p>
+    </div>
+  </footer>
+
+  <!-- Toast Container -->
+  <div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/utils/ui-helpers.js"></script>
+  <script>
+    // Create Game Form Handler
+    document.getElementById('createGameForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const playerName = document.getElementById('createPlayerName').value.trim();
+      const btn = document.getElementById('createGameBtn');
+      const btnText = btn.querySelector('.btn-text');
+      const spinner = btn.querySelector('.spinner-border');
+      
+      // Disable button and show loading
+      btn.disabled = true;
+      btnText.textContent = 'Creating...';
+      spinner.classList.remove('d-none');
+      
+      try {
+        const response = await fetch('/lobby/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ playerName }),
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Show success message
+          showToast('Success', 'Game created! Redirecting...', 'success');
+          
+          // Redirect to lobby
+          setTimeout(() => {
+            window.location.href = data.redirectUrl;
+          }, 500);
+        } else {
+          throw new Error(data.error || 'Failed to create game');
+        }
+      } catch (error) {
+        console.error('Create game error:', error);
+        showToast('Error', error.message, 'danger');
+        
+        // Re-enable button
+        btn.disabled = false;
+        btnText.textContent = 'Create Game Lobby';
+        spinner.classList.add('d-none');
+      }
+    });
+
+    // Join Game Form Handler
+    document.getElementById('joinGameForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const playerName = document.getElementById('joinPlayerName').value.trim();
+      let gameId = document.getElementById('gameId').value.trim();
+      
+      // Extract game ID from URL if full URL is provided
+      if (gameId.includes('lobby/')) {
+        gameId = gameId.split('lobby/').pop().split('?')[0].split('#')[0];
+      } else if (gameId.includes('game/')) {
+        gameId = gameId.split('game/').pop().split('?')[0].split('#')[0];
+      }
+      
+      const btn = document.getElementById('joinGameBtn');
+      const btnText = btn.querySelector('.btn-text');
+      const spinner = btn.querySelector('.spinner-border');
+      
+      // Disable button and show loading
+      btn.disabled = true;
+      btnText.textContent = 'Joining...';
+      spinner.classList.remove('d-none');
+      
+      try {
+        const response = await fetch(`/lobby/join/${gameId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ playerName }),
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Show success message
+          showToast('Success', 'Joined game! Redirecting...', 'success');
+          
+          // Redirect to lobby
+          setTimeout(() => {
+            window.location.href = data.redirectUrl;
+          }, 500);
+        } else {
+          throw new Error(data.error || 'Failed to join game');
+        }
+      } catch (error) {
+        console.error('Join game error:', error);
+        showToast('Error', error.message, 'danger');
+        
+        // Re-enable button
+        btn.disabled = false;
+        btnText.textContent = 'Join Game';
+        spinner.classList.add('d-none');
+      }
+    });
+  </script>
+</body>
+</html>
