@@ -2,6 +2,7 @@
 import * as gameDb from '../../database/gameDb';
 import * as playerDb from '../../database/playerDb';
 import * as canvasDb from '../../database/canvasDb';
+import { execute } from '../../config/database';
 import { createPaintBag, drawPaintCubes } from '../paint/paintBag';
 import { createCanvasDeck, createInitialMarket } from '../canvas/canvasMarket';
 import { initializeTurnOrder } from './turnManager';
