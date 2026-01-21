@@ -34,6 +34,8 @@ function createApp() {
     }));
     // Static files
     app.use(express_1.default.static(path_1.default.join(__dirname, '..', 'public')));
+    // Serve canvas assets from /assets/canvases
+    app.use('/assets', express_1.default.static(path_1.default.join(__dirname, '..', '..', '..', 'assets')));
     // Health check
     app.get('/health', (_req, res) => {
         res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -42,10 +44,12 @@ function createApp() {
     const indexRoutes = require('./routes/index.routes').default;
     const lobbyRoutes = require('./routes/lobby.routes').default;
     const gameRoutes = require('./routes/game.routes').default;
+    const adminRoutes = require('./routes/admin.routes').default;
     // Register routes
     app.use('/', indexRoutes);
     app.use('/lobby', lobbyRoutes);
     app.use('/game', gameRoutes);
+    app.use('/admin', adminRoutes);
     // 404 handler
     app.use((_req, res) => {
         res.status(404).render('pages/404', { title: 'Page Not Found' });

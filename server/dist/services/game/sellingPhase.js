@@ -1,4 +1,6 @@
 "use strict";
+// Selling Phase Service
+// Handles the paint collection phase after paintings are completed
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -33,132 +35,232 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.collectSellIntents = collectSellIntents;
-exports.sellCanvas = sellCanvas;
-exports.completeSelling = completeSelling;
-// Selling phase - round robin canvas selling
+exports.initializeSellingPhase = initializeSellingPhase;
+exports.getCurrentCollector = getCurrentCollector;
+exports.canCollectPaint = canCollectPaint;
+exports.collectPaintCubes = collectPaintCubes;
+exports.skipCollection = skipCollection;
+exports.isSellingPhaseComplete = isSellingPhaseComplete;
+exports.getSellingPhaseStatus = getSellingPhaseStatus;
 const gameDb = __importStar(require("../../database/gameDb"));
 const playerDb = __importStar(require("../../database/playerDb"));
 const canvasDb = __importStar(require("../../database/canvasDb"));
-const scoreTracker_1 = require("../score/scoreTracker");
-const gameEngine_1 = require("./gameEngine");
 const constants_1 = require("../../utils/constants");
-async function collectSellIntents(gameId, intents) {
+/**
+ * Initialize the selling phase based on completed paintings
+ * Players are ordered by Paint Value of their completed paintings
+ */
+async function initializeSellingPhase(gameId) {
     const players = await playerDb.getGamePlayers(gameId);
-    const results = [];
-    // Process in turn order
-    const sortedPlayers = [...players].sort((a, b) => a.turn_order - b.turn_order);
-    for (const player of sortedPlayers) {
-        const intent = intents.find(i => i.playerId === player.id);
-        if (!intent || intent.canvasIds.length === 0)
-            continue;
-        // Process each canvas the player wants to sell
-        for (const canvasId of intent.canvasIds) {
-            const result = await sellCanvas(gameId, player.id, canvasId);
-            if (result) {
-                results.push(result);
+    const gameState = await gameDb.getGameState(gameId);
+    if (!gameState)
+        return null;
+    // Gather all completed paintings from this round (not yet collected)
+    const completedPaintings = [];
+    for (const player of players) {
+        const canvases = await canvasDb.getPlayerCanvases(player.id);
+        // Find recently completed canvases (completed but not yet had selling phase)
+        for (const canvas of canvases) {
+            if (canvas.completed && canvas.definition) {
+                completedPaintings.push({
+                    playerId: player.id,
+                    canvasId: canvas.id,
+                    paintValue: canvas.definition.paint_value,
+                    playerName: player.name,
+                });
             }
         }
     }
-    return results;
+    // If no completed paintings, skip selling phase
+    if (completedPaintings.length === 0) {
+        return null;
+    }
+    // Sort by paint value (highest first)
+    completedPaintings.sort((a, b) => b.paintValue - a.paintValue);
+    // Assign ranks and cubes per action
+    const sellingOrder = completedPaintings.map((painting, index) => {
+        let rank;
+        let cubesPerAction;
+        if (index === 0) {
+            rank = 'first';
+            cubesPerAction = constants_1.SELLING_PAINT_PAYOUT.FIRST; // 4 cubes
+        }
+        else if (index === 1) {
+            rank = 'second';
+            cubesPerAction = constants_1.SELLING_PAINT_PAYOUT.SECOND; // 2 cubes
+        }
+        else {
+            rank = 'other';
+            cubesPerAction = constants_1.SELLING_PAINT_PAYOUT.OTHER; // 1 cube
+        }
+        return {
+            playerId: painting.playerId,
+            paintValue: painting.paintValue,
+            rank,
+            cubesPerAction,
+            remainingCubes: painting.paintValue, // Can collect up to paint value
+            completedCanvasId: painting.canvasId,
+        };
+    });
+    const sellingData = {
+        order: sellingOrder,
+        currentIndex: 0,
+        paintMarketAtStart: [...gameState.paint_market],
+        isActive: true,
+    };
+    // Store selling phase data in game state
+    await gameDb.updateGameState(gameId, {
+        selling_phase_data: sellingData,
+    });
+    return sellingData;
 }
-async function sellCanvas(gameId, playerId, canvasId) {
-    const canvas = await canvasDb.getPlayerCanvas(canvasId);
-    if (!canvas || !canvas.completed || canvas.player_id !== playerId) {
+/**
+ * Get the current player who should collect paint
+ */
+function getCurrentCollector(sellingData) {
+    if (!sellingData.isActive || sellingData.currentIndex >= sellingData.order.length) {
         return null;
     }
-    if (!canvas.definition) {
-        return null;
+    return sellingData.order[sellingData.currentIndex];
+}
+/**
+ * Check if a player can collect paint cubes
+ */
+function canCollectPaint(sellingData, playerId, paintMarket) {
+    if (!sellingData.isActive) {
+        return { canCollect: false, maxCubes: 0, reason: 'Selling phase is not active' };
     }
-    const { star_value, food_value, paint_value } = canvas.definition;
-    // Add nutrition
-    const player = await playerDb.getPlayer(playerId);
-    if (!player)
-        return null;
-    let newNutrition = player.nutrition + food_value;
-    let excessFood = 0;
-    // If nutrition exceeds 5, gain 4 paint cubes per excess food
-    if (newNutrition > 5) {
-        excessFood = newNutrition - 5;
-        newNutrition = 5;
+    const currentCollector = getCurrentCollector(sellingData);
+    if (!currentCollector) {
+        return { canCollect: false, maxCubes: 0, reason: 'No current collector' };
     }
-    await playerDb.updatePlayerNutrition(playerId, newNutrition);
-    await playerDb.addFoodEarned(playerId, food_value);
-    // Award paint cubes from market based on paint value
-    const paintReceived = await awardPaintCubes(gameId, playerId, paint_value);
-    // Add extra cubes for excess food
-    if (excessFood > 0) {
-        const bonusCubes = excessFood * 4;
-        await awardPaintCubes(gameId, playerId, bonusCubes);
+    if (currentCollector.playerId !== playerId) {
+        return { canCollect: false, maxCubes: 0, reason: 'Not your turn to collect' };
     }
-    // Award star points
-    await (0, scoreTracker_1.updatePlayerScore)(playerId, star_value);
-    // Return painted cubes to bag
+    if (paintMarket.length === 0) {
+        return { canCollect: false, maxCubes: 0, reason: 'Paint market is empty' };
+    }
+    if (currentCollector.remainingCubes <= 0) {
+        return { canCollect: false, maxCubes: 0, reason: 'No more cubes to collect' };
+    }
+    // Can collect up to cubesPerAction or remaining, whichever is smaller
+    const maxCubes = Math.min(currentCollector.cubesPerAction, currentCollector.remainingCubes, paintMarket.length);
+    return { canCollect: true, maxCubes };
+}
+/**
+ * Player collects paint cubes from the market during selling phase
+ */
+async function collectPaintCubes(gameId, playerId, selectedCubeIds) {
     const gameState = await gameDb.getGameState(gameId);
-    if (gameState) {
-        // Get the cubes that were used on this canvas
-        const cubeIds = canvas.painted_squares.map(ps => ps.cubeId);
-        // We need to recreate the cubes (they're not stored anymore)
-        // In a real implementation, we'd track these properly
-        // For now, just delete the canvas
+    if (!gameState || !gameState.selling_phase_data) {
+        throw new Error('Selling phase not active');
     }
-    // Delete the canvas
-    await canvasDb.deletePlayerCanvas(canvasId);
+    const sellingData = gameState.selling_phase_data;
+    const canCollect = canCollectPaint(sellingData, playerId, gameState.paint_market);
+    if (!canCollect.canCollect) {
+        throw new Error(canCollect.reason || 'Cannot collect paint');
+    }
+    // Validate selected cubes exist in market
+    const selectedCubes = [];
+    for (const cubeId of selectedCubeIds) {
+        const cube = gameState.paint_market.find(c => c.id === cubeId);
+        if (!cube) {
+            throw new Error(`Cube ${cubeId} not found in paint market`);
+        }
+        selectedCubes.push(cube);
+    }
+    // Validate not taking more than allowed
+    if (selectedCubes.length > canCollect.maxCubes) {
+        throw new Error(`Can only collect ${canCollect.maxCubes} cubes`);
+    }
+    // Add cubes to player's inventory
+    await playerDb.addPaintCubes(playerId, gameId, selectedCubes);
+    // Remove cubes from market
+    const newPaintMarket = gameState.paint_market.filter(c => !selectedCubeIds.includes(c.id));
+    // Update selling data
+    const currentIndex = sellingData.currentIndex;
+    sellingData.order[currentIndex].remainingCubes -= selectedCubes.length;
+    // Check if current player is done collecting or market empty
+    const shouldAdvance = sellingData.order[currentIndex].remainingCubes <= 0 ||
+        newPaintMarket.length === 0;
+    if (shouldAdvance) {
+        sellingData.currentIndex++;
+        // Skip players who can't collect anymore
+        while (sellingData.currentIndex < sellingData.order.length &&
+            (sellingData.order[sellingData.currentIndex].remainingCubes <= 0 || newPaintMarket.length === 0)) {
+            sellingData.currentIndex++;
+        }
+    }
+    // Check if selling phase is complete
+    sellingData.isActive = sellingData.currentIndex < sellingData.order.length && newPaintMarket.length > 0;
+    // Update game state
+    await gameDb.updateGameState(gameId, {
+        paint_market: newPaintMarket,
+        selling_phase_data: sellingData,
+    });
     return {
-        playerId,
-        canvasId,
-        starValue: star_value,
-        foodValue: food_value,
-        paintValue: paint_value,
-        paintReceived,
+        success: true,
+        sellingData,
+        cubesCollected: selectedCubes,
     };
 }
-async function awardPaintCubes(gameId, playerId, paintValue) {
+/**
+ * Skip collecting (pass turn)
+ */
+async function skipCollection(gameId, playerId) {
     const gameState = await gameDb.getGameState(gameId);
-    if (!gameState)
-        return 0;
-    // Determine how many cubes to award based on paint value rank
-    // This is simplified - real game has complex payout rules
-    let cubesToAward = 0;
-    if (paintValue >= 4) {
-        cubesToAward = constants_1.SELLING_PAINT_PAYOUT.FIRST; // 4 cubes
+    if (!gameState || !gameState.selling_phase_data) {
+        throw new Error('Selling phase not active');
     }
-    else if (paintValue >= 2) {
-        cubesToAward = constants_1.SELLING_PAINT_PAYOUT.SECOND; // 2 cubes
+    const sellingData = gameState.selling_phase_data;
+    const currentCollector = getCurrentCollector(sellingData);
+    if (!currentCollector || currentCollector.playerId !== playerId) {
+        throw new Error('Not your turn to collect');
     }
-    else {
-        cubesToAward = constants_1.SELLING_PAINT_PAYOUT.OTHER; // 1 cube
-    }
-    // Take cubes from paint market
-    const availableCubes = gameState.paint_market.slice(0, cubesToAward);
-    const remainingMarket = gameState.paint_market.slice(cubesToAward);
-    if (availableCubes.length > 0) {
-        await playerDb.addPaintCubes(playerId, gameId, availableCubes);
-        await gameDb.updateGameState(gameId, {
-            paint_market: remainingMarket,
-        });
-    }
-    return availableCubes.length;
+    // Mark current player as done (set remaining to 0)
+    sellingData.order[sellingData.currentIndex].remainingCubes = 0;
+    sellingData.currentIndex++;
+    // Check if selling phase is complete
+    sellingData.isActive = sellingData.currentIndex < sellingData.order.length;
+    await gameDb.updateGameState(gameId, {
+        selling_phase_data: sellingData,
+    });
+    return sellingData;
 }
-async function completeSelling(gameId, intents) {
-    // Collect and process all sell intents
-    await collectSellIntents(gameId, intents);
-    // After selling, check for starvation
-    const players = await playerDb.getGamePlayers(gameId);
-    const starvedPlayers = players.filter(p => p.nutrition < 1);
-    if (starvedPlayers.length > 0) {
-        // Game ends due to starvation
-        // Winner is player with highest score
-        const sortedPlayers = [...players].sort((a, b) => {
-            if (a.score !== b.score)
-                return b.score - a.score;
-            if (a.paintings_completed !== b.paintings_completed) {
-                return b.paintings_completed - a.paintings_completed;
-            }
-            return b.food_earned - a.food_earned;
-        });
-        const winner = sortedPlayers[0];
-        await gameDb.setGameWinner(gameId, winner.id);
+/**
+ * Check if selling phase is complete
+ */
+function isSellingPhaseComplete(sellingData) {
+    if (!sellingData)
+        return true;
+    return !sellingData.isActive;
+}
+/**
+ * Get selling phase status for UI
+ */
+function getSellingPhaseStatus(sellingData, players) {
+    if (!sellingData || !sellingData.isActive) {
+        return { isActive: false, currentCollector: null, order: [] };
     }
-    return (0, gameEngine_1.getFullGameState)(gameId);
+    const currentEntry = getCurrentCollector(sellingData);
+    let currentCollector = null;
+    if (currentEntry) {
+        const player = players.find(p => p.id === currentEntry.playerId);
+        currentCollector = {
+            playerId: currentEntry.playerId,
+            playerName: player?.name || 'Unknown',
+            cubesPerAction: currentEntry.cubesPerAction,
+            remainingCubes: currentEntry.remainingCubes,
+        };
+    }
+    const order = sellingData.order.map((entry, index) => {
+        const player = players.find(p => p.id === entry.playerId);
+        return {
+            playerId: entry.playerId,
+            playerName: player?.name || 'Unknown',
+            rank: entry.rank,
+            done: index < sellingData.currentIndex || entry.remainingCubes <= 0,
+        };
+    });
+    return { isActive: true, currentCollector, order };
 }

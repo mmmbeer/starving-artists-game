@@ -167,6 +167,96 @@ router.post('/:gameId/action/sell', async (req, res) => {
         res.status(400).json({ error: error.message || 'Failed to register sell intent' });
     }
 });
+// Collect paint during selling phase
+router.post('/:gameId/action/collect-paint', async (req, res) => {
+    try {
+        const { gameId } = req.params;
+        const { cubeIds } = req.body;
+        const playerId = req.session.playerId;
+        if (!playerId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+        if (!Array.isArray(cubeIds)) {
+            return res.status(400).json({ error: 'Invalid cube IDs' });
+        }
+        const result = await actionHandler.performCollectPaintAction(gameId, playerId, cubeIds);
+        // Emit socket event for real-time update
+        const io = req.app.get('io');
+        if (io) {
+            io.to(`game:${gameId}`).emit('game-state', result.gameState);
+            io.to(`game:${gameId}`).emit('action-performed', {
+                action: 'collect-paint',
+                playerId,
+                cubesCollected: result.cubesCollected.length,
+            });
+            if (result.sellingComplete) {
+                io.to(`game:${gameId}`).emit('selling-complete', {
+                    gameId,
+                });
+            }
+        }
+        res.json({
+            success: true,
+            gameState: result.gameState,
+            cubesCollected: result.cubesCollected,
+            sellingComplete: result.sellingComplete,
+        });
+    }
+    catch (error) {
+        console.error('Collect paint error:', error);
+        res.status(400).json({ error: error.message || 'Failed to collect paint' });
+    }
+});
+// Skip collection during selling phase
+router.post('/:gameId/action/skip-collection', async (req, res) => {
+    try {
+        const { gameId } = req.params;
+        const playerId = req.session.playerId;
+        if (!playerId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+        const result = await actionHandler.performSkipCollectionAction(gameId, playerId);
+        // Emit socket event for real-time update
+        const io = req.app.get('io');
+        if (io) {
+            io.to(`game:${gameId}`).emit('game-state', result.gameState);
+            io.to(`game:${gameId}`).emit('action-performed', {
+                action: 'skip-collection',
+                playerId,
+            });
+            if (result.sellingComplete) {
+                io.to(`game:${gameId}`).emit('selling-complete', {
+                    gameId,
+                });
+            }
+        }
+        res.json({
+            success: true,
+            gameState: result.gameState,
+            sellingComplete: result.sellingComplete,
+        });
+    }
+    catch (error) {
+        console.error('Skip collection error:', error);
+        res.status(400).json({ error: error.message || 'Failed to skip collection' });
+    }
+});
+// Get available actions for current player
+router.get('/:gameId/available-actions', async (req, res) => {
+    try {
+        const { gameId } = req.params;
+        const playerId = req.session.playerId;
+        if (!playerId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+        const actions = await actionHandler.getAvailableActions(gameId, playerId);
+        res.json({ success: true, ...actions });
+    }
+    catch (error) {
+        console.error('Get available actions error:', error);
+        res.status(400).json({ error: error.message || 'Failed to get available actions' });
+    }
+});
 // Get current game state (API endpoint)
 router.get('/:gameId/state', async (req, res) => {
     try {
