@@ -1,67 +1,38 @@
+// Environment configuration
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-export interface DatabaseConfig {
-  host: string;
-  user: string;
-  port: number;
-  password: string;
-  database: string;
-}
-
-export interface RealtimeConfig {
-  enableSocketIo: boolean;
-  enableWebSocket: boolean;
-  socketIoPath: string;
-  // Priority order: Socket.IO first (better for shared hosting), WebSocket as fallback
-}
-
 export interface AppConfig {
   port: number;
-  database: DatabaseConfig;
-  realtime: RealtimeConfig;
+  nodeEnv: string;
+  sessionSecret: string;
+  database: {
+    host: string;
+    user: string;
+    password: string;
+    database: string;
+    port: number;
+  };
 }
 
-const parseBoolean = (value: string | undefined, fallback: boolean) => {
-  if (!value) {
-    return fallback;
-  }
-  const normalized = value.toLowerCase();
-  return normalized !== 'false' && normalized !== '0';
-};
+const requiredEnvVars = ['DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_NAME'];
 
-const requiredEnv = ['DB_HOST', 'DB_USER', 'DB_PORT', 'DB_PASSWORD', 'DB_NAME'];
-
-for (const envVar of requiredEnv) {
+for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
     throw new Error(`Missing required environment variable: ${envVar}`);
   }
 }
 
-export const getConfig = (): AppConfig => {
-  const port = Number(process.env.PORT ?? 4000);
-  if (Number.isNaN(port)) {
-    throw new Error('PORT must be a valid number');
-  }
-
-  const realtime: RealtimeConfig = {
-    // Socket.IO is primary for shared hosting compatibility
-    enableSocketIo: parseBoolean(process.env.REALTIME_SOCKET_IO_ENABLED, true),
-    enableWebSocket: parseBoolean(process.env.REALTIME_WSS_ENABLED, true),
-    // Standard Socket.IO path for better Apache/shared hosting support
-    socketIoPath: process.env.SOCKET_IO_PATH ?? '/socket.io'
-  };
-
-  return {
-    port,
-    database: {
-      host: process.env.DB_HOST!,
-      user: process.env.DB_USER!,
-      password: process.env.DB_PASSWORD!,
-      port: Number(process.env.DB_PORT!),
-      database: process.env.DB_NAME!
-    },
-    realtime
-  };
+export const config: AppConfig = {
+  port: parseInt(process.env.PORT || '4000', 10),
+  nodeEnv: process.env.NODE_ENV || 'development',
+  sessionSecret: process.env.SESSION_SECRET || 'starving-artists-secret-key-change-in-production',
+  database: {
+    host: process.env.DB_HOST!,
+    user: process.env.DB_USER!,
+    password: process.env.DB_PASSWORD!,
+    database: process.env.DB_NAME!,
+    port: parseInt(process.env.DB_PORT || '3306', 10),
+  },
 };
