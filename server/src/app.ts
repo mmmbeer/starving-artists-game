@@ -34,6 +34,9 @@ export function createApp(): Express {
 
   // Static files
   app.use(express.static(path.join(__dirname, '..', 'public')));
+  
+  // Serve canvas assets from /assets/canvases
+  app.use('/assets', express.static(path.join(__dirname, '..', '..', '..', 'assets')));
 
   // Health check
   app.get('/health', (_req: Request, res: Response) => {
@@ -44,11 +47,13 @@ export function createApp(): Express {
   const indexRoutes = require('./routes/index.routes').default;
   const lobbyRoutes = require('./routes/lobby.routes').default;
   const gameRoutes = require('./routes/game.routes').default;
+  const adminRoutes = require('./routes/admin.routes').default;
 
   // Register routes
   app.use('/', indexRoutes);
   app.use('/lobby', lobbyRoutes);
   app.use('/game', gameRoutes);
+  app.use('/admin', adminRoutes);
 
   // 404 handler
   app.use((_req: Request, res: Response) => {
