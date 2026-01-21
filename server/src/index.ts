@@ -3,7 +3,6 @@ import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import { createApp } from './app';
 import { config } from './config/env';
-import { getPool, closePool } from './config/database';
 
 const app = createApp();
 const server = http.createServer(app);
@@ -27,37 +26,27 @@ registerGameSocketHandlers(io);
 // Make io available globally for routes
 app.set('io', io);
 
-// Test database connection
-getPool()
-  .getConnection()
-  .then((connection) => {
-    console.log('Database connected successfully');
-    connection.release();
-  })
-  .catch((err) => {
-    console.error('Database connection failed:', err);
-    process.exit(1);
-  });
+// Using in-memory database - no connection test needed
+console.log('Using in-memory database for development');
 
 // Start server
 server.listen(config.port, () => {
   console.log(`Server running on port ${config.port}`);
   console.log(`Environment: ${config.nodeEnv}`);
+  console.log(`URL: http://localhost:${config.port}`);
 });
 
 // Graceful shutdown
-process.on('SIGTERM', async () => {
+process.on('SIGTERM', () => {
   console.log('SIGTERM received, shutting down gracefully');
-  server.close(async () => {
-    await closePool();
+  server.close(() => {
     process.exit(0);
   });
 });
 
-process.on('SIGINT', async () => {
+process.on('SIGINT', () => {
   console.log('SIGINT received, shutting down gracefully');
-  server.close(async () => {
-    await closePool();
+  server.close(() => {
     process.exit(0);
   });
 });
