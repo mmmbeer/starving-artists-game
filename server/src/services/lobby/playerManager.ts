@@ -1,6 +1,6 @@
 // Player connection management service
-import * as playerDb from '../database/playerDb';
-import { Player } from '../models/types';
+import * as playerDb from '../../database/playerDb';
+import { Player } from '../../models/types';
 
 interface PlayerConnection {
   playerId: string;
