@@ -1,8 +1,8 @@
 // Lobby management service
-import * as gameDb from '../database/gameDb';
-import * as playerDb from '../database/playerDb';
-import { Game, Player } from '../models/types';
-import { sanitizePlayerName } from '../utils/validation';
+import * as gameDb from '../../database/gameDb';
+import * as playerDb from '../../database/playerDb';
+import { Game, Player } from '../../models/types';
+import { sanitizePlayerName } from '../../utils/validation';
 
 export interface LobbyInfo {
   game: Game;
