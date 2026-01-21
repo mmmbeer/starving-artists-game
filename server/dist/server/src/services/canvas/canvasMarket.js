@@ -40,8 +40,8 @@ exports.refillMarketSlot = refillMarketSlot;
 exports.getCanvasCost = getCanvasCost;
 exports.shiftMarketLeft = shiftMarketLeft;
 exports.resetMarket = resetMarket;
-const helpers_1 = require("../utils/helpers");
-const canvasDb = __importStar(require("../database/canvasDb"));
+const helpers_1 = require("../../utils/helpers");
+const canvasDb = __importStar(require("../../database/canvasDb"));
 async function createCanvasDeck() {
     const allCanvases = await canvasDb.getAllCanvasDefinitions();
     const canvasIds = allCanvases.map(c => c.id);

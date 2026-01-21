@@ -38,9 +38,9 @@ exports.performBuyCanvasAction = performBuyCanvasAction;
 exports.performPaintAction = performPaintAction;
 exports.performEndTurnAction = performEndTurnAction;
 // Game action handler - processes player actions
-const gameDb = __importStar(require("../database/gameDb"));
-const playerDb = __importStar(require("../database/playerDb"));
-const canvasDb = __importStar(require("../database/canvasDb"));
+const gameDb = __importStar(require("../../database/gameDb"));
+const playerDb = __importStar(require("../../database/playerDb"));
+const canvasDb = __importStar(require("../../database/canvasDb"));
 const paintBag_1 = require("../paint/paintBag");
 const canvasMarket_1 = require("../canvas/canvasMarket");
 const canvasManager_1 = require("../canvas/canvasManager");

@@ -41,6 +41,7 @@ exports.endGame = endGame;
 const gameDb = __importStar(require("../../database/gameDb"));
 const playerDb = __importStar(require("../../database/playerDb"));
 const canvasDb = __importStar(require("../../database/canvasDb"));
+const database_1 = require("../../config/database");
 const paintBag_1 = require("../paint/paintBag");
 const canvasMarket_1 = require("../canvas/canvasMarket");
 const turnManager_1 = require("./turnManager");
@@ -62,7 +63,7 @@ async function startGame(gameId) {
     for (let i = 0; i < shuffledPlayers.length; i++) {
         const player = shuffledPlayers[i];
         // Update turn order in database
-        await gameDb.execute('UPDATE players SET turn_order = ? WHERE id = ?', [i, player.id]);
+        await (0, database_1.execute)('UPDATE players SET turn_order = ? WHERE id = ?', [i, player.id]);
     }
     // Create paint bag
     const paintBag = (0, paintBag_1.createPaintBag)();
