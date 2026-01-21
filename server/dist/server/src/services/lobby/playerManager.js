@@ -43,7 +43,7 @@ exports.updatePing = updatePing;
 exports.getConnectedPlayers = getConnectedPlayers;
 exports.isPlayerConnected = isPlayerConnected;
 // Player connection management service
-const playerDb = __importStar(require("../database/playerDb"));
+const playerDb = __importStar(require("../../database/playerDb"));
 const connections = new Map();
 const PING_INTERVAL = 30000; // 30 seconds
 const DISCONNECT_TIMEOUT = 60000; // 60 seconds

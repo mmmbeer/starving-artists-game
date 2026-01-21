@@ -7,8 +7,8 @@ exports.removeFromPaintMarket = removeFromPaintMarket;
 exports.canTakeCubeFromMarket = canTakeCubeFromMarket;
 exports.executePaintTrade = executePaintTrade;
 exports.validateTradeRatio = validateTradeRatio;
-const helpers_1 = require("../utils/helpers");
-const constants_1 = require("../utils/constants");
+const helpers_1 = require("../../utils/helpers");
+const constants_1 = require("../../utils/constants");
 function createPaintBag() {
     const cubes = [];
     // Regular colors: 18 of each (7 colors = 126 cubes)

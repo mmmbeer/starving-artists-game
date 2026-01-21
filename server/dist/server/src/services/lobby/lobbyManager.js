@@ -39,9 +39,9 @@ exports.leaveLobby = leaveLobby;
 exports.getLobbyInfo = getLobbyInfo;
 exports.canStartGame = canStartGame;
 // Lobby management service
-const gameDb = __importStar(require("../database/gameDb"));
-const playerDb = __importStar(require("../database/playerDb"));
-const validation_1 = require("../utils/validation");
+const gameDb = __importStar(require("../../database/gameDb"));
+const playerDb = __importStar(require("../../database/playerDb"));
+const validation_1 = require("../../utils/validation");
 async function createLobby(playerName) {
     const sanitizedName = (0, validation_1.sanitizePlayerName)(playerName);
     // Create player first to get ID for host

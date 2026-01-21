@@ -42,9 +42,9 @@ exports.decrementAllNutrition = decrementAllNutrition;
 exports.checkStarvation = checkStarvation;
 exports.hasActionAvailable = hasActionAvailable;
 // Turn management service
-const gameDb = __importStar(require("../database/gameDb"));
-const playerDb = __importStar(require("../database/playerDb"));
-const constants_1 = require("../utils/constants");
+const gameDb = __importStar(require("../../database/gameDb"));
+const playerDb = __importStar(require("../../database/playerDb"));
+const constants_1 = require("../../utils/constants");
 async function initializeTurnOrder(gameId, players) {
     if (players.length === 0)
         return;

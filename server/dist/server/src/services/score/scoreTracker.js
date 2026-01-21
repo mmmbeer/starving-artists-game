@@ -39,9 +39,9 @@ exports.determineWinnerByStarvation = determineWinnerByStarvation;
 exports.declareWinner = declareWinner;
 exports.getLeaderboard = getLeaderboard;
 // Score tracking and win condition service
-const playerDb = __importStar(require("../database/playerDb"));
-const gameDb = __importStar(require("../database/gameDb"));
-const constants_1 = require("../utils/constants");
+const playerDb = __importStar(require("../../database/playerDb"));
+const gameDb = __importStar(require("../../database/gameDb"));
+const constants_1 = require("../../utils/constants");
 async function updatePlayerScore(playerId, pointsToAdd) {
     const player = await playerDb.getPlayer(playerId);
     if (!player)
