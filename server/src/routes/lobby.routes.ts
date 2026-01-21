@@ -130,6 +130,15 @@ router.post('/:gameId/start', async (req: Request, res: Response) => {
     
     await gameEngine.startGame(gameId);
     
+    // Emit Socket.IO event to notify all players
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`lobby:${gameId}`).emit('game-starting', {
+        gameId,
+        redirectUrl: `/game/${gameId}`,
+      });
+    }
+    
     res.json({
       success: true,
       redirectUrl: `/game/${gameId}`,
