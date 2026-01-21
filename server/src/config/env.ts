@@ -25,7 +25,7 @@ for (const envVar of requiredEnvVars) {
 }
 
 export const config: AppConfig = {
-  port: parseInt(process.env.PORT || '4000', 10),
+  port: parseInt(process.env.PORT || '8001', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
   sessionSecret: process.env.SESSION_SECRET || 'starving-artists-secret-key-change-in-production',
   database: {
