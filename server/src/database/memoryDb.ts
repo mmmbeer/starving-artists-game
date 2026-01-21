@@ -283,6 +283,37 @@ export const memoryDb = {
     return null;
   },
   
+  // Canvas definition management (admin)
+  saveCanvasDefinition(id: number | null, data: any) {
+    if (id) {
+      // Update existing
+      const index = canvasDefinitions.findIndex(c => c.id === id);
+      if (index >= 0) {
+        canvasDefinitions[index] = { ...canvasDefinitions[index], ...data, id };
+        return canvasDefinitions[index];
+      }
+    }
+    
+    // Create new
+    const newId = Math.max(...canvasDefinitions.map(c => c.id), 0) + 1;
+    const newCanvas = { ...data, id: newId };
+    canvasDefinitions.push(newCanvas);
+    return newCanvas;
+  },
+  
+  deleteCanvasDefinition(id: number) {
+    const index = canvasDefinitions.findIndex(c => c.id === id);
+    if (index >= 0) {
+      canvasDefinitions.splice(index, 1);
+      return true;
+    }
+    return false;
+  },
+  
+  getCanvasDefinitionByFilename(filename: string) {
+    return canvasDefinitions.find(c => c.filename === filename) || null;
+  },
+  
   // Utility
   clear() {
     games.clear();
