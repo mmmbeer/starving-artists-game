@@ -3,54 +3,61 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createApp = void 0;
+exports.createApp = createApp;
+// Express application setup
 const express_1 = __importDefault(require("express"));
-const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
-const lobbyRoutes_1 = __importDefault(require("./lobby/lobbyRoutes"));
-const health_1 = require("./realtime/health");
-const origins_1 = require("./config/origins");
-const allowedOrigins = (0, origins_1.getAllowedOrigins)();
-const applyCorsHeaders = (req, res) => {
-    const origin = req.headers.origin;
-    if (origin && allowedOrigins.includes(origin)) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
-        res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept');
-        res.setHeader('Access-Control-Allow-Credentials', 'true');
-    }
-};
-const clientDistCandidates = [
-    path_1.default.resolve(__dirname, '..', '..', '..', '..', 'client', 'dist'),
-    path_1.default.resolve(__dirname, '..', '..', 'client', 'dist'),
-];
-const clientDist = clientDistCandidates.find((candidate) => fs_1.default.existsSync(candidate));
-if (!clientDist) {
-    throw new Error(`client dist directory not found; checked ${clientDistCandidates.join(', ')}`);
-}
-const createApp = () => {
+const body_parser_1 = __importDefault(require("body-parser"));
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const express_session_1 = __importDefault(require("express-session"));
+const compression_1 = __importDefault(require("compression"));
+const env_1 = require("./config/env");
+function createApp() {
     const app = (0, express_1.default)();
-    app.use(express_1.default.json());
-    app.use((req, res, next) => {
-        applyCorsHeaders(req, res);
-        if (req.method === 'OPTIONS') {
-            res.sendStatus(204);
-            return;
-        }
-        next();
-    });
+    // View engine setup
+    app.set('views', path_1.default.join(__dirname, '..', 'views'));
+    app.set('view engine', 'ejs');
+    // Middleware
+    app.use((0, compression_1.default)());
+    app.use(body_parser_1.default.json());
+    app.use(body_parser_1.default.urlencoded({ extended: true }));
+    app.use((0, cookie_parser_1.default)());
+    app.use((0, express_session_1.default)({
+        secret: env_1.config.sessionSecret,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            secure: env_1.config.nodeEnv === 'production',
+            httpOnly: true,
+            maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        },
+    }));
+    // Static files
+    app.use(express_1.default.static(path_1.default.join(__dirname, '..', 'public')));
+    // Health check
     app.get('/health', (_req, res) => {
-        res.status(200).json({ status: 'ok' });
+        res.json({ status: 'ok', timestamp: new Date().toISOString() });
     });
-    app.get('/realtime/health', (_req, res) => {
-        res.status(200).json((0, health_1.getRealtimeHealth)());
+    // Import routes
+    const indexRoutes = require('./routes/index.routes').default;
+    const lobbyRoutes = require('./routes/lobby.routes').default;
+    const gameRoutes = require('./routes/game.routes').default;
+    // Register routes
+    app.use('/', indexRoutes);
+    app.use('/lobby', lobbyRoutes);
+    app.use('/game', gameRoutes);
+    // 404 handler
+    app.use((_req, res) => {
+        res.status(404).render('pages/404', { title: 'Page Not Found' });
     });
-    app.use('/api/lobby', lobbyRoutes_1.default);
-    app.use(express_1.default.static(clientDist));
-    app.get('*', (_req, res) => {
-        res.sendFile(path_1.default.join(clientDist, 'index.html'));
+    // Error handler
+    app.use((err, _req, res, _next) => {
+        console.error('Error:', err);
+        res.status(500).render('pages/error', {
+            title: 'Error',
+            message: env_1.config.nodeEnv === 'development' ? err.message : 'Something went wrong',
+            error: env_1.config.nodeEnv === 'development' ? err : {},
+        });
     });
     return app;
-};
-exports.createApp = createApp;
-exports.default = exports.createApp;
+}
