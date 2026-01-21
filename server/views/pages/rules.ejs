@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="default">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rules - Starving Artists</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/themes/default.css">
+  <link rel="stylesheet" href="/css/overrides.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/components.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="container">
+      <a href="/" class="app-logo">🎨 <span>Starving Artists</span></a>
+      <nav class="header-nav">
+        <a href="/" class="btn btn-sm btn-outline-primary">Home</a>
+        <a href="/about" class="btn btn-sm btn-outline-primary">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <div class="container py-5">
+      <h1 class="display-4 mb-4">🎨 How to Play</h1>
+      
+      <div class="card mb-4">
+        <div class="card-body">
+          <h2 class="h4 mb-3">🎯 Objective</h2>
+          <p class="lead">
+            Be the first artist to complete paintings worth <strong>18 stars</strong> or complete <strong>5 paintings</strong> to win the game!
+          </p>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-body">
+          <h2 class="h4 mb-3">⏰ Game Phases</h2>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="p-3 border rounded">
+                <h5>☀️ Morning</h5>
+                <p class="mb-0">Players take turns performing actions: Work, Buy Canvases, or Paint.</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="p-3 border rounded">
+                <h5>🌤️ Day</h5>
+                <p class="mb-0">Continue taking actions. Plan your strategy!</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="p-3 border rounded">
+                <h5>🌙 Night</h5>
+                <p class="mb-0">Feed your artist. Lose nutrition if you can't eat!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-body">
+          <h2 class="h4 mb-3">🎬 Actions</h2>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="p-3 border rounded h-100">
+                <h5>🖌️ Work</h5>
+                <p>Draw 3 paint cubes from the paint bag. These go into your personal supply.</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="p-3 border rounded h-100">
+                <h5>🖼️ Buy Canvas</h5>
+                <p>Purchase a canvas from the market. Cost varies by position (1-3 cubes).</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="p-3 border rounded h-100">
+                <h5>🎨 Paint</h5>
+                <p>Drag paint cubes onto your canvases. Match colors to the required squares!</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="p-3 border rounded h-100">
+                <h5>⏭️ End Turn</h5>
+                <p>Pass your turn to the next player when you're done with actions.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-body">
+          <h2 class="h4 mb-3">🎨 Paint Cubes</h2>
+          <p>The paint bag contains cubes in 7 colors:</p>
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            <span class="badge" style="background-color: #EF4444;">Red</span>
+            <span class="badge" style="background-color: #F97316;">Orange</span>
+            <span class="badge" style="background-color: #EAB308;">Yellow</span>
+            <span class="badge" style="background-color: #22C55E;">Green</span>
+            <span class="badge" style="background-color: #3B82F6;">Blue</span>
+            <span class="badge" style="background-color: #A855F7;">Purple</span>
+            <span class="badge" style="background-color: #1F2937;">Black</span>
+            <span class="badge" style="background: linear-gradient(135deg, #EC4899, #8B5CF6, #3B82F6); color: white;">Wild ⭐</span>
+          </div>
+          <p><strong>Wild cubes</strong> can be used as any color, but only one wild per canvas!</p>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-body">
+          <h2 class="h4 mb-3">❤️ Nutrition</h2>
+          <p>
+            Your artist starts with <strong>5 nutrition</strong>. At night, you lose nutrition. 
+            Complete paintings to earn food and stay alive!
+          </p>
+          <p class="text-danger">
+            <strong>Warning:</strong> If your nutrition reaches 0, you're eliminated from the game!
+          </p>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-body">
+          <h2 class="h4 mb-3">🏆 Winning</h2>
+          <p>You win by achieving either:</p>
+          <ul>
+            <li>Accumulate <strong>18 stars</strong> from completed paintings</li>
+            <li>Complete <strong>5 paintings</strong> total</li>
+          </ul>
+          <p>The game ends immediately when any player achieves a win condition!</p>
+        </div>
+      </div>
+
+      <div class="text-center mt-5">
+        <a href="/" class="btn btn-primary btn-lg">🎮 Start Playing</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container text-center">
+      <p>&copy; 2025 Starving Artists Online. Based on the board game by Fairway 3 Games.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
