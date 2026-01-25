@@ -10,15 +10,38 @@
   <link rel="stylesheet" href="/css/themes/default.css">
   <style>
     .admin-header {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      background: #0f172a;
       color: white;
-      padding: 1rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      height: 48px;
+      display: flex;
+      align-items: center;
+    }
+    .header-ribbon {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 1rem;
+      width: 100%;
+      font-size: 0.9rem;
+    }
+    .header-ribbon .header-title {
+      text-align: center;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .header-actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
     }
     .editor-container {
       display: grid;
       grid-template-columns: 1fr 350px;
       gap: 1.5rem;
-      height: calc(100vh - 160px);
+      height: calc(100vh - 72px);
     }
     .canvas-workspace {
       background: #1f2937;
@@ -31,11 +54,15 @@
       position: relative;
       display: inline-block;
       cursor: crosshair;
+      transform-origin: top left;
     }
     .canvas-image {
-      max-width: 100%;
-      height: auto;
       display: block;
+    }
+    #squaresOverlay {
+      position: absolute;
+      top: 0;
+      left: 0;
     }
     .square-overlay {
       position: absolute;
@@ -83,38 +110,14 @@
       padding: 1.5rem;
       overflow-y: auto;
     }
-    .color-checkbox {
-      display: inline-flex;
-      align-items: center;
-      margin-right: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
-    .color-checkbox input {
-      margin-right: 0.25rem;
-    }
-    .color-swatch {
-      width: 20px;
-      height: 20px;
-      border-radius: 4px;
-      display: inline-block;
-      margin-left: 4px;
-      border: 1px solid #ccc;
-    }
-    .color-swatch.red { background: #EF4444; }
-    .color-swatch.orange { background: #F97316; }
-    .color-swatch.yellow { background: #EAB308; }
-    .color-swatch.green { background: #22C55E; }
-    .color-swatch.blue { background: #3B82F6; }
-    .color-swatch.purple { background: #A855F7; }
-    .color-swatch.black { background: #1F2937; }
     .square-list {
-      max-height: 200px;
+      max-height: 360px;
       overflow-y: auto;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
     }
     .square-list-item {
-      padding: 0.5rem;
+      padding: 0.35rem 0.5rem;
       border-bottom: 1px solid #e5e7eb;
       cursor: pointer;
       font-size: 0.85rem;
@@ -144,36 +147,128 @@
       background: #3B82F6;
       color: white;
     }
+    .color-ribbon {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      margin-top: -0.5rem;
+      margin-bottom: 1rem;
+      background: #2b3440;
+      border-radius: 8px;
+      align-items: center;
+    }
+    .color-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: #e5e7eb;
+      font-size: 0.8rem;
+      user-select: none;
+    }
+    .color-toggle input {
+      width: 14px;
+      height: 14px;
+      margin: 0;
+    }
+    .color-toggle.red input { accent-color: #EF4444; }
+    .color-toggle.orange input { accent-color: #F97316; }
+    .color-toggle.yellow input { accent-color: #EAB308; }
+    .color-toggle.green input { accent-color: #22C55E; }
+    .color-toggle.blue input { accent-color: #3B82F6; }
+    .color-toggle.purple input { accent-color: #A855F7; }
+    .color-toggle.black input { accent-color: #111827; }
     .info-text {
       font-size: 0.8rem;
       color: #6b7280;
       margin-top: 0.5rem;
     }
-    .preview-colors {
-      display: flex;
-      gap: 2px;
-      margin-top: 4px;
+    .square-grid-header,
+    .square-grid-row,
+    .square-grid-total {
+      display: grid;
+      grid-template-columns: minmax(120px, 1fr) repeat(7, 22px);
+      align-items: center;
+      gap: 4px;
     }
-    .preview-colors .mini-swatch {
-      width: 12px;
-      height: 12px;
-      border-radius: 2px;
+    .square-grid-header {
+      padding: 0.35rem 0.5rem;
+      background: #f8fafc;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #64748b;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    .square-grid-row {
+      padding: 0.3rem 0.5rem;
+    }
+    .square-grid-row.selected {
+      background: #dbeafe;
+    }
+    .square-label {
+      font-size: 0.8rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .color-cell {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      background: #f3f4f6;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .color-cell.active {
+      color: #fff;
+      border-color: transparent;
+    }
+    .color-cell.active.yellow { color: #1f2937; }
+    .color-cell.red.active { background: #EF4444; }
+    .color-cell.orange.active { background: #F97316; }
+    .color-cell.yellow.active { background: #EAB308; }
+    .color-cell.green.active { background: #22C55E; }
+    .color-cell.blue.active { background: #3B82F6; }
+    .color-cell.purple.active { background: #A855F7; }
+    .color-cell.black.active { background: #111827; }
+    .square-grid-total {
+      padding: 0.4rem 0.5rem;
+      border-top: 1px solid #e5e7eb;
+      background: #f8fafc;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #475569;
+      position: sticky;
+      bottom: 0;
+      z-index: 2;
+    }
+    .total-cell {
+      font-size: 0.7rem;
+      font-weight: 700;
     }
   </style>
 </head>
 <body>
   <header class="admin-header">
-    <div class="container-fluid">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <a href="/admin/canvases" class="text-white-50 text-decoration-none">← All Canvases</a>
-          <h1 class="h4 mb-0 mt-1"><%= fileInfo.title %></h1>
-          <small class="text-white-50"><%= fileInfo.artist %> <% if (fileInfo.year) { %>(<%= fileInfo.year %>)<% } %></small>
-        </div>
-        <div class="d-flex gap-2">
-          <button id="saveBtn" class="btn btn-success">💾 Save Canvas</button>
-          <a href="/admin/canvases" class="btn btn-outline-light">Cancel</a>
-        </div>
+    <div class="container-fluid header-ribbon">
+      <div>
+        <a href="/admin/canvases" class="text-white-50 text-decoration-none">??? All Canvases</a>
+      </div>
+      <div class="header-title">
+        <%= fileInfo.artist %> - <%= fileInfo.title %> <% if (fileInfo.year) { %>(<%= fileInfo.year %>)<% } %>
+      </div>
+      <div class="header-actions">
+        <button id="saveBtn" class="btn btn-success btn-sm">Save</button>
+        <button id="saveNextBtn" class="btn btn-success btn-sm" <%= nextUnfinishedFilename ? '' : 'disabled' %>>Save &amp; Next</button>
+        <a href="/admin/canvases" class="btn btn-outline-light btn-sm">Cancel</a>
       </div>
     </div>
   </header>
@@ -183,10 +278,34 @@
       <!-- Canvas Workspace -->
       <div class="canvas-workspace">
         <div class="toolbar">
-          <button id="addModeBtn" class="active">➕ Add Squares</button>
-          <button id="selectModeBtn">🖱️ Select Mode</button>
-          <button id="clearAllBtn">🗑️ Clear All</button>
+          <button id="addModeBtn" class="active">??? Add Squares</button>
+          <button id="selectModeBtn">??????? Select Mode</button>
+          <button id="clearAllBtn">??????? Clear All</button>
           <span class="text-white ms-auto small">Click on canvas to add paint squares. Drag to move.</span>
+        </div>
+        <div class="color-ribbon" id="addColorsRibbon">
+          <span class="text-white-50 small">Allowed Colors</span>
+          <label class="color-toggle red">
+            <input type="checkbox" value="red" checked> Red
+          </label>
+          <label class="color-toggle orange">
+            <input type="checkbox" value="orange"> Orange
+          </label>
+          <label class="color-toggle yellow">
+            <input type="checkbox" value="yellow"> Yellow
+          </label>
+          <label class="color-toggle green">
+            <input type="checkbox" value="green"> Green
+          </label>
+          <label class="color-toggle blue">
+            <input type="checkbox" value="blue"> Blue
+          </label>
+          <label class="color-toggle purple">
+            <input type="checkbox" value="purple"> Purple
+          </label>
+          <label class="color-toggle black">
+            <input type="checkbox" value="black"> Black
+          </label>
         </div>
         <div class="canvas-container" id="canvasContainer">
           <img 
@@ -224,17 +343,17 @@
           
           <div class="row mb-3">
             <div class="col-4">
-              <label class="form-label">⭐ Stars</label>
+              <label class="form-label">??? Stars</label>
               <input type="number" class="form-control" name="star_value" 
                      value="<%= canvas ? canvas.star_value : defaultValues.star_value %>" min="1" max="10">
             </div>
             <div class="col-4">
-              <label class="form-label">🎨 Paint</label>
+              <label class="form-label">???? Paint</label>
               <input type="number" class="form-control" name="paint_value" 
                      value="<%= canvas ? canvas.paint_value : defaultValues.paint_value %>" min="1" max="10">
             </div>
             <div class="col-4">
-              <label class="form-label">🍎 Food</label>
+              <label class="form-label">???? Food</label>
               <input type="number" class="form-control" name="food_value" 
                      value="<%= canvas ? canvas.food_value : defaultValues.food_value %>" min="0" max="10">
             </div>
@@ -258,34 +377,6 @@
         <div class="square-list mb-3" id="squareList">
           <!-- Populated by JS -->
         </div>
-        
-        <!-- Selected Square Colors -->
-        <div id="selectedSquareEditor" style="display: none;">
-          <h6 class="mb-2">Allowed Colors</h6>
-          <div id="colorCheckboxes">
-            <label class="color-checkbox">
-              <input type="checkbox" value="red"> Red <span class="color-swatch red"></span>
-            </label>
-            <label class="color-checkbox">
-              <input type="checkbox" value="orange"> Orange <span class="color-swatch orange"></span>
-            </label>
-            <label class="color-checkbox">
-              <input type="checkbox" value="yellow"> Yellow <span class="color-swatch yellow"></span>
-            </label>
-            <label class="color-checkbox">
-              <input type="checkbox" value="green"> Green <span class="color-swatch green"></span>
-            </label>
-            <label class="color-checkbox">
-              <input type="checkbox" value="blue"> Blue <span class="color-swatch blue"></span>
-            </label>
-            <label class="color-checkbox">
-              <input type="checkbox" value="purple"> Purple <span class="color-swatch purple"></span>
-            </label>
-            <label class="color-checkbox">
-              <input type="checkbox" value="black"> Black <span class="color-swatch black"></span>
-            </label>
-          </div>
-        </div>
       </div>
     </div>
   </main>
@@ -298,12 +389,25 @@
     let mode = 'add'; // 'add' or 'select'
     let isDragging = false;
     let dragOffset = { x: 0, y: 0 };
-    let squareSize = 30; // Default square size in pixels
+    const baseSquareSize = 115;
+    const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'black'];
+    const colorLabels = ['R', 'O', 'Y', 'G', 'B', 'V', 'B'];
+    let zoomScale = 1;
+    let fitScale = 1;
+    let hasManualZoom = false;
     
     // Load existing squares
     <% if (canvas && canvas.layout_json && canvas.layout_json.squares) { %>
       squares = <%- JSON.stringify(canvas.layout_json.squares) %>;
     <% } %>
+    squares = squares.map(sq => ({
+      ...sq,
+      position: {
+        x: sq.position?.x ?? sq.x ?? 0,
+        y: sq.position?.y ?? sq.y ?? 0,
+      },
+      allowedColors: sq.allowedColors && sq.allowedColors.length ? sq.allowedColors : ['red'],
+    }));
     
     // DOM elements
     const canvasContainer = document.getElementById('canvasContainer');
@@ -311,8 +415,10 @@
     const squaresOverlay = document.getElementById('squaresOverlay');
     const squareList = document.getElementById('squareList');
     const squareCountEl = document.getElementById('squareCount');
-    const selectedSquareEditor = document.getElementById('selectedSquareEditor');
-    const colorCheckboxes = document.querySelectorAll('#colorCheckboxes input[type="checkbox"]');
+    const addColorsRibbon = document.getElementById('addColorsRibbon');
+    const addColorInputs = Array.from(addColorsRibbon.querySelectorAll('input[type="checkbox"]'));
+    const saveNextBtn = document.getElementById('saveNextBtn');
+    const nextUnfinishedFilename = '<%= nextUnfinishedFilename || "" %>';
     
     // Mode buttons
     document.getElementById('addModeBtn').addEventListener('click', () => {
@@ -336,6 +442,15 @@
         renderSquares();
       }
     });
+
+    addColorInputs.forEach(input => {
+      input.addEventListener('change', () => {
+        const selected = addColorInputs.filter(i => i.checked);
+        if (selected.length === 0) {
+          input.checked = true;
+        }
+      });
+    });
     
     // Add square on click
     canvasContainer.addEventListener('click', (e) => {
@@ -343,14 +458,19 @@
       if (e.target.classList.contains('square-overlay') || e.target.classList.contains('delete-btn')) return;
       
       const rect = canvasImage.getBoundingClientRect();
-      const x = Math.round(e.clientX - rect.left);
-      const y = Math.round(e.clientY - rect.top);
+      const x = Math.round((e.clientX - rect.left) / zoomScale - baseSquareSize / 2);
+      const y = Math.round((e.clientY - rect.top) / zoomScale - baseSquareSize / 2);
+      const maxX = Math.max(0, canvasImage.naturalWidth - baseSquareSize);
+      const maxY = Math.max(0, canvasImage.naturalHeight - baseSquareSize);
+      const clampedX = Math.max(0, Math.min(x, maxX));
+      const clampedY = Math.max(0, Math.min(y, maxY));
+      const selectedColors = addColorInputs.filter(i => i.checked).map(i => i.value);
       
       // Create new square
       const newSquare = {
         id: `sq-${Date.now()}`,
-        position: { x, y },
-        allowedColors: ['red'], // Default color
+        position: { x: clampedX, y: clampedY },
+        allowedColors: selectedColors.length ? selectedColors : ['red'],
       };
       
       squares.push(newSquare);
@@ -363,15 +483,33 @@
       squaresOverlay.innerHTML = '';
       squareList.innerHTML = '';
       squareCountEl.textContent = squares.length;
+      updateOverlaySize();
+
+      const headerRow = document.createElement('div');
+      headerRow.className = 'square-grid-header';
+      headerRow.innerHTML = `
+        <div class="square-label"> </div>
+        ${colorLabels.map(label => `<div class="text-center">${label}</div>`).join('')}
+      `;
+      squareList.appendChild(headerRow);
+
+      const colorTotals = colors.reduce((acc, color) => {
+        acc[color] = 0;
+        return acc;
+      }, {});
       
       squares.forEach((sq, index) => {
+        colors.forEach(color => {
+          if (sq.allowedColors.includes(color)) colorTotals[color] += 1;
+        });
+
         // Create overlay element
         const div = document.createElement('div');
         div.className = 'square-overlay' + (index === selectedSquareIndex ? ' selected' : '');
-        div.style.left = sq.position.x + 'px';
-        div.style.top = sq.position.y + 'px';
-        div.style.width = squareSize + 'px';
-        div.style.height = squareSize + 'px';
+        div.style.left = (sq.position.x * zoomScale) + 'px';
+        div.style.top = (sq.position.y * zoomScale) + 'px';
+        div.style.width = (baseSquareSize * zoomScale) + 'px';
+        div.style.height = (baseSquareSize * zoomScale) + 'px';
         div.textContent = index + 1;
         div.dataset.index = index;
         
@@ -382,7 +520,7 @@
         // Delete button
         const deleteBtn = document.createElement('div');
         deleteBtn.className = 'delete-btn';
-        deleteBtn.textContent = '×';
+        deleteBtn.textContent = '??';
         deleteBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           squares.splice(index, 1);
@@ -400,10 +538,12 @@
         // Drag functionality
         div.addEventListener('mousedown', (e) => {
           if (e.target.classList.contains('delete-btn')) return;
+          if (mode !== 'select') return;
           isDragging = true;
+          const rect = canvasImage.getBoundingClientRect();
           dragOffset = {
-            x: e.clientX - sq.position.x,
-            y: e.clientY - sq.position.y
+            x: (e.clientX - rect.left) / zoomScale - sq.position.x,
+            y: (e.clientY - rect.top) / zoomScale - sq.position.y
           };
           selectSquare(index);
         });
@@ -412,18 +552,31 @@
         
         // Create list item
         const li = document.createElement('div');
-        li.className = 'square-list-item' + (index === selectedSquareIndex ? ' selected' : '');
+        li.className = 'square-grid-row' + (index === selectedSquareIndex ? ' selected' : '');
         li.innerHTML = `
-          <strong>#${index + 1}</strong> (${sq.position.x}, ${sq.position.y})
-          <div class="preview-colors">
-            ${sq.allowedColors.map(c => `<div class="mini-swatch" style="background: ${getColorHex(c)}"></div>`).join('')}
-          </div>
+          <div class="square-label"><strong>#${index + 1}</strong> (${sq.position.x}, ${sq.position.y})</div>
+          ${colors.map(color => {
+            const active = sq.allowedColors.includes(color);
+            return `<div class="color-cell ${color} ${active ? 'active' : ''}" data-color="${color}" data-index="${index}">${active ? '?' : ''}</div>`;
+          }).join('')}
         `;
         li.addEventListener('click', () => selectSquare(index));
         squareList.appendChild(li);
       });
-      
-      updateSelectedSquareEditor();
+
+      const totalRow = document.createElement('div');
+      totalRow.className = 'square-grid-total';
+      totalRow.innerHTML = `
+        <div class="square-label">Total</div>
+        ${colors.map(color => {
+          const count = colorTotals[color];
+          const active = count > 0;
+          return `<div class="color-cell total-cell ${color} ${active ? 'active' : ''}">${count || ''}</div>`;
+        }).join('')}
+      `;
+      squareList.appendChild(totalRow);
+
+      bindColorCellHandlers();
     }
     
     // Mouse move for dragging
@@ -431,12 +584,14 @@
       if (!isDragging || selectedSquareIndex < 0) return;
       
       const rect = canvasImage.getBoundingClientRect();
-      const x = Math.round(e.clientX - rect.left - squareSize / 2);
-      const y = Math.round(e.clientY - rect.top - squareSize / 2);
+      const x = Math.round((e.clientX - rect.left) / zoomScale - dragOffset.x);
+      const y = Math.round((e.clientY - rect.top) / zoomScale - dragOffset.y);
       
       // Clamp to canvas bounds
-      squares[selectedSquareIndex].position.x = Math.max(0, Math.min(x, canvasImage.width - squareSize));
-      squares[selectedSquareIndex].position.y = Math.max(0, Math.min(y, canvasImage.height - squareSize));
+      const maxX = Math.max(0, canvasImage.naturalWidth - baseSquareSize);
+      const maxY = Math.max(0, canvasImage.naturalHeight - baseSquareSize);
+      squares[selectedSquareIndex].position.x = Math.max(0, Math.min(x, maxX));
+      squares[selectedSquareIndex].position.y = Math.max(0, Math.min(y, maxY));
       
       renderSquares();
     });
@@ -450,41 +605,29 @@
       selectedSquareIndex = index;
       renderSquares();
     }
-    
-    // Update selected square editor
-    function updateSelectedSquareEditor() {
-      if (selectedSquareIndex < 0 || selectedSquareIndex >= squares.length) {
-        selectedSquareEditor.style.display = 'none';
-        return;
-      }
-      
-      selectedSquareEditor.style.display = 'block';
-      const sq = squares[selectedSquareIndex];
-      
-      colorCheckboxes.forEach(cb => {
-        cb.checked = sq.allowedColors.includes(cb.value);
+
+    function bindColorCellHandlers() {
+      squareList.querySelectorAll('.color-cell[data-index]').forEach(cell => {
+        cell.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const index = parseInt(cell.dataset.index, 10);
+          const color = cell.dataset.color;
+          if (Number.isNaN(index) || !color) return;
+
+          const square = squares[index];
+          const hasColor = square.allowedColors.includes(color);
+          if (hasColor && square.allowedColors.length === 1) return;
+
+          if (hasColor) {
+            square.allowedColors = square.allowedColors.filter(c => c !== color);
+          } else {
+            square.allowedColors = [...square.allowedColors, color];
+          }
+          selectedSquareIndex = index;
+          renderSquares();
+        });
       });
     }
-    
-    // Color checkbox change
-    colorCheckboxes.forEach(cb => {
-      cb.addEventListener('change', () => {
-        if (selectedSquareIndex < 0) return;
-        
-        const selectedColors = Array.from(colorCheckboxes)
-          .filter(c => c.checked)
-          .map(c => c.value);
-        
-        // Ensure at least one color is selected
-        if (selectedColors.length === 0) {
-          cb.checked = true;
-          return;
-        }
-        
-        squares[selectedSquareIndex].allowedColors = selectedColors;
-        renderSquares();
-      });
-    });
     
     // Color helper
     function getColorHex(color) {
@@ -499,9 +642,57 @@
       };
       return colors[color] || '#888';
     }
+
+    function updateOverlaySize() {
+      if (!canvasImage.naturalWidth || !canvasImage.naturalHeight) return;
+      const displayWidth = canvasImage.naturalWidth * zoomScale;
+      const displayHeight = canvasImage.naturalHeight * zoomScale;
+      canvasImage.style.width = displayWidth + 'px';
+      canvasImage.style.height = displayHeight + 'px';
+      squaresOverlay.style.width = displayWidth + 'px';
+      squaresOverlay.style.height = displayHeight + 'px';
+    }
+
+    function computeFitScale() {
+      const workspace = document.querySelector('.canvas-workspace');
+      const style = window.getComputedStyle(workspace);
+      const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+      const paddingY = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+      const availableWidth = workspace.clientWidth - paddingX;
+      const availableHeight = workspace.clientHeight - paddingY - 110;
+      if (!canvasImage.naturalWidth || !canvasImage.naturalHeight) return 1;
+      const scaleX = availableWidth / canvasImage.naturalWidth;
+      const scaleY = availableHeight / canvasImage.naturalHeight;
+      return Math.min(scaleX, scaleY);
+    }
+
+    function applyZoom(newScale, manual = false) {
+      zoomScale = Math.max(0.2, Math.min(newScale, fitScale));
+      if (manual) hasManualZoom = true;
+      updateOverlaySize();
+      renderSquares();
+    }
+
+    canvasContainer.addEventListener('wheel', (e) => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      if (e.deltaY > 0) {
+        applyZoom(zoomScale - 0.05, true);
+      }
+    }, { passive: false });
+
+    window.addEventListener('resize', () => {
+      fitScale = computeFitScale();
+      if (!hasManualZoom) {
+        applyZoom(fitScale, false);
+      } else {
+        zoomScale = Math.max(0.2, Math.min(zoomScale, fitScale));
+        updateOverlaySize();
+        renderSquares();
+      }
+    });
     
-    // Save canvas
-    document.getElementById('saveBtn').addEventListener('click', async () => {
+    async function saveCanvas(redirectToNext) {
       const form = document.getElementById('canvasForm');
       const formData = new FormData(form);
       
@@ -528,16 +719,33 @@
         const result = await response.json();
         
         if (result.success) {
-          alert('Canvas saved successfully!');
-          // Update the hidden ID field
           document.querySelector('input[name="id"]').value = result.canvas.id;
+          if (redirectToNext && nextUnfinishedFilename) {
+            window.location.href = `/admin/canvas/edit/${encodeURIComponent(nextUnfinishedFilename)}`;
+            return;
+          }
+          alert('Canvas saved successfully!');
         } else {
           alert('Error: ' + (result.error || 'Failed to save'));
         }
       } catch (error) {
         alert('Error: ' + error.message);
       }
+    }
+
+    document.getElementById('saveBtn').addEventListener('click', () => saveCanvas(false));
+    if (saveNextBtn) {
+      saveNextBtn.addEventListener('click', () => saveCanvas(true));
+    }
+
+    canvasImage.addEventListener('load', () => {
+      fitScale = computeFitScale();
+      applyZoom(fitScale);
     });
+    if (canvasImage.complete) {
+      fitScale = computeFitScale();
+      applyZoom(fitScale);
+    }
     
     // Initial render
     renderSquares();

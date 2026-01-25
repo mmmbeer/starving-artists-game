@@ -144,4 +144,5 @@ export interface CanvasFileInfo {
   fullPath: string;
   inDatabase: boolean;
   canvasId?: number;
+  isUnfinished?: boolean;
 }

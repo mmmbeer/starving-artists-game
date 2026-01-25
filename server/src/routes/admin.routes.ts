@@ -55,6 +55,7 @@ function getCanvasFiles(): CanvasFileInfo[] {
       c.filename === filename || 
       c.name === parsed.title
     );
+    const isUnfinished = !existing || !existing.layout_json || !existing.layout_json.squares || existing.layout_json.squares.length === 0;
     
     return {
       filename,
@@ -65,8 +66,21 @@ function getCanvasFiles(): CanvasFileInfo[] {
       fullPath: `/assets/canvases/${filename}`,
       inDatabase: !!existing,
       canvasId: existing?.id,
+      isUnfinished,
     };
   });
+}
+
+function getNextUnfinishedFilename(currentFilename: string): string | null {
+  const canvasFiles = getCanvasFiles();
+  const currentIndex = canvasFiles.findIndex(file => file.filename === currentFilename);
+  if (currentIndex === -1) return null;
+  for (let i = currentIndex + 1; i < canvasFiles.length; i++) {
+    if (canvasFiles[i].isUnfinished) {
+      return canvasFiles[i].filename;
+    }
+  }
+  return null;
 }
 
 // Admin dashboard
@@ -119,11 +133,13 @@ router.get('/canvas/edit/:filename', (req: Request, res: Response) => {
     c.filename === decodedFilename || 
     c.name === fileInfo.title
   );
+  const nextUnfinishedFilename = getNextUnfinishedFilename(decodedFilename);
   
   res.render('pages/admin/canvas-editor', {
     title: `Edit Canvas - ${fileInfo.title}`,
     fileInfo,
     canvas: existing || null,
+    nextUnfinishedFilename,
     defaultValues: {
       star_value: 3,
       paint_value: 2,

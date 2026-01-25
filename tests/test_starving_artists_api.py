@@ -7,6 +7,7 @@ import requests
 import json
 import time
 from pathlib import Path
+from urllib.parse import quote
 
 # Base URL for the server
 BASE_URL = "http://localhost:8001"
@@ -561,6 +562,28 @@ class TestStaticPages:
         # May return 200 or 404 if not implemented
         assert response.status_code in [200, 404]
         print("OK About page endpoint accessible")
+
+
+class TestAdminCanvasEditor:
+    """Test admin canvas editor page"""
+
+    def test_admin_canvas_editor_renders_controls(self):
+        """Canvas editor should show save buttons and add mode"""
+        list_response = requests.get(f"{BASE_URL}/admin/api/canvases")
+        assert list_response.status_code == 200
+        data = list_response.json()
+        assert data["success"] == True
+        canvases = data.get("canvases", [])
+        if not canvases:
+            pytest.skip('No canvases available to test editor page')
+
+        filename = canvases[0]["filename"]
+        editor_response = requests.get(f"{BASE_URL}/admin/canvas/edit/{quote(filename)}")
+        assert editor_response.status_code == 200
+        assert 'Save & Next' in editor_response.text
+        assert 'Add Squares' in editor_response.text
+        assert 'Allowed Colors' in editor_response.text
+        print('OK Admin canvas editor renders controls')
 
 
 class TestAdminCanvasFiles:
