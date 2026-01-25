@@ -26,8 +26,8 @@ registerGameSocketHandlers(io);
 // Make io available globally for routes
 app.set('io', io);
 
-// Using in-memory database - no connection test needed
-console.log('Using in-memory database for development');
+// Game state remains in-memory; canvas definitions load from MySQL
+console.log('Using in-memory game state; canvas definitions load from MySQL');
 
 // Start server
 server.listen(config.port, () => {

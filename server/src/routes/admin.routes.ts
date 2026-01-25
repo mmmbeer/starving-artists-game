@@ -2,8 +2,8 @@
 import { Router, Request, Response } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
-import { CanvasFileInfo, CanvasDefinition } from '../models/types';
-import { memoryDb } from '../database/memoryDb';
+import { CanvasFileInfo } from '../models/types';
+import * as canvasDb from '../database/canvasDb';
 
 const router = Router();
 
@@ -32,7 +32,7 @@ function parseCanvasFilename(filename: string): { artist: string; title: string;
 }
 
 // Get all canvas files from assets directory
-function getCanvasFiles(): CanvasFileInfo[] {
+async function getCanvasFiles(): Promise<CanvasFileInfo[]> {
   const canvasDir = path.join(process.cwd(), 'dist', 'server', 'assets', 'canvases');
   
   if (!fs.existsSync(canvasDir)) {
@@ -44,7 +44,7 @@ function getCanvasFiles(): CanvasFileInfo[] {
     .filter(f => /\.(png|jpg|jpeg|gif|webp)$/i.test(f))
     .sort();
   
-  const existingCanvases = memoryDb.getCanvasDefinitions();
+  const existingCanvases = await canvasDb.getAllCanvasDefinitions();
   
   return files.map(filename => {
     const parsed = parseCanvasFilename(filename);
@@ -71,8 +71,8 @@ function getCanvasFiles(): CanvasFileInfo[] {
   });
 }
 
-function getNextUnfinishedFilename(currentFilename: string): string | null {
-  const canvasFiles = getCanvasFiles();
+async function getNextUnfinishedFilename(currentFilename: string): Promise<string | null> {
+  const canvasFiles = await getCanvasFiles();
   const currentIndex = canvasFiles.findIndex(file => file.filename === currentFilename);
   if (currentIndex === -1) return null;
   for (let i = currentIndex + 1; i < canvasFiles.length; i++) {
@@ -84,9 +84,9 @@ function getNextUnfinishedFilename(currentFilename: string): string | null {
 }
 
 // Admin dashboard
-router.get('/', (_req: Request, res: Response) => {
-  const canvasFiles = getCanvasFiles();
-  const canvasDefinitions = memoryDb.getCanvasDefinitions();
+router.get('/', async (_req: Request, res: Response) => {
+  const canvasFiles = await getCanvasFiles();
+  const canvasDefinitions = await canvasDb.getAllCanvasDefinitions();
   
   const stats = {
     totalFiles: canvasFiles.length,
@@ -103,8 +103,8 @@ router.get('/', (_req: Request, res: Response) => {
 });
 
 // List all canvas files
-router.get('/canvases', (_req: Request, res: Response) => {
-  const canvasFiles = getCanvasFiles();
+router.get('/canvases', async (_req: Request, res: Response) => {
+  const canvasFiles = await getCanvasFiles();
   
   res.render('pages/admin/canvases', {
     title: 'Admin - All Canvases',
@@ -113,11 +113,11 @@ router.get('/canvases', (_req: Request, res: Response) => {
 });
 
 // Canvas editor - view/edit a single canvas
-router.get('/canvas/edit/:filename', (req: Request, res: Response) => {
+router.get('/canvas/edit/:filename', async (req: Request, res: Response) => {
   const { filename } = req.params;
   const decodedFilename = decodeURIComponent(filename);
   
-  const canvasFiles = getCanvasFiles();
+  const canvasFiles = await getCanvasFiles();
   const fileInfo = canvasFiles.find(f => f.filename === decodedFilename);
   
   if (!fileInfo) {
@@ -128,12 +128,10 @@ router.get('/canvas/edit/:filename', (req: Request, res: Response) => {
   }
   
   // Get existing canvas definition if any
-  const canvasDefinitions = memoryDb.getCanvasDefinitions();
-  const existing = canvasDefinitions.find(c => 
-    c.filename === decodedFilename || 
-    c.name === fileInfo.title
-  );
-  const nextUnfinishedFilename = getNextUnfinishedFilename(decodedFilename);
+  const existingByFilename = await canvasDb.getCanvasDefinitionByFilename(decodedFilename);
+  const existingByTitle = existingByFilename ? null : await canvasDb.getCanvasDefinitionByTitle(fileInfo.title);
+  const existing = existingByFilename || existingByTitle;
+  const nextUnfinishedFilename = await getNextUnfinishedFilename(decodedFilename);
   
   res.render('pages/admin/canvas-editor', {
     title: `Edit Canvas - ${fileInfo.title}`,
@@ -149,15 +147,15 @@ router.get('/canvas/edit/:filename', (req: Request, res: Response) => {
 });
 
 // API: Get canvas files as JSON
-router.get('/api/canvases', (_req: Request, res: Response) => {
-  const canvasFiles = getCanvasFiles();
+router.get('/api/canvases', async (_req: Request, res: Response) => {
+  const canvasFiles = await getCanvasFiles();
   res.json({ success: true, canvases: canvasFiles });
 });
 
 // API: Get single canvas definition
-router.get('/api/canvas/:id', (req: Request, res: Response) => {
+router.get('/api/canvas/:id', async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
-  const canvas = memoryDb.getCanvasDefinition(id);
+  const canvas = await canvasDb.getCanvasDefinition(id);
   
   if (!canvas) {
     return res.status(404).json({ error: 'Canvas not found' });
@@ -167,7 +165,7 @@ router.get('/api/canvas/:id', (req: Request, res: Response) => {
 });
 
 // API: Save/update canvas definition
-router.post('/api/canvas', (req: Request, res: Response) => {
+router.post('/api/canvas', async (req: Request, res: Response) => {
   try {
     const {
       id,
@@ -212,13 +210,13 @@ router.post('/api/canvas', (req: Request, res: Response) => {
       filename: filename || null,
     };
     
-    // Save to memory database
-    const savedCanvas = memoryDb.saveCanvasDefinition(id, canvasData);
+    const normalizedId = id ? parseInt(id, 10) : null;
+    const savedCanvas = await canvasDb.saveCanvasDefinition(normalizedId, canvasData);
     
     res.json({
       success: true,
       canvas: savedCanvas,
-      message: id ? 'Canvas updated' : 'Canvas created',
+      message: normalizedId ? 'Canvas updated' : 'Canvas created',
     });
   } catch (error: any) {
     console.error('Save canvas error:', error);
@@ -227,10 +225,10 @@ router.post('/api/canvas', (req: Request, res: Response) => {
 });
 
 // API: Delete canvas definition
-router.delete('/api/canvas/:id', (req: Request, res: Response) => {
+router.delete('/api/canvas/:id', async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
   
-  const success = memoryDb.deleteCanvasDefinition(id);
+  const success = await canvasDb.deleteCanvasDefinition(id);
   
   if (!success) {
     return res.status(404).json({ error: 'Canvas not found' });
@@ -240,9 +238,9 @@ router.delete('/api/canvas/:id', (req: Request, res: Response) => {
 });
 
 // API: Bulk import canvases from files
-router.post('/api/canvases/import', (_req: Request, res: Response) => {
+router.post('/api/canvases/import', async (_req: Request, res: Response) => {
   try {
-    const canvasFiles = getCanvasFiles();
+    const canvasFiles = await getCanvasFiles();
     const imported: string[] = [];
     const skipped: string[] = [];
     
@@ -268,7 +266,7 @@ router.post('/api/canvases/import', (_req: Request, res: Response) => {
         filename: file.filename,
       };
       
-      memoryDb.saveCanvasDefinition(null, canvasData);
+      await canvasDb.saveCanvasDefinition(null, canvasData);
       imported.push(file.filename);
     }
     

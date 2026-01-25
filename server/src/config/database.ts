@@ -1,32 +1,28 @@
-// Database configuration - uses in-memory store for development
-// This allows testing without MySQL dependency
+// Database configuration using MySQL (mysql2)
+import { createPool, Pool, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
+import { config } from './env';
 
-import { memoryDb } from '../database/memoryDb';
+let pool: Pool | null = null;
 
-// Mock pool for compatibility with existing code
-const mockPool = {
-  getConnection: async () => ({
-    release: () => {},
-    query: async () => [[]],
-    execute: async () => [{ insertId: '1' }],
-  }),
-  end: async () => {},
-};
-
-let pool: any = null;
-
-export function getPool(): any {
+export function getPool(): Pool {
   if (!pool) {
-    pool = mockPool;
-    console.log('Using in-memory database for development');
+    pool = createPool({
+      host: config.database.host,
+      user: config.database.user,
+      password: config.database.password,
+      database: config.database.database,
+      port: config.database.port,
+      waitForConnections: true,
+      connectionLimit: 10,
+      namedPlaceholders: true,
+    });
   }
   return pool;
 }
 
 export async function query<T = any>(sql: string, params?: any[]): Promise<T[]> {
-  // In-memory mode - queries are handled by memoryDb
-  console.log('Query:', sql, params);
-  return [];
+  const [rows] = await getPool().query<RowDataPacket[]>(sql, params);
+  return rows as unknown as T[];
 }
 
 export async function queryOne<T = any>(sql: string, params?: any[]): Promise<T | null> {
@@ -34,16 +30,14 @@ export async function queryOne<T = any>(sql: string, params?: any[]): Promise<T 
   return results.length > 0 ? results[0] : null;
 }
 
-export async function execute(sql: string, params?: any[]): Promise<any> {
-  console.log('Execute:', sql, params);
-  return { insertId: '1', affectedRows: 1 };
+export async function execute(sql: string, params?: any[]): Promise<ResultSetHeader> {
+  const [result] = await getPool().execute<ResultSetHeader>(sql, params);
+  return result;
 }
 
 export async function closePool(): Promise<void> {
   if (pool) {
+    await pool.end();
     pool = null;
   }
 }
-
-// Export memoryDb for direct access
-export { memoryDb };
