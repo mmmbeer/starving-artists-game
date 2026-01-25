@@ -260,7 +260,12 @@
   <header class="admin-header">
     <div class="container-fluid header-ribbon">
       <div>
-        <a href="/admin/canvases" class="text-white-50 text-decoration-none">??? All Canvases</a>
+        <a href="/admin/canvases" class="text-white-50 text-decoration-none">
+          <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="vertical-align: -2px;">
+            <path fill="currentColor" d="M14.5 5l-7 7 7 7 1.4-1.4L10.3 12l5.6-5.6z"/>
+          </svg>
+          All Canvases
+        </a>
       </div>
       <div class="header-title">
         <%= fileInfo.artist %> - <%= fileInfo.title %> <% if (fileInfo.year) { %>(<%= fileInfo.year %>)<% } %>
@@ -278,9 +283,24 @@
       <!-- Canvas Workspace -->
       <div class="canvas-workspace">
         <div class="toolbar">
-          <button id="addModeBtn" class="active">??? Add Squares</button>
-          <button id="selectModeBtn">??????? Select Mode</button>
-          <button id="clearAllBtn">??????? Clear All</button>
+          <button id="addModeBtn" class="active">
+            <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="vertical-align: -2px;">
+              <path fill="currentColor" d="M11 5h2v14h-2zM5 11h14v2H5z"/>
+            </svg>
+            Add Squares
+          </button>
+          <button id="selectModeBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="vertical-align: -2px;">
+              <path fill="currentColor" d="M4 2l16 8-6.5 1.5L12 20l-3-6.5L4 2z"/>
+            </svg>
+            Select Mode
+          </button>
+          <button id="clearAllBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="vertical-align: -2px;">
+              <path fill="currentColor" d="M9 3h6l1 2h5v2H3V5h5zM6 9h12l-1 11H7z"/>
+            </svg>
+            Clear All
+          </button>
           <span class="text-white ms-auto small">Click on canvas to add paint squares. Drag to move.</span>
         </div>
         <div class="color-ribbon" id="addColorsRibbon">
@@ -343,17 +363,17 @@
           
           <div class="row mb-3">
             <div class="col-4">
-              <label class="form-label">??? Stars</label>
+              <label class="form-label">Stars</label>
               <input type="number" class="form-control" name="star_value" 
                      value="<%= canvas ? canvas.star_value : defaultValues.star_value %>" min="1" max="10">
             </div>
             <div class="col-4">
-              <label class="form-label">???? Paint</label>
+              <label class="form-label">Paint</label>
               <input type="number" class="form-control" name="paint_value" 
                      value="<%= canvas ? canvas.paint_value : defaultValues.paint_value %>" min="1" max="10">
             </div>
             <div class="col-4">
-              <label class="form-label">???? Food</label>
+              <label class="form-label">Food</label>
               <input type="number" class="form-control" name="food_value" 
                      value="<%= canvas ? canvas.food_value : defaultValues.food_value %>" min="0" max="10">
             </div>
@@ -420,19 +440,32 @@
     const saveNextBtn = document.getElementById('saveNextBtn');
     const nextUnfinishedFilename = '<%= nextUnfinishedFilename || "" %>';
     
+    function applyMode(nextMode) {
+      mode = nextMode;
+      const addBtn = document.getElementById('addModeBtn');
+      const selectBtn = document.getElementById('selectModeBtn');
+      if (mode === 'add') {
+        addBtn.classList.add('active');
+        selectBtn.classList.remove('active');
+        canvasContainer.style.cursor = 'crosshair';
+      } else {
+        selectBtn.classList.add('active');
+        addBtn.classList.remove('active');
+        canvasContainer.style.cursor = 'default';
+      }
+    }
+
     // Mode buttons
     document.getElementById('addModeBtn').addEventListener('click', () => {
-      mode = 'add';
-      document.getElementById('addModeBtn').classList.add('active');
-      document.getElementById('selectModeBtn').classList.remove('active');
-      canvasContainer.style.cursor = 'crosshair';
+      if (addColorInputs.every(i => !i.checked)) {
+        applyMode('select');
+        return;
+      }
+      applyMode('add');
     });
     
     document.getElementById('selectModeBtn').addEventListener('click', () => {
-      mode = 'select';
-      document.getElementById('selectModeBtn').classList.add('active');
-      document.getElementById('addModeBtn').classList.remove('active');
-      canvasContainer.style.cursor = 'default';
+      applyMode('select');
     });
     
     document.getElementById('clearAllBtn').addEventListener('click', () => {
@@ -447,7 +480,9 @@
       input.addEventListener('change', () => {
         const selected = addColorInputs.filter(i => i.checked);
         if (selected.length === 0) {
-          input.checked = true;
+          applyMode('select');
+        } else {
+          applyMode('add');
         }
       });
     });
@@ -465,6 +500,10 @@
       const clampedX = Math.max(0, Math.min(x, maxX));
       const clampedY = Math.max(0, Math.min(y, maxY));
       const selectedColors = addColorInputs.filter(i => i.checked).map(i => i.value);
+      if (selectedColors.length === 0) {
+        applyMode('select');
+        return;
+      }
       
       // Create new square
       const newSquare = {
