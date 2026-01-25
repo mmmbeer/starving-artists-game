@@ -10,8 +10,14 @@ import { config } from './config/env';
 export function createApp(): Express {
   const app = express();
 
+  const isSourceRun = path.basename(__dirname) === 'src';
+  const serverRoot = isSourceRun ? path.join(__dirname, '..') : __dirname;
+  const assetsRoot = isSourceRun
+    ? path.join(serverRoot, '..', 'assets')
+    : path.join(serverRoot, 'assets');
+
   // View engine setup
-  app.set('views', path.join(__dirname, '..', 'views'));
+  app.set('views', path.join(serverRoot, 'views'));
   app.set('view engine', 'ejs');
 
   // Middleware
@@ -33,10 +39,10 @@ export function createApp(): Express {
   );
 
   // Static files
-  app.use(express.static(path.join(__dirname, '..', 'public')));
+  app.use(express.static(path.join(serverRoot, 'public')));
   
   // Serve canvas assets from /assets/canvases
-  app.use('/assets', express.static(path.join(__dirname, '..', '..', '..', 'assets')));
+  app.use('/assets', express.static(assetsRoot));
 
   // Health check
   app.get('/health', (_req: Request, res: Response) => {
