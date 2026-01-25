@@ -33,7 +33,7 @@ function parseCanvasFilename(filename: string): { artist: string; title: string;
 
 // Get all canvas files from assets directory
 function getCanvasFiles(): CanvasFileInfo[] {
-  const canvasDir = path.join(process.cwd(), '..', 'assets', 'canvases');
+  const canvasDir = path.join(process.cwd(), 'dist', 'server', 'assets', 'canvases');
   
   if (!fs.existsSync(canvasDir)) {
     console.log('Canvas directory not found:', canvasDir);

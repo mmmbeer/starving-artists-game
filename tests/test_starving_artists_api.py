@@ -6,6 +6,7 @@ import pytest
 import requests
 import json
 import time
+from pathlib import Path
 
 # Base URL for the server
 BASE_URL = "http://localhost:8001"
@@ -148,14 +149,32 @@ class TestLobbyPage:
         assert "Game Lobby" in lobby_response.text
         assert "LobbyTestHost" in lobby_response.text
         assert "Players" in lobby_response.text
-        print("✓ Lobby page loads correctly")
+        print("OK Lobby page loads correctly")
     
     def test_lobby_page_invalid_game(self):
         """Lobby page for invalid game should show error"""
         response = requests.get(f"{BASE_URL}/lobby/invalid-game-id")
         # Should return 404 or error page
         assert response.status_code in [404, 200]  # 200 with error page
-        print("✓ Invalid lobby handled correctly")
+        print("OK Invalid lobby handled correctly")
+
+    def test_lobby_page_prompts_name_for_new_user(self):
+        """Lobby page should prompt for name when no session player"""
+        host_session = requests.Session()
+        create_response = host_session.post(
+            f"{BASE_URL}/lobby/create",
+            json={"playerName": "PromptHost"},
+            headers={"Content-Type": "application/json"}
+        )
+        data = create_response.json()
+        game_id = data["gameId"]
+
+        new_session = requests.Session()
+        lobby_response = new_session.get(f"{BASE_URL}/lobby/{game_id}")
+        assert lobby_response.status_code == 200
+        assert "Join This Lobby" in lobby_response.text
+        assert "joinLobbyForm" in lobby_response.text
+        print("OK Lobby page prompts for name when not joined")
 
 
 class TestGameStart:
@@ -534,14 +553,35 @@ class TestStaticPages:
         response = requests.get(f"{BASE_URL}/rules")
         # May return 200 or 404 if not implemented
         assert response.status_code in [200, 404]
-        print("✓ Rules page endpoint accessible")
+        print("OK Rules page endpoint accessible")
     
     def test_about_page(self):
         """About page should load"""
         response = requests.get(f"{BASE_URL}/about")
         # May return 200 or 404 if not implemented
         assert response.status_code in [200, 404]
-        print("✓ About page endpoint accessible")
+        print("OK About page endpoint accessible")
+
+
+class TestAdminCanvasFiles:
+    """Test admin canvas file listing"""
+
+    def test_admin_canvas_files_from_dist(self):
+        """Admin canvas list should match dist/server/assets/canvases"""
+        response = requests.get(f"{BASE_URL}/admin/api/canvases")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["success"] == True
+        canvases = data.get("canvases", [])
+
+        repo_root = Path(__file__).resolve().parents[1]
+        canvas_dir = repo_root / "dist" / "server" / "assets" / "canvases"
+        assert canvas_dir.exists()
+
+        valid_exts = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
+        file_count = len([p for p in canvas_dir.iterdir() if p.suffix.lower() in valid_exts])
+        assert len(canvases) == file_count
+        print("OK Admin canvas list matches dist assets folder")
 
 
 if __name__ == "__main__":

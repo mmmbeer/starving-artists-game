@@ -51,6 +51,37 @@
             </div>
           </div>
 
+          <% if (!currentPlayer) { %>
+            <div class="card shadow-sm mb-4">
+              <div class="card-body">
+                <h5 class="mb-3">Join This Lobby</h5>
+                <form id="joinLobbyForm">
+                  <label for="joinLobbyPlayerName" class="form-label">Your Name</label>
+                  <div class="input-group">
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="joinLobbyPlayerName" 
+                      placeholder="Enter your artist name" 
+                      required
+                      maxlength="50"
+                      pattern="[a-zA-Z0-9\\s\\-_]+"
+                      data-testid="join-lobby-player-name"
+                    >
+                    <button class="btn btn-outline-secondary" id="randomLobbyNameBtn" type="button" title="Random name">
+                      🎲
+                    </button>
+                  </div>
+                  <div class="form-text">2-50 characters, alphanumeric only</div>
+                  <button type="submit" class="btn btn-accent w-100 mt-3" id="joinLobbyBtn" data-testid="join-lobby-btn">
+                    <span class="btn-text">Join Lobby</span>
+                    <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                  </button>
+                </form>
+              </div>
+            </div>
+          <% } %>
+
           <!-- Players List -->
           <div class="card shadow-lg mb-4">
             <div class="card-header">
@@ -145,11 +176,16 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/utils/ui-helpers.js"></script>
+  <script type="module">
+    import { randomName } from '/js/utils/random-name.js';
+    window.randomName = randomName;
+  </script>
   <script>
     // Game and player data from server
     const gameId = '<%= game.id %>';
     const playerId = '<%= currentPlayer ? currentPlayer.id : "" %>';
     const isHost = <%= isHost %>;
+    const hasPlayer = !!playerId;
     
     // Initialize Socket.IO
     const socket = io({
@@ -163,7 +199,9 @@
     socket.on('connect', () => {
       console.log('Connected to server');
       // Join lobby room
-      socket.emit('join-lobby', { gameId, playerId });
+      if (hasPlayer) {
+        socket.emit('join-lobby', { gameId, playerId });
+      }
     });
 
     socket.on('disconnect', () => {
@@ -237,6 +275,63 @@
         document.execCommand('copy');
       });
     });
+
+    const joinLobbyForm = document.getElementById('joinLobbyForm');
+    if (joinLobbyForm) {
+      const joinLobbyBtn = document.getElementById('joinLobbyBtn');
+      const joinLobbyBtnText = joinLobbyBtn.querySelector('.btn-text');
+      const joinLobbySpinner = joinLobbyBtn.querySelector('.spinner-border');
+      const joinLobbyNameInput = document.getElementById('joinLobbyPlayerName');
+      const randomLobbyNameBtn = document.getElementById('randomLobbyNameBtn');
+
+      if (randomLobbyNameBtn) {
+        randomLobbyNameBtn.addEventListener('click', () => {
+          if (window.randomName) {
+            joinLobbyNameInput.value = window.randomName();
+            joinLobbyNameInput.focus();
+          }
+        });
+      }
+
+      joinLobbyForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const playerName = joinLobbyNameInput.value.trim();
+        if (!playerName || playerName.length < 2 || playerName.length > 50) {
+          showToast('Invalid Name', 'Name must be 2-50 characters, alphanumeric.', 'warning');
+          return;
+        }
+
+        joinLobbyBtn.disabled = true;
+        joinLobbyBtnText.textContent = 'Joining...';
+        joinLobbySpinner.classList.remove('d-none');
+
+        try {
+          const response = await fetch(`/lobby/join/${gameId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ playerName }),
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            showToast('Success', 'Joined lobby!', 'success');
+            setTimeout(() => {
+              window.location.href = data.redirectUrl || `/lobby/${gameId}`;
+            }, 300);
+          } else {
+            throw new Error(data.error || 'Failed to join lobby');
+          }
+        } catch (error) {
+          console.error('Join lobby error:', error);
+          showToast('Error', error.message, 'danger');
+          joinLobbyBtn.disabled = false;
+          joinLobbyBtnText.textContent = 'Join Lobby';
+          joinLobbySpinner.classList.add('d-none');
+        }
+      });
+    }
 
     // Start game button
     if (isHost) {
