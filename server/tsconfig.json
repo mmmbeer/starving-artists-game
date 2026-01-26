@@ -4,8 +4,8 @@
     "module": "CommonJS",
     "moduleResolution": "node",
 
-    "outDir": "../dist/server",
     "rootDir": "src",
+    "outDir": "../dist/server",
 
     "strict": true,
     "noImplicitAny": true,
@@ -15,8 +15,6 @@
 
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
-
-    // ❌ baseUrl removed
   },
   "include": ["src/**/*.ts"]
 }
