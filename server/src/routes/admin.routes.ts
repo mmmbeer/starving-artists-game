@@ -113,7 +113,7 @@ router.get('/canvases', async (_req: Request, res: Response) => {
 });
 
 // Canvas editor - view/edit a single canvas
-router.get('/canvas/edit/:filename', async (req: Request, res: Response) => {
+router.get('/canvas/edit/:filename', async (req: Request<{ filename: string }>, res: Response) => {
   const { filename } = req.params;
   const decodedFilename = decodeURIComponent(filename);
   
@@ -153,7 +153,7 @@ router.get('/api/canvases', async (_req: Request, res: Response) => {
 });
 
 // API: Get single canvas definition
-router.get('/api/canvas/:id', async (req: Request, res: Response) => {
+router.get('/api/canvas/:id', async (req: Request<{ id: string }>, res: Response) => {
   const id = parseInt(req.params.id);
   const canvas = await canvasDb.getCanvasDefinition(id);
   
@@ -225,7 +225,7 @@ router.post('/api/canvas', async (req: Request, res: Response) => {
 });
 
 // API: Delete canvas definition
-router.delete('/api/canvas/:id', async (req: Request, res: Response) => {
+router.delete('/api/canvas/:id', async (req: Request<{ id: string }>, res: Response) => {
   const id = parseInt(req.params.id);
   
   const success = await canvasDb.deleteCanvasDefinition(id);

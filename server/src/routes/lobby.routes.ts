@@ -36,7 +36,7 @@ router.post('/create', async (req: Request, res: Response) => {
 });
 
 // Join existing game lobby
-router.post('/join/:gameId', async (req: Request, res: Response) => {
+router.post('/join/:gameId', async (req: Request<{ gameId: string }>, res: Response) => {
   try {
     const { gameId } = req.params;
     const { playerName } = req.body;
@@ -88,7 +88,7 @@ router.post('/join/:gameId', async (req: Request, res: Response) => {
 });
 
 // Get lobby page
-router.get('/:gameId', async (req: Request, res: Response) => {
+router.get('/:gameId', async (req: Request<{ gameId: string }>, res: Response) => {
   try {
     const { gameId } = req.params;
     const playerId = req.session.playerId;
@@ -114,7 +114,7 @@ router.get('/:gameId', async (req: Request, res: Response) => {
 });
 
 // Start game
-router.post('/:gameId/start', async (req: Request, res: Response) => {
+router.post('/:gameId/start', async (req: Request<{ gameId: string }>, res: Response) => {
   try {
     const { gameId } = req.params;
     const playerId = req.session.playerId;
@@ -150,7 +150,7 @@ router.post('/:gameId/start', async (req: Request, res: Response) => {
 });
 
 // Leave lobby
-router.post('/:gameId/leave', async (req: Request, res: Response) => {
+router.post('/:gameId/leave', async (req: Request<{ gameId: string }>, res: Response) => {
   try {
     const { gameId } = req.params;
     const playerId = req.session.playerId;

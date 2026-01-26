@@ -8,7 +8,7 @@ import { isValidUUID } from '../utils/validation';
 const router = Router();
 
 // Get game page
-router.get('/:gameId', async (req: Request, res: Response) => {
+router.get('/:gameId', async (req: Request<{ gameId: string }>, res: Response) => {
   try {
     const { gameId } = req.params;
     const playerId = req.session.playerId;
@@ -48,7 +48,7 @@ router.get('/:gameId', async (req: Request, res: Response) => {
 });
 
 // Perform work action
-router.post('/:gameId/action/work', async (req: Request, res: Response) => {
+router.post('/:gameId/action/work', async (req: Request<{ gameId: string }>, res: Response) => {
   try {
     const { gameId } = req.params;
     const playerId = req.session.playerId;
@@ -67,7 +67,7 @@ router.post('/:gameId/action/work', async (req: Request, res: Response) => {
 });
 
 // Buy canvas action
-router.post('/:gameId/action/buy-canvas', async (req: Request, res: Response) => {
+router.post('/:gameId/action/buy-canvas', async (req: Request<{ gameId: string }>, res: Response) => {
   try {
     const { gameId } = req.params;
     const { slotIndex } = req.body;
@@ -95,7 +95,7 @@ router.post('/:gameId/action/buy-canvas', async (req: Request, res: Response) =>
 });
 
 // Paint action
-router.post('/:gameId/action/paint', async (req: Request, res: Response) => {
+router.post('/:gameId/action/paint', async (req: Request<{ gameId: string }>, res: Response) => {
   try {
     const { gameId } = req.params;
     const { paintings } = req.body;
@@ -123,7 +123,7 @@ router.post('/:gameId/action/paint', async (req: Request, res: Response) => {
 });
 
 // End turn action
-router.post('/:gameId/action/end-turn', async (req: Request, res: Response) => {
+router.post('/:gameId/action/end-turn', async (req: Request<{ gameId: string }>, res: Response) => {
   try {
     const { gameId } = req.params;
     const playerId = req.session.playerId;
@@ -142,7 +142,7 @@ router.post('/:gameId/action/end-turn', async (req: Request, res: Response) => {
 });
 
 // Submit selling intents
-router.post('/:gameId/action/sell', async (req: Request, res: Response) => {
+router.post('/:gameId/action/sell', async (req: Request<{ gameId: string }>, res: Response) => {
   try {
     const { gameId } = req.params;
     const { canvasIds } = req.body;
@@ -166,7 +166,7 @@ router.post('/:gameId/action/sell', async (req: Request, res: Response) => {
 });
 
 // Collect paint during selling phase
-router.post('/:gameId/action/collect-paint', async (req: Request, res: Response) => {
+router.post('/:gameId/action/collect-paint', async (req: Request<{ gameId: string }>, res: Response) => {
   try {
     const { gameId } = req.params;
     const { cubeIds } = req.body;
@@ -212,7 +212,7 @@ router.post('/:gameId/action/collect-paint', async (req: Request, res: Response)
 });
 
 // Skip collection during selling phase
-router.post('/:gameId/action/skip-collection', async (req: Request, res: Response) => {
+router.post('/:gameId/action/skip-collection', async (req: Request<{ gameId: string }>, res: Response) => {
   try {
     const { gameId } = req.params;
     const playerId = req.session.playerId;
@@ -251,7 +251,7 @@ router.post('/:gameId/action/skip-collection', async (req: Request, res: Respons
 });
 
 // Get available actions for current player
-router.get('/:gameId/available-actions', async (req: Request, res: Response) => {
+router.get('/:gameId/available-actions', async (req: Request<{ gameId: string }>, res: Response) => {
   try {
     const { gameId } = req.params;
     const playerId = req.session.playerId;
@@ -270,7 +270,7 @@ router.get('/:gameId/available-actions', async (req: Request, res: Response) => 
 });
 
 // Get current game state (API endpoint)
-router.get('/:gameId/state', async (req: Request, res: Response) => {
+router.get('/:gameId/state', async (req: Request<{ gameId: string }>, res: Response) => {
   try {
     const { gameId } = req.params;
     const playerId = req.session.playerId;
