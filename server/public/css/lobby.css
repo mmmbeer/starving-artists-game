@@ -1,1 +1,269 @@
-/* Lobby Page Styles */\n\n.lobby-header {\n  padding: var(--spacing-xl) 0;\n}\n\n.game-link-container {\n  background-color: var(--color-bg-secondary);\n  border: 2px solid var(--color-accent);\n  border-radius: var(--radius-lg);\n}\n\n.game-link-container input {\n  font-family: monospace;\n  font-size: var(--font-size-sm);\n}\n\n#copyLinkBtn .copied-text {\n  color: var(--color-success);\n}\n\n/* Players List */\n.players-list {\n  display: flex;\n  flex-direction: column;\n  gap: var(--spacing-md);\n}\n\n.player-item {\n  display: flex;\n  align-items: center;\n  gap: var(--spacing-md);\n  padding: var(--spacing-md);\n  background-color: var(--color-bg-secondary);\n  border: 2px solid var(--color-border-light);\n  border-radius: var(--radius-lg);\n  transition: all var(--transition-base);\n}\n\n.player-item.current-player {\n  background-color: var(--color-accent-light);\n  border-color: var(--color-accent);\n  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);\n}\n\n.player-item.empty-slot {\n  opacity: 0.5;\n  border-style: dashed;\n}\n\n.player-avatar {\n  width: 56px;\n  height: 56px;\n  border-radius: 50%;\n  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));\n  color: var(--color-text-inverse);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  font-size: var(--font-size-xl);\n  font-weight: var(--font-weight-bold);\n  flex-shrink: 0;\n}\n\n.player-avatar.empty {\n  background: var(--color-bg-tertiary);\n  color: var(--color-text-muted);\n}\n\n.player-info {\n  flex: 1;\n}\n\n.player-name {\n  font-size: var(--font-size-lg);\n  font-weight: var(--font-weight-semibold);\n  color: var(--color-text-primary);\n  margin-bottom: var(--spacing-xs);\n  display: flex;\n  align-items: center;\n  gap: var(--spacing-xs);\n}\n\n.player-status {\n  font-size: var(--font-size-sm);\n  color: var(--color-text-secondary);\n  display: flex;\n  align-items: center;\n  gap: var(--spacing-xs);\n}\n\n.status-indicator {\n  width: 10px;\n  height: 10px;\n  border-radius: 50%;\n  display: inline-block;\n}\n\n.status-indicator.online {\n  background-color: var(--color-success);\n  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.3);\n  animation: pulse 2s infinite;\n}\n\n.status-indicator.offline {\n  background-color: var(--color-text-muted);\n}\n\n@keyframes pulse {\n  0%, 100% {\n    opacity: 1;\n  }\n  50% {\n    opacity: 0.5;\n  }\n}\n\n/* Lobby Controls */\n.lobby-controls {\n  margin-top: var(--spacing-lg);\n}\n\n.lobby-controls .btn {\n  font-size: var(--font-size-lg);\n  padding: var(--spacing-md) var(--spacing-xl);\n}\n\n/* Hero Section on Landing */\n.hero-section {\n  padding: var(--spacing-xxl) 0;\n  min-height: calc(100vh - var(--header-height) - 200px);\n  display: flex;\n  align-items: center;\n}\n\n.hero-stats {\n  display: flex;\n  gap: var(--spacing-xl);\n  margin-top: var(--spacing-xl);\n}\n\n.stat-item {\n  text-align: center;\n}\n\n.stat-item strong {\n  display: block;\n  font-size: var(--font-size-2xl);\n  color: var(--color-accent);\n  font-weight: var(--font-weight-bold);\n}\n\n.stat-item span {\n  display: block;\n  font-size: var(--font-size-sm);\n  color: var(--color-text-secondary);\n  text-transform: uppercase;\n  letter-spacing: 0.5px;\n}\n\n/* Divider */\n.divider {\n  display: flex;\n  align-items: center;\n  text-align: center;\n  color: var(--color-text-muted);\n}\n\n.divider::before,\n.divider::after {\n  content: '';\n  flex: 1;\n  border-bottom: 1px solid var(--color-border-light);\n}\n\n.divider span {\n  padding: 0 var(--spacing-md);\n  font-weight: var(--font-weight-medium);\n  font-size: var(--font-size-sm);\n}\n\n/* Features Section */\n.features-section {\n  background-color: var(--color-bg-secondary);\n}\n\n.feature-card {\n  padding: var(--spacing-lg);\n  height: 100%;\n  transition: transform var(--transition-base);\n}\n\n.feature-card:hover {\n  transform: translateY(-4px);\n}\n\n.feature-icon {\n  font-size: 3rem;\n  margin-bottom: var(--spacing-md);\n}\n\n.feature-card h4 {\n  font-size: var(--font-size-lg);\n  font-weight: var(--font-weight-semibold);\n  margin-bottom: var(--spacing-sm);\n  color: var(--color-primary);\n}\n\n.feature-card p {\n  font-size: var(--font-size-sm);\n  color: var(--color-text-secondary);\n  margin: 0;\n}\n\n/* Header Nav */\n.header-nav {\n  display: flex;\n  gap: var(--spacing-sm);\n  align-items: center;\n}\n\n/* Responsive */\n@media (max-width: 768px) {\n  .hero-stats {\n    gap: var(--spacing-md);\n  }\n  \n  .stat-item strong {\n    font-size: var(--font-size-xl);\n  }\n  \n  .player-item {\n    padding: var(--spacing-sm);\n  }\n  \n  .player-avatar {\n    width: 48px;\n    height: 48px;\n    font-size: var(--font-size-lg);\n  }\n  \n  .player-name {\n    font-size: var(--font-size-base);\n  }\n}\n
+/* Lobby Page Styles */
+
+.lobby-header {
+  padding: var(--spacing-xl) 0;
+}
+
+.game-link-container {
+  background-color: var(--color-bg-secondary);
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius-lg);
+}
+
+.game-link-container input {
+  font-family: monospace;
+  font-size: var(--font-size-sm);
+}
+
+#copyLinkBtn .copied-text {
+  color: var(--color-success);
+}
+
+/* Players List */
+.players-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.player-item {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-bg-secondary);
+  border: 2px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+}
+
+.player-item.current-player {
+  background-color: var(--color-accent-light);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.15);
+}
+
+.player-item.empty-slot {
+  opacity: 0.7;
+  border-style: dashed;
+}
+
+.player-line {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.player-number {
+  min-width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--color-border-light);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
+}
+
+.player-name {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-badge {
+  border: 2px solid var(--color-border-light);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-tertiary);
+}
+
+.player-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 2px solid var(--color-border-light);
+  border-radius: var(--radius-pill);
+  padding: 2px 10px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-tertiary);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.player-status-pill.status-online {
+  border-color: var(--color-success);
+  color: var(--color-success);
+  background: rgba(40, 167, 69, 0.08);
+}
+
+.player-status-pill.status-offline {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+  background: rgba(220, 53, 69, 0.08);
+}
+
+.player-status-pill.status-empty {
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+  background: rgba(255, 193, 7, 0.08);
+}
+
+.status-dot.status-online {
+  background-color: var(--color-success);
+  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25);
+}
+
+.status-dot.status-offline {
+  background-color: var(--color-danger);
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+}
+
+.status-dot.status-empty {
+  background-color: var(--color-warning);
+  box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.25);
+}
+
+/* Lobby Controls */
+.lobby-controls {
+  margin-top: var(--spacing-lg);
+}
+
+.lobby-controls .btn {
+  font-size: var(--font-size-lg);
+  padding: var(--spacing-md) var(--spacing-xl);
+}
+
+/* Hero Section on Landing */
+.hero-section {
+  padding: var(--spacing-xxl) 0;
+  min-height: calc(100vh - var(--header-height) - 200px);
+  display: flex;
+  align-items: center;
+}
+
+.hero-stats {
+  display: flex;
+  gap: var(--spacing-xl);
+  margin-top: var(--spacing-xl);
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-item strong {
+  display: block;
+  font-size: var(--font-size-2xl);
+  color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
+}
+
+.stat-item span {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.divider span {
+  padding: 0 var(--spacing-md);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+}
+
+/* Features Section */
+.features-section {
+  background-color: var(--color-bg-secondary);
+}
+
+.feature-card {
+  padding: var(--spacing-lg);
+  height: 100%;
+  transition: transform var(--transition-base);
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+}
+
+.feature-icon {
+  font-size: 3rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.feature-card h4 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--spacing-sm);
+  color: var(--color-primary);
+}
+
+.feature-card p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Header Nav */
+.header-nav {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-stats {
+    gap: var(--spacing-md);
+  }
+
+  .stat-item strong {
+    font-size: var(--font-size-xl);
+  }
+
+  .player-item {
+    padding: var(--spacing-sm);
+  }
+
+  .player-number {
+    min-width: 24px;
+    height: 24px;
+  }
+
+  .player-name {
+    font-size: var(--font-size-sm);
+  }
+}

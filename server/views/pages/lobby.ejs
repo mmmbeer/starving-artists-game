@@ -65,14 +65,14 @@
                       placeholder="Enter your artist name" 
                       required
                       maxlength="50"
-                      pattern="[a-zA-Z0-9\\s\\-_]+"
+                      pattern="[a-zA-Z0-9\\s,\\-_]+"
                       data-testid="join-lobby-player-name"
                     >
                     <button class="btn btn-outline-secondary" id="randomLobbyNameBtn" type="button" title="Random name">
                       🎲
                     </button>
                   </div>
-                  <div class="form-text">2-50 characters, alphanumeric only</div>
+                  <div class="form-text">2-50 characters (letters, numbers, spaces, dashes, underscores, commas)</div>
                   <button type="submit" class="btn btn-accent w-100 mt-3" id="joinLobbyBtn" data-testid="join-lobby-btn">
                     <span class="btn-text">Join Lobby</span>
                     <span class="spinner-border spinner-border-sm d-none" role="status"></span>
@@ -94,23 +94,14 @@
               <div id="playersList" class="players-list" data-testid="players-list">
                 <% players.forEach((player, index) => { %>
                   <div class="player-item <%= currentPlayer && player.id === currentPlayer.id ? 'current-player' : '' %>" data-player-id="<%= player.id %>">
-                    <div class="player-avatar">
-                      <%= player.name.charAt(0).toUpperCase() %>
-                    </div>
-                    <div class="player-info">
-                      <div class="player-name">
-                        <%= player.name %>
-                        <% if (player.is_host) { %>
-                          <span class="badge bg-warning text-dark ms-2">Host</span>
-                        <% } %>
-                        <% if (currentPlayer && player.id === currentPlayer.id) { %>
-                          <span class="badge bg-primary ms-2">You</span>
-                        <% } %>
-                      </div>
-                      <div class="player-status">
-                        <span class="status-indicator <%= player.connected ? 'online' : 'offline' %>"></span>
+                    <div class="player-line">
+                      <span class="player-number">#<%= index + 1 %></span>
+                      <span class="player-name"><%= player.name %></span>
+                      <span class="player-badge"><%= player.is_host ? 'host' : 'player' %></span>
+                      <span class="player-status-pill <%= player.connected ? 'status-online' : 'status-offline' %>">
+                        <span class="status-dot <%= player.connected ? 'status-online' : 'status-offline' %>"></span>
                         <%= player.connected ? 'Online' : 'Offline' %>
-                      </div>
+                      </span>
                     </div>
                   </div>
                 <% }); %>
@@ -118,12 +109,14 @@
                 <!-- Empty slots -->
                 <% for (let i = players.length; i < 4; i++) { %>
                   <div class="player-item empty-slot">
-                    <div class="player-avatar empty">
-                      ?
-                    </div>
-                    <div class="player-info">
-                      <div class="player-name text-muted">Waiting for player...</div>
-                      <div class="player-status text-muted">Empty slot</div>
+                    <div class="player-line">
+                      <span class="player-number">#<%= i + 1 %></span>
+                      <span class="player-name text-muted">Waiting on player...</span>
+                      <span class="player-badge">player</span>
+                      <span class="player-status-pill status-empty">
+                        <span class="status-dot status-empty"></span>
+                        Empty
+                      </span>
                     </div>
                   </div>
                 <% } %>
@@ -298,7 +291,7 @@
 
         const playerName = joinLobbyNameInput.value.trim();
         if (!playerName || playerName.length < 2 || playerName.length > 50) {
-          showToast('Invalid Name', 'Name must be 2-50 characters, alphanumeric.', 'warning');
+          showToast('Invalid Name', 'Name must be 2-50 characters (letters, numbers, spaces, dashes, underscores, commas).', 'warning');
           return;
         }
 
@@ -406,23 +399,18 @@
       playerCount.textContent = players.length;
       
       let html = '';
-      players.forEach(player => {
+      players.forEach((player, index) => {
         const isCurrent = player.id === playerId;
         html += `
           <div class="player-item ${isCurrent ? 'current-player' : ''}" data-player-id="${player.id}">
-            <div class="player-avatar">
-              ${player.name.charAt(0).toUpperCase()}
-            </div>
-            <div class="player-info">
-              <div class="player-name">
-                ${player.name}
-                ${player.is_host ? '<span class="badge bg-warning text-dark ms-2">Host</span>' : ''}
-                ${isCurrent ? '<span class="badge bg-primary ms-2">You</span>' : ''}
-              </div>
-              <div class="player-status">
-                <span class="status-indicator ${player.connected ? 'online' : 'offline'}"></span>
+            <div class="player-line">
+              <span class="player-number">#${index + 1}</span>
+              <span class="player-name">${player.name}</span>
+              <span class="player-badge">${player.is_host ? 'host' : 'player'}</span>
+              <span class="player-status-pill ${player.connected ? 'status-online' : 'status-offline'}">
+                <span class="status-dot ${player.connected ? 'status-online' : 'status-offline'}"></span>
                 ${player.connected ? 'Online' : 'Offline'}
-              </div>
+              </span>
             </div>
           </div>
         `;
@@ -432,10 +420,14 @@
       for (let i = players.length; i < 4; i++) {
         html += `
           <div class="player-item empty-slot">
-            <div class="player-avatar empty">?</div>
-            <div class="player-info">
-              <div class="player-name text-muted">Waiting for player...</div>
-              <div class="player-status text-muted">Empty slot</div>
+            <div class="player-line">
+              <span class="player-number">#${i + 1}</span>
+              <span class="player-name text-muted">Waiting on player...</span>
+              <span class="player-badge">player</span>
+              <span class="player-status-pill status-empty">
+                <span class="status-dot status-empty"></span>
+                Empty
+              </span>
             </div>
           </div>
         `;

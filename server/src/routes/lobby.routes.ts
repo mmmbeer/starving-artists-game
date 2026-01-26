@@ -13,7 +13,7 @@ router.post('/create', async (req: Request, res: Response) => {
     
     if (!playerName || !isValidPlayerName(playerName)) {
       return res.status(400).json({
-        error: 'Invalid player name. Must be 2-50 characters, alphanumeric.',
+        error: 'Invalid player name. Must be 2-50 characters (letters, numbers, spaces, dashes, underscores, commas).',
       });
     }
     
@@ -43,7 +43,7 @@ router.post('/join/:gameId', async (req: Request, res: Response) => {
     
     if (!playerName || !isValidPlayerName(playerName)) {
       return res.status(400).json({
-        error: 'Invalid player name. Must be 2-50 characters, alphanumeric.',
+        error: 'Invalid player name. Must be 2-50 characters (letters, numbers, spaces, dashes, underscores, commas).',
       });
     }
     

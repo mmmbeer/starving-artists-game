@@ -6,7 +6,7 @@ export function isValidUUID(uuid: string): boolean {
 }
 
 export function isValidPlayerName(name: string): boolean {
-  return name.length >= 2 && name.length <= 50 && /^[a-zA-Z0-9\s-_]+$/.test(name);
+  return name.length >= 2 && name.length <= 50 && /^[a-zA-Z0-9\s-_,]+$/.test(name);
 }
 
 export function sanitizePlayerName(name: string): string {
