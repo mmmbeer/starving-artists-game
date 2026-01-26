@@ -2,16 +2,21 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "CommonJS",
-    "moduleResolution": "Node",
+    "moduleResolution": "node",
+
     "outDir": "../dist/server",
     "rootDir": "src",
+
     "strict": true,
     "noImplicitAny": true,
+
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
-    "baseUrl": "."
+
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+
+    // ❌ baseUrl removed
   },
   "include": ["src/**/*.ts"]
 }
