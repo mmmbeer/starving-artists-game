@@ -3,6 +3,7 @@ import * as gameDb from '../../database/gameDb';
 import * as playerDb from '../../database/playerDb';
 import { Game, Player } from '../../models/types';
 import { sanitizePlayerName } from '../../utils/validation';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface LobbyInfo {
   game: Game;
@@ -14,15 +15,16 @@ export async function createLobby(playerName: string): Promise<LobbyInfo> {
   const sanitizedName = sanitizePlayerName(playerName);
   
   // Create player first to get ID for host
-  const tempPlayerId = 'temp';
-  const game = await gameDb.createGame(tempPlayerId);
+  const hostPlayerId = uuidv4();
+  const game = await gameDb.createGame(hostPlayerId);
   
   // Create host player
   const player = await playerDb.createPlayer(
     game.id,
     sanitizedName,
     0,
-    true
+    true,
+    hostPlayerId
   );
   
   // Update game with actual host player ID

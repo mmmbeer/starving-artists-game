@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import compression from 'compression';
 import { config } from './config/env';
+import { MySQLSessionStore } from './services/session/mysqlSessionStore';
 
 export function createApp(): Express {
   const app = express();
@@ -25,11 +26,15 @@ export function createApp(): Express {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(cookieParser());
+  const sessionStore = new MySQLSessionStore({
+    ttlMs: 24 * 60 * 60 * 1000,
+  });
   app.use(
     session({
       secret: config.sessionSecret,
       resave: false,
       saveUninitialized: false,
+      store: sessionStore,
       cookie: {
         secure: config.nodeEnv === 'production',
         httpOnly: true,

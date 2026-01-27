@@ -129,6 +129,28 @@ class TestLobbyJoin:
         print("✓ Duplicate player name rejected")
 
 
+class TestSessionPersistence:
+    """Test that sessions survive client reloads via cookies"""
+    
+    def test_session_cookie_reuse(self):
+        """Session cookie should allow reloading the lobby without re-auth"""
+        session = requests.Session()
+        create_response = session.post(
+            f"{BASE_URL}/lobby/create",
+            json={"playerName": "PersistentHost"},
+            headers={"Content-Type": "application/json"}
+        )
+        assert create_response.status_code == 200
+        game_id = create_response.json()["gameId"]
+        
+        reloaded_session = requests.Session()
+        reloaded_session.cookies.update(session.cookies)
+        lobby_response = reloaded_session.get(f"{BASE_URL}/lobby/{game_id}")
+        assert lobby_response.status_code == 200
+        assert "PersistentHost" in lobby_response.text
+        print("âœ“ Session cookie reuse keeps player identity")
+
+
 class TestLobbyPage:
     """Test lobby page rendering"""
     

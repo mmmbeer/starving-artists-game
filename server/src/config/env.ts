@@ -18,7 +18,6 @@ export interface AppConfig {
   };
 }
 
-// Database vars are now optional since we use in-memory store
 export const config: AppConfig = {
   port: parseInt(process.env.PORT || '8001', 10),
   nodeEnv: process.env.NODE_ENV || 'development',

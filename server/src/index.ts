@@ -26,8 +26,8 @@ registerGameSocketHandlers(io);
 // Make io available globally for routes
 app.set('io', io);
 
-// Game state remains in-memory; canvas definitions load from MySQL
-console.log('Using in-memory game state; canvas definitions load from MySQL');
+// Game state and sessions persist in MySQL
+console.log('Using MySQL-backed game state and sessions');
 
 // Start server
 server.listen(config.port, () => {
