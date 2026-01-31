@@ -21,13 +21,8 @@ class GameActions {
       
       if (response.success) {
         showToast('Work Complete', 'You drew 3 paint cubes!', 'success');
-        
-        // Emit socket event
-        if (window.socket) {
-          window.socket.emit('action:work', {
-            gameId: this.gameId,
-            playerId: this.playerId
-          });
+        if (window.applyGameState && response.gameState) {
+          window.applyGameState(response.gameState);
         }
       }
     } catch (error) {
@@ -50,14 +45,8 @@ class GameActions {
       
       if (response.success) {
         showToast('Canvas Purchased', 'Canvas added to your studio!', 'success');
-        
-        // Emit socket event
-        if (window.socket) {
-          window.socket.emit('action:buy-canvas', {
-            gameId: this.gameId,
-            playerId: this.playerId,
-            slotIndex
-          });
+        if (window.applyGameState && response.gameState) {
+          window.applyGameState(response.gameState);
         }
       }
     } catch (error) {
@@ -81,13 +70,8 @@ class GameActions {
       
       if (response.success) {
         showToast('Turn Ended', 'Moving to next player...', 'info');
-        
-        // Emit socket event
-        if (window.socket) {
-          window.socket.emit('action:end-turn', {
-            gameId: this.gameId,
-            playerId: this.playerId
-          });
+        if (window.applyGameState && response.gameState) {
+          window.applyGameState(response.gameState);
         }
       }
     } catch (error) {

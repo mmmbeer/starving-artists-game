@@ -89,7 +89,9 @@ export async function getCanvasDefinitions(
     'SELECT id, title, artist, year, star_value, paint_value, food_value, layout_json, filename FROM canvases WHERE id IN (?)',
     [canvasIds]
   );
-  return rows.map(mapCanvasRow);
+  const mapped = rows.map(mapCanvasRow);
+  const byId = new Map(mapped.map(canvas => [canvas.id, canvas]));
+  return canvasIds.map(id => byId.get(id)).filter(Boolean) as CanvasDefinition[];
 }
 
 export async function getCanvasDefinitionByFilename(

@@ -378,6 +378,8 @@
     // Game configuration from server
     const gameId = '<%= game.id %>';
     const playerId = '<%= currentPlayer.id %>';
+    window.gameId = gameId;
+    window.playerId = playerId;
     let isCurrentTurn = <%= isCurrentTurn %>;
     
     // Initial game state
@@ -446,6 +448,32 @@
       console.log('Game initialized successfully');
     }
 
+    function applyGameState(newState) {
+      isCurrentTurn = newState.game.current_player_id === playerId;
+      
+      if (gameUI) {
+        gameUI.updateGameState(newState);
+      } else {
+        updatePhaseIndicator(newState.game.current_phase);
+        updateTurnIndicator(newState);
+      }
+      
+      updateWaitingOverlay();
+      updateDayNumber(newState.game.day_number);
+      
+      if (newState.game.current_phase === 'selling') {
+        showSellingPhase(newState);
+      } else {
+        hideSellingPhase();
+      }
+      
+      if (window.dragDropManager) {
+        setTimeout(() => window.dragDropManager.refresh(), 100);
+      }
+    }
+
+    window.applyGameState = applyGameState;
+
     function setupSocketHandlers() {
       socket.on('connect', () => {
         console.log('Connected to server');
@@ -460,31 +488,7 @@
 
       socket.on('game-state', (newState) => {
         console.log('Game state updated:', newState);
-        
-        // Update local state
-        isCurrentTurn = newState.game.current_player_id === playerId;
-        
-        if (gameUI) {
-          gameUI.updateGameState(newState);
-        }
-        
-        // Update UI elements
-        updatePhaseIndicator(newState.game.current_phase);
-        updateTurnIndicator(newState);
-        updateWaitingOverlay();
-        updateDayNumber(newState.game.day_number);
-        
-        // Handle selling phase
-        if (newState.game.current_phase === 'selling') {
-          showSellingPhase(newState);
-        } else {
-          hideSellingPhase();
-        }
-        
-        // Refresh drag and drop
-        if (window.dragDropManager) {
-          setTimeout(() => window.dragDropManager.refresh(), 100);
-        }
+        applyGameState(newState);
       });
 
       socket.on('action-performed', (data) => {
@@ -700,7 +704,10 @@
       
       if (!overlay) return;
       
-      if (isCurrentTurn || initialGameState.game.current_phase === 'selling') {
+      const currentPhase = gameUI?.gameState?.game?.current_phase || initialGameState.game.current_phase;
+      const myTurn = gameUI ? gameUI.isMyTurn() : isCurrentTurn;
+      
+      if (myTurn || currentPhase === 'selling') {
         overlay.classList.add('d-none');
       } else {
         overlay.classList.remove('d-none');

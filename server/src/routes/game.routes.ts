@@ -4,6 +4,7 @@ import * as gameEngine from '../services/game/gameEngine';
 import * as actionHandler from '../services/game/actionHandler';
 import * as sellingPhase from '../services/game/sellingPhase';
 import { isValidUUID } from '../utils/validation';
+import { CUBES_PER_WORK_ACTION } from '../utils/constants';
 
 const router = Router();
 
@@ -58,6 +59,16 @@ router.post('/:gameId/action/work', async (req: Request<{ gameId: string }>, res
     }
     
     const gameState = await actionHandler.performWorkAction(gameId, playerId);
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`game:${gameId}`).emit('game-state', gameState);
+      io.to(`game:${gameId}`).emit('action-performed', {
+        action: 'work',
+        playerId,
+        cubesDrawn: CUBES_PER_WORK_ACTION,
+      });
+    }
     
     res.json({ success: true, gameState });
   } catch (error: any) {
@@ -86,6 +97,16 @@ router.post('/:gameId/action/buy-canvas', async (req: Request<{ gameId: string }
       playerId,
       slotIndex
     );
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`game:${gameId}`).emit('game-state', gameState);
+      io.to(`game:${gameId}`).emit('action-performed', {
+        action: 'buy-canvas',
+        playerId,
+        slotIndex,
+      });
+    }
     
     res.json({ success: true, gameState });
   } catch (error: any) {
@@ -109,13 +130,31 @@ router.post('/:gameId/action/paint', async (req: Request<{ gameId: string }>, re
       return res.status(400).json({ error: 'Invalid paintings data' });
     }
     
-    const gameState = await actionHandler.performPaintAction(
+    const result = await actionHandler.performPaintAction(
       gameId,
       playerId,
       paintings
     );
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`game:${gameId}`).emit('game-state', result.gameState);
+      io.to(`game:${gameId}`).emit('action-performed', {
+        action: 'paint',
+        playerId,
+        paintingsCount: paintings.length,
+        completions: result.completions,
+      });
+      
+      if (result.gameState.game.status === 'finished') {
+        io.to(`game:${gameId}`).emit('game-ended', {
+          winner: result.gameState.players.find(p => p.id === result.gameState.game.winner_id),
+          finalScores: result.gameState.players,
+        });
+      }
+    }
     
-    res.json({ success: true, gameState });
+    res.json({ success: true, gameState: result.gameState, completions: result.completions });
   } catch (error: any) {
     console.error('Paint action error:', error);
     res.status(400).json({ error: error.message || 'Failed to paint' });
@@ -132,9 +171,22 @@ router.post('/:gameId/action/end-turn', async (req: Request<{ gameId: string }>,
       return res.status(401).json({ error: 'Not authenticated' });
     }
     
-    const gameState = await actionHandler.performEndTurnAction(gameId, playerId);
+    const result = await actionHandler.performEndTurnAction(gameId, playerId);
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`game:${gameId}`).emit('game-state', result.gameState);
+      io.to(`game:${gameId}`).emit('turn-changed', {
+        currentPlayerId: result.gameState.game.current_player_id,
+        currentPhase: result.gameState.game.current_phase,
+      });
+      
+      if (result.phaseResult) {
+        io.to(`game:${gameId}`).emit('phase-changed', result.phaseResult);
+      }
+    }
     
-    res.json({ success: true, gameState });
+    res.json({ success: true, gameState: result.gameState, phaseResult: result.phaseResult });
   } catch (error: any) {
     console.error('End turn error:', error);
     res.status(400).json({ error: error.message || 'Failed to end turn' });

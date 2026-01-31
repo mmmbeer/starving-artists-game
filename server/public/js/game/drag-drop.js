@@ -212,22 +212,14 @@ class DragDropManager {
     
     try {
       const gameId = window.gameId;
-      const playerId = window.playerId;
-      
       const response = await api.post(`/game/${gameId}/action/paint`, {
         paintings: this.pendingPaints
       });
       
       if (response.success) {
         showToast('Success', 'Paints applied successfully!', 'success');
-        
-        // Emit socket event for real-time update
-        if (window.socket) {
-          window.socket.emit('action:paint', {
-            gameId: gameId,
-            playerId: playerId,
-            paintings: this.pendingPaints
-          });
+        if (window.applyGameState && response.gameState) {
+          window.applyGameState(response.gameState);
         }
         
         this.pendingPaints = [];
