@@ -27,6 +27,7 @@ export const GAME_STATUS = {
 } as const;
 
 export const INITIAL_NUTRITION = 5;
+export const STARTING_PAINT_CUBES_PER_PLAYER = 6;
 export const CUBES_PER_WORK_ACTION = 3;
 export const CANVAS_MARKET_SIZE = 3;
 export const INITIAL_PAINT_MARKET_SIZE = 4;

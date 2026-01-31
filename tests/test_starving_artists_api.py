@@ -235,6 +235,50 @@ class TestGameStart:
         assert data["redirectUrl"] == f"/game/{game_id}"
         print("✓ Game started successfully with 2 players")
         return {"gameId": game_id, "hostSession": host_session, "player2Session": player2_session}
+
+    def test_starting_paint_cubes_and_market(self):
+        """Starting setup should deal 6 cubes per player, then fill paint market"""
+        host_session = requests.Session()
+        create_response = host_session.post(
+            f"{BASE_URL}/lobby/create",
+            json={"playerName": "StartCubesHost"},
+            headers={"Content-Type": "application/json"}
+        )
+        game_data = create_response.json()
+        game_id = game_data["gameId"]
+
+        player2_session = requests.Session()
+        join_response = player2_session.post(
+            f"{BASE_URL}/lobby/join/{game_id}",
+            json={"playerName": "StartCubesPlayer2"},
+            headers={"Content-Type": "application/json"}
+        )
+        assert join_response.status_code == 200
+
+        start_response = host_session.post(
+            f"{BASE_URL}/lobby/{game_id}/start",
+            headers={"Content-Type": "application/json"}
+        )
+        assert start_response.status_code == 200
+
+        state_response = host_session.get(f"{BASE_URL}/game/{game_id}/state")
+        assert state_response.status_code == 200
+        state_data = state_response.json()
+        assert state_data["success"] == True
+
+        players = state_data["gameState"]["players"]
+        player_cubes = state_data["gameState"]["playerPaintCubes"]
+        paint_market = state_data["gameState"]["gameState"]["paint_market"]
+        paint_bag = state_data["gameState"]["gameState"]["paint_bag"]
+
+        for player in players:
+            assert len(player_cubes.get(player["id"], [])) == 6
+
+        assert len(paint_market) == 4
+
+        expected_remaining = 150 - (len(players) * 6) - 4
+        assert len(paint_bag) == expected_remaining
+        print("✓ Starting cubes and paint market initialized correctly")
     
     def test_start_game_not_enough_players(self):
         """Cannot start game with only 1 player"""

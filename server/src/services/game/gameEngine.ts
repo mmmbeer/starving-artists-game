@@ -8,7 +8,7 @@ import { createCanvasDeck, createInitialMarket } from '../canvas/canvasMarket';
 import { initializeTurnOrder } from './turnManager';
 import { FullGameState } from '../../models/types';
 import { shuffleArray } from '../../utils/helpers';
-import { INITIAL_PAINT_MARKET_SIZE } from '../../utils/constants';
+import { INITIAL_PAINT_MARKET_SIZE, STARTING_PAINT_CUBES_PER_PLAYER } from '../../utils/constants';
 
 export async function startGame(gameId: string): Promise<FullGameState> {
   const game = await gameDb.getGame(gameId);
@@ -36,11 +36,21 @@ export async function startGame(gameId: string): Promise<FullGameState> {
   
   // Create paint bag
   const paintBag = createPaintBag();
-  const shuffledBag = shuffleArray(paintBag);
+  let remainingBag = shuffleArray(paintBag);
   
-  // Draw initial paint market
+  // Deal starting paint cubes in player order
+  for (const player of shuffledPlayers) {
+    const { drawn, remaining } = drawPaintCubes(
+      remainingBag,
+      STARTING_PAINT_CUBES_PER_PLAYER
+    );
+    await playerDb.addPaintCubes(player.id, gameId, drawn);
+    remainingBag = remaining;
+  }
+  
+  // Draw initial paint market (after starting hands)
   const { drawn: initialMarket, remaining: bagAfterMarket } = drawPaintCubes(
-    shuffledBag,
+    remainingBag,
     INITIAL_PAINT_MARKET_SIZE
   );
   
