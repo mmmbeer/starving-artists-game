@@ -59,6 +59,6 @@
 
   /* Game specific */
   --canvas-size: 200px;
-  --cube-size: 32px;
+  --cube-size: 64px;
   --market-card-width: 180px;
 }

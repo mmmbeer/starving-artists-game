@@ -173,19 +173,18 @@
   height: var(--cube-size);
   border-radius: var(--radius-sm);
   cursor: grab;
-  box-shadow: var(--shadow-sm);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition: transform var(--transition-fast);
   position: relative;
-  border: 2px solid rgba(0, 0, 0, 0.2);
+  background-color: transparent;
   background-image: url("/assets/cubes.png");
-  background-size: 300% 300%;
+  --cube-sprite-scale: calc(var(--cube-size) / 200);
+  background-size: calc(1024px * var(--cube-sprite-scale)) calc(1024px * var(--cube-sprite-scale));
   background-repeat: no-repeat;
   background-position: 0 0;
 }
 
 .paint-cube:hover {
   transform: scale(1.1);
-  box-shadow: var(--shadow-md);
 }
 
 .paint-cube.dragging {
@@ -197,17 +196,15 @@
   cursor: default;
 }
 
-.paint-cube[data-color="red"] { background-position: 0% 0%; }
-.paint-cube[data-color="orange"] { background-position: 50% 0%; }
-.paint-cube[data-color="yellow"] { background-position: 100% 0%; }
-.paint-cube[data-color="green"] { background-position: 0% 50%; }
-.paint-cube[data-color="blue"] { background-position: 50% 50%; }
-.paint-cube[data-color="purple"] { background-position: 100% 50%; }
-.paint-cube[data-color="black"] { background-position: 0% 100%; }
-.paint-cube[data-color="wild"] { background-position: 50% 100%; }
+.paint-cube[data-color="red"] { background-position: calc(70px * var(--cube-sprite-scale) * -1) calc(55px * var(--cube-sprite-scale) * -1); }
+.paint-cube[data-color="orange"] { background-position: calc(410px * var(--cube-sprite-scale) * -1) calc(55px * var(--cube-sprite-scale) * -1); }
+.paint-cube[data-color="yellow"] { background-position: calc(750px * var(--cube-sprite-scale) * -1) calc(55px * var(--cube-sprite-scale) * -1); }
+.paint-cube[data-color="green"] { background-position: calc(70px * var(--cube-sprite-scale) * -1) calc(505px * var(--cube-sprite-scale) * -1); }
+.paint-cube[data-color="blue"] { background-position: calc(410px * var(--cube-sprite-scale) * -1) calc(505px * var(--cube-sprite-scale) * -1); }
+.paint-cube[data-color="purple"] { background-position: calc(750px * var(--cube-sprite-scale) * -1) calc(505px * var(--cube-sprite-scale) * -1); }
+.paint-cube[data-color="black"] { background-position: calc(70px * var(--cube-sprite-scale) * -1) calc(850px * var(--cube-sprite-scale) * -1); }
+.paint-cube[data-color="wild"] { background-position: calc(410px * var(--cube-sprite-scale) * -1) calc(850px * var(--cube-sprite-scale) * -1); }
 .paint-cube[data-color="wild"] { 
-  border-color: gold;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
 /* Player Canvases */
