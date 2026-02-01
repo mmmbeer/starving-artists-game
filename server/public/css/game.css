@@ -158,13 +158,13 @@
 /* Paint Cubes */
 .paint-cubes-container {
   min-height: 80px;
-  padding: var(--spacing-sm);
+  padding: var(--spacing-xs);
   background-color: var(--color-bg-secondary);
   border: 2px dashed var(--color-border-medium);
   border-radius: var(--radius-md);
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-xs);
+  gap: 4px;
   align-content: flex-start;
 }
 
@@ -173,7 +173,7 @@
   height: var(--cube-size);
   border-radius: var(--radius-sm);
   cursor: grab;
-  transition: transform var(--transition-fast);
+  transition: none;
   position: relative;
   background-color: transparent;
   background-image: url("/assets/cubes.png");
@@ -184,7 +184,6 @@
 }
 
 .paint-cube:hover {
-  transform: scale(1.1);
 }
 
 .paint-cube.dragging {
@@ -372,9 +371,9 @@
 .paint-market {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-xs);
+  gap: 4px;
   min-height: 80px;
-  padding: var(--spacing-md);
+  padding: var(--spacing-xs);
   background-color: var(--color-bg-secondary);
   border-radius: var(--radius-md);
 }
@@ -734,12 +733,9 @@
 }
 
 .paint-cube.selectable:hover:not(.disabled) {
-  transform: scale(1.15);
 }
 
 .paint-cube.selectable.selected {
-  box-shadow: 0 0 0 3px var(--color-accent), 0 0 10px rgba(212, 175, 55, 0.5);
-  transform: scale(1.1);
 }
 
 .paint-cube.selectable.disabled {
