@@ -277,11 +277,13 @@
 .canvas-square.drop-zone {
   border-color: var(--color-accent);
   background-color: rgba(212, 175, 55, 0.1);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.25);
 }
 
 .canvas-square.drop-zone.drag-over {
   background-color: rgba(212, 175, 55, 0.3);
   transform: scale(1.05);
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.45);
 }
 
 .canvas-square.painted {
@@ -323,14 +325,16 @@
 }
 
 .canvas-market {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   gap: var(--spacing-md);
+  overflow-x: auto;
+  padding-bottom: var(--spacing-sm);
+  scroll-snap-type: x mandatory;
 }
 
 @media (max-width: 768px) {
   .canvas-market {
-    grid-template-columns: 1fr;
+    padding-bottom: var(--spacing-md);
   }
 }
 
@@ -342,6 +346,8 @@
   cursor: pointer;
   transition: all var(--transition-base);
   position: relative;
+  min-width: 220px;
+  scroll-snap-align: start;
 }
 
 .market-canvas-card:hover {
@@ -841,6 +847,8 @@
 
 .paint-drop-zone:not(.painted) {
   cursor: pointer;
+  border-color: rgba(212, 175, 55, 0.9);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.35);
 }
 
 .paint-drop-zone:not(.painted):hover {
@@ -851,6 +859,12 @@
 
 .paint-drop-zone.painted {
   border-color: rgba(0, 0, 0, 0.5);
+}
+
+.paint-drop-zone.drag-over {
+  background-color: rgba(212, 175, 55, 0.4);
+  box-shadow: 0 0 14px rgba(212, 175, 55, 0.6);
+  transform: scale(1.08);
 }
 
 .paint-check {
@@ -873,6 +887,31 @@
   border-radius: var(--radius-md);
 }
 
+.market-canvas-media {
+  position: relative;
+  margin-top: var(--spacing-sm);
+}
+
+.market-canvas-metrics {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-around;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(10, 10, 10, 0.65));
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-xs);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity var(--transition-base), transform var(--transition-base);
+  border-bottom-left-radius: var(--radius-md);
+  border-bottom-right-radius: var(--radius-md);
+  pointer-events: none;
+}
+
 .canvas-squares-overlay {
   position: absolute;
   top: 0;
@@ -890,9 +929,38 @@
   position: absolute;
   width: 8px;
   height: 8px;
-  background-color: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(0, 0, 0, 0.3);
+  background-color: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(0, 0, 0, 0.25);
   border-radius: 2px;
+  opacity: 0.35;
+  transition: opacity var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+
+.market-canvas-media:hover .canvas-square-marker {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.8);
+}
+
+.market-canvas-media:hover .canvas-square {
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.45);
+  border-color: var(--color-accent);
+}
+
+.market-canvas-media:hover .market-canvas-metrics {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.canvas-square.valid-drop,
+.paint-drop-zone.valid-drop {
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.65);
+  border-color: var(--color-accent);
+}
+
+.canvas-square.invalid-drop,
+.paint-drop-zone.invalid-drop {
+  opacity: 0.45;
 }
 
 /* Canvas artist info */

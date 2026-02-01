@@ -118,20 +118,60 @@ class GameUI {
   }
 
   renderMarketCanvas(canvas, cost, slotIndex) {
+    const artistHTML = canvas.artist ? `<div class="canvas-artist">${canvas.artist}</div>` : '';
     return `
       <div class="market-canvas-card" data-slot-index="${slotIndex}">
         <div class="canvas-cost">💎 ${cost}</div>
         <div class="canvas-header">
           <div class="canvas-name">${canvas.name}</div>
+          ${artistHTML}
         </div>
-        <div class="canvas-values">
-          <span title="Stars">⭐ ${canvas.star_value}</span>
-          <span title="Paint">🎨 ${canvas.paint_value}</span>
-          <span title="Food">🍎 ${canvas.food_value}</span>
-        </div>
-        ${this.renderCanvasGrid(canvas.layout_json.squares, true)}
+        ${this.renderMarketCanvasMedia(canvas)}
       </div>
     `;
+  }
+
+  renderMarketCanvasMedia(canvas) {
+    const valuesHTML = `
+      <span title="Stars">⭐ ${canvas.star_value}</span>
+      <span title="Paint">🎨 ${canvas.paint_value}</span>
+      <span title="Food">🍎 ${canvas.food_value}</span>
+    `;
+
+    if (canvas.filename) {
+      return `
+        <div class="market-canvas-media">
+          <img src="/assets/canvases/${canvas.filename}" alt="${canvas.name}" class="canvas-thumbnail">
+          ${this.renderMarketSquareMarkers(canvas)}
+          <div class="market-canvas-metrics">${valuesHTML}</div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="market-canvas-media">
+        ${this.renderCanvasGrid(canvas.layout_json.squares, true)}
+        <div class="market-canvas-metrics">${valuesHTML}</div>
+      </div>
+    `;
+  }
+
+  renderMarketSquareMarkers(canvas) {
+    if (!canvas.layout_json || !canvas.layout_json.squares) return '';
+    const markers = canvas.layout_json.squares.map(square => {
+      const left = (square.position && square.position.x !== undefined) ? square.position.x : (square.x || 0);
+      const top = (square.position && square.position.y !== undefined) ? square.position.y : (square.y || 0);
+      return `
+        <div 
+          class="canvas-square-marker" 
+          style="left: ${left / 3}px; top: ${top / 3}px;"
+          data-allowed-colors="${square.allowedColors.join(',')}"
+          title="${square.allowedColors.join(', ')}"
+        ></div>
+      `;
+    }).join('');
+
+    return `<div class="canvas-squares-overlay preview">${markers}</div>`;
   }
 
   renderCanvasGrid(squares, isMarket = false) {
@@ -247,12 +287,56 @@ class GameUI {
             <span>🍎 ${canvas.definition.food_value}</span>
           </div>
         </div>
-        ${this.renderPlayerCanvasGrid(canvas)}
+        ${this.renderPlayerCanvasBody(canvas)}
         <div class="progress-bar-container">
           <div class="progress-bar" style="width: ${percentage}%"></div>
         </div>
         <div class="text-center mt-2">
           <small class="progress-text">${painted}/${total} painted</small>
+        </div>
+      </div>
+    `;
+  }
+
+  renderPlayerCanvasBody(canvas) {
+    if (canvas.definition && canvas.definition.filename) {
+      return this.renderPlayerCanvasImage(canvas);
+    }
+    return this.renderPlayerCanvasGrid(canvas);
+  }
+
+  renderPlayerCanvasImage(canvas) {
+    const paintedMap = new Map(
+      canvas.painted_squares.map(ps => [ps.squareId, ps])
+    );
+
+    const squares = canvas.definition.layout_json.squares;
+    const overlaySquares = squares.map(square => {
+      const painted = paintedMap.get(square.id);
+      const isPainted = !!painted;
+      const left = (square.position && square.position.x !== undefined) ? square.position.x : (square.x || 0);
+      const top = (square.position && square.position.y !== undefined) ? square.position.y : (square.y || 0);
+      const paintedStyle = isPainted ? `background-color: ${getPaintColor(painted.color)};` : '';
+      const cubeColor = isPainted ? `data-cube-color="${painted.color}"` : '';
+      return `
+        <div 
+          class="paint-drop-zone ${isPainted ? 'painted' : 'drop-zone'}" 
+          data-square-id="${square.id}"
+          data-allowed-colors="${square.allowedColors.join(',')}"
+          style="left: ${left}px; top: ${top}px; ${paintedStyle}"
+          ${cubeColor}
+          title="${isPainted ? 'Painted: ' + painted.color : 'Allowed: ' + square.allowedColors.join(', ')}"
+        >
+          ${isPainted ? '<span class="paint-check">✓</span>' : ''}
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="canvas-painting-container" data-orientation="${canvas.definition.layout_json?.orientation || 'landscape'}">
+        <img src="/assets/canvases/${canvas.definition.filename}" alt="${canvas.definition.name}" class="canvas-painting-img">
+        <div class="canvas-paint-overlay">
+          ${overlaySquares}
         </div>
       </div>
     `;
@@ -285,7 +369,7 @@ class GameUI {
           "
           ${isPainted ? `data-cube-color="${painted.color}"` : ''}
         >
-          ${isPainted ? '<span style="color: white; font-size: 20px;">✓</span>' : ''}
+          ${isPainted ? '<span class="paint-check">✓</span>' : ''}
         </div>
       `;
     });

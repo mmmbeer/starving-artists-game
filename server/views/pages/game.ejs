@@ -129,14 +129,9 @@
                         <div class="canvas-artist"><%= canvas.artist %></div>
                       <% } %>
                     </div>
-                    <div class="canvas-values">
-                      <span title="Stars">⭐ <%= canvas.star_value %></span>
-                      <span title="Paint">🎨 <%= canvas.paint_value %></span>
-                      <span title="Food">🍎 <%= canvas.food_value %></span>
-                    </div>
                     <% if (canvas.filename) { %>
                       <!-- Canvas with image -->
-                      <div class="canvas-image-container">
+                      <div class="market-canvas-media">
                         <img src="/assets/canvases/<%= canvas.filename %>" alt="<%= canvas.name %>" class="canvas-thumbnail">
                         <% if (canvas.layout_json && canvas.layout_json.squares) { %>
                           <div class="canvas-squares-overlay preview">
@@ -150,9 +145,15 @@
                             <% }); %>
                           </div>
                         <% } %>
+                        <div class="market-canvas-metrics">
+                          <span title="Stars">⭐ <%= canvas.star_value %></span>
+                          <span title="Paint">🎨 <%= canvas.paint_value %></span>
+                          <span title="Food">🍎 <%= canvas.food_value %></span>
+                        </div>
                       </div>
                     <% } else if (canvas.layout_json && canvas.layout_json.squares) { %>
                       <!-- Canvas without image - grid preview -->
+                      <div class="market-canvas-media">
                       <div class="canvas-grid canvas-preview">
                         <% 
                           const squares = canvas.layout_json.squares;
@@ -169,6 +170,12 @@
                               title="<%= square.allowedColors.join(', ') %>"
                             ></div>
                           <% }); %>
+                        </div>
+                      </div>
+                        <div class="market-canvas-metrics">
+                          <span title="Stars">⭐ <%= canvas.star_value %></span>
+                          <span title="Paint">🎨 <%= canvas.paint_value %></span>
+                          <span title="Food">🍎 <%= canvas.food_value %></span>
                         </div>
                       </div>
                     <% } %>
@@ -318,10 +325,11 @@
                             <% canvas.definition.layout_json.squares.forEach(square => { %>
                               <% const painted = paintedMap.get(square.id); %>
                               <div 
-                                class="paint-drop-zone <%= painted ? 'painted' : '' %>" 
+                                class="paint-drop-zone <%= painted ? 'painted' : 'drop-zone' %>" 
                                 data-square-id="<%= square.id %>"
                                 data-allowed-colors="<%= square.allowedColors.join(',') %>"
                                 style="left: <%= square.position?.x || 0 %>px; top: <%= square.position?.y || 0 %>px;<%= painted ? ' background-color: var(--paint-' + painted.color + ');' : '' %>"
+                                <%= painted ? 'data-cube-color="' + painted.color + '"' : '' %>
                                 title="<%= painted ? 'Painted: ' + painted.color : 'Allowed: ' + square.allowedColors.join(', ') %>"
                               >
                                 <% if (painted) { %><span class="paint-check">✓</span><% } %>

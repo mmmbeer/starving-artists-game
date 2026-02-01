@@ -25,7 +25,7 @@ class DragDropManager {
   }
 
   setupDropZones() {
-    const squares = document.querySelectorAll('.canvas-square.drop-zone:not(.painted)');
+    const squares = document.querySelectorAll('.canvas-square.drop-zone:not(.painted), .paint-drop-zone.drop-zone:not(.painted)');
     
     squares.forEach(square => {
       square.addEventListener('dragover', (e) => this.handleDragOver(e));
@@ -69,7 +69,7 @@ class DragDropManager {
   handleDragEnter(e) {
     e.preventDefault();
     
-    const square = e.target.closest('.canvas-square');
+    const square = e.target.closest('.canvas-square, .paint-drop-zone');
     if (square && !square.classList.contains('painted')) {
       if (this.canPaintSquare(square)) {
         square.classList.add('drag-over');
@@ -78,7 +78,7 @@ class DragDropManager {
   }
 
   handleDragLeave(e) {
-    const square = e.target.closest('.canvas-square');
+    const square = e.target.closest('.canvas-square, .paint-drop-zone');
     if (square) {
       square.classList.remove('drag-over');
     }
@@ -88,8 +88,13 @@ class DragDropManager {
     e.preventDefault();
     e.stopPropagation();
     
-    const square = e.target.closest('.canvas-square');
+    const square = e.target.closest('.canvas-square, .paint-drop-zone');
     if (!square || square.classList.contains('painted')) {
+      return false;
+    }
+
+    if (this.pendingPaints.length >= 4) {
+      showToast('Paint Limit Reached', 'You can place up to 4 cubes per painting action', 'warning');
       return false;
     }
     
@@ -129,7 +134,7 @@ class DragDropManager {
     if (this.draggedCubeData.isWild) {
       const canvas = square.closest('.canvas-card');
       if (canvas) {
-        const hasWild = canvas.querySelector('.canvas-square[data-cube-color="wild"]');
+        const hasWild = canvas.querySelector('[data-cube-color="wild"]');
         if (hasWild) {
           return false; // Canvas already has a wild cube
         }
@@ -148,7 +153,7 @@ class DragDropManager {
     square.dataset.cubeColor = color;
     
     // Add checkmark or indication
-    square.innerHTML = '<span style="color: white; font-size: 16px;">✓</span>';
+    square.innerHTML = '<span class="paint-check">✓</span>';
     
     // Update progress bar
     this.updateCanvasProgress(square.closest('.canvas-card'));
@@ -259,8 +264,8 @@ class DragDropManager {
   updateCanvasProgress(canvasCard) {
     if (!canvasCard) return;
     
-    const squares = canvasCard.querySelectorAll('.canvas-square');
-    const painted = canvasCard.querySelectorAll('.canvas-square.painted');
+    const squares = canvasCard.querySelectorAll('.canvas-square, .paint-drop-zone');
+    const painted = canvasCard.querySelectorAll('.canvas-square.painted, .paint-drop-zone.painted');
     const percentage = (painted.length / squares.length) * 100;
     
     const progressBar = canvasCard.querySelector('.progress-bar');
@@ -285,19 +290,18 @@ class DragDropManager {
     
     this.dropZones.forEach(square => {
       if (this.canPaintSquare(square)) {
-        square.style.borderColor = 'var(--color-accent)';
-        square.style.boxShadow = '0 0 8px var(--color-accent)';
+        square.classList.add('valid-drop');
+        square.classList.remove('invalid-drop');
       } else {
-        square.style.opacity = '0.5';
+        square.classList.add('invalid-drop');
+        square.classList.remove('valid-drop');
       }
     });
   }
 
   removeAllHighlights() {
     this.dropZones.forEach(square => {
-      square.style.borderColor = '';
-      square.style.boxShadow = '';
-      square.style.opacity = '';
+      square.classList.remove('valid-drop', 'invalid-drop');
       square.classList.remove('drag-over');
     });
   }
