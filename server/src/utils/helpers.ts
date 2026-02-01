@@ -1,7 +1,7 @@
 // Helper functions
 import { v4 as uuidv4 } from 'uuid';
 import { PaintCube, PaintColor } from '../models/types';
-import { PAINT_COLORS } from './constants';
+import { PAINT_CUBE_DISTRIBUTION } from './constants';
 
 export function generateId(): string {
   return uuidv4();
@@ -27,25 +27,19 @@ export function createPaintCube(color: PaintColor): PaintCube {
 export function createInitialPaintBag(): PaintCube[] {
   const cubes: PaintCube[] = [];
   
-  // Add regular colors (approximately 18 of each based on game rules)
-  const regularColors = PAINT_COLORS.filter(c => c !== 'wild');
-  for (const color of regularColors) {
-    for (let i = 0; i < 18; i++) {
+  Object.entries(PAINT_CUBE_DISTRIBUTION).forEach(([color, count]) => {
+    for (let i = 0; i < count; i++) {
       cubes.push(createPaintCube(color as PaintColor));
     }
-  }
-  
-  // Add wild cubes (approximately 24 based on game rules)
-  for (let i = 0; i < 24; i++) {
-    cubes.push(createPaintCube('wild'));
-  }
+  });
   
   return shuffleArray(cubes);
 }
 
 export function drawFromBag(bag: PaintCube[], count: number): { drawn: PaintCube[]; remaining: PaintCube[] } {
-  const drawn = bag.slice(0, count);
-  const remaining = bag.slice(count);
+  const shuffled = shuffleArray(bag);
+  const drawn = shuffled.slice(0, count);
+  const remaining = shuffled.slice(count);
   return { drawn, remaining };
 }
 

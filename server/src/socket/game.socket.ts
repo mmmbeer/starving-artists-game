@@ -55,14 +55,15 @@ export function registerGameSocketHandlers(io: SocketIOServer) {
     });
     
     // Buy canvas action
-    socket.on('action:buy-canvas', async (data: { gameId: string; playerId: string; slotIndex: number }) => {
+    socket.on('action:buy-canvas', async (data: { gameId: string; playerId: string; slotIndex: number; cubeIds: string[] }) => {
       try {
-        const { gameId, playerId, slotIndex } = data;
+        const { gameId, playerId, slotIndex, cubeIds } = data;
         
         const gameState = await actionHandler.performBuyCanvasAction(
           gameId,
           playerId,
-          slotIndex
+          slotIndex,
+          cubeIds
         );
         
         // Broadcast updated state

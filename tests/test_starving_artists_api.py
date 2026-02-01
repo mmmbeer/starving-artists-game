@@ -280,6 +280,66 @@ class TestGameStart:
         assert len(paint_bag) == expected_remaining
         print("✓ Starting cubes and paint market initialized correctly")
     
+    def test_paint_bag_distribution(self):
+        """Paint bag + market + player cubes should match fixed distribution"""
+        host_session = requests.Session()
+        create_response = host_session.post(
+            f"{BASE_URL}/lobby/create",
+            json={"playerName": "DistributionHost"},
+            headers={"Content-Type": "application/json"}
+        )
+        game_data = create_response.json()
+        game_id = game_data["gameId"]
+
+        player2_session = requests.Session()
+        join_response = player2_session.post(
+            f"{BASE_URL}/lobby/join/{game_id}",
+            json={"playerName": "DistributionPlayer2"},
+            headers={"Content-Type": "application/json"}
+        )
+        assert join_response.status_code == 200
+
+        start_response = host_session.post(
+            f"{BASE_URL}/lobby/{game_id}/start",
+            headers={"Content-Type": "application/json"}
+        )
+        assert start_response.status_code == 200
+
+        state_response = host_session.get(f"{BASE_URL}/game/{game_id}/state")
+        assert state_response.status_code == 200
+        state_data = state_response.json()
+        assert state_data["success"] == True
+
+        game_state = state_data["gameState"]
+        paint_bag = game_state["gameState"]["paint_bag"]
+        paint_market = game_state["gameState"]["paint_market"]
+        player_cubes = game_state["playerPaintCubes"]
+
+        all_cubes = []
+        all_cubes.extend(paint_bag)
+        all_cubes.extend(paint_market)
+        for cubes in player_cubes.values():
+            all_cubes.extend(cubes)
+
+        counts = {}
+        for cube in all_cubes:
+            color = cube["color"]
+            counts[color] = counts.get(color, 0) + 1
+
+        expected = {
+            "black": 20,
+            "red": 15,
+            "orange": 20,
+            "yellow": 20,
+            "green": 20,
+            "blue": 30,
+            "purple": 15,
+            "wild": 10,
+        }
+
+        assert counts == expected
+        print("OK Paint cube distribution matches expected counts")
+
     def test_start_game_not_enough_players(self):
         """Cannot start game with only 1 player"""
         session = requests.Session()
@@ -525,9 +585,12 @@ class TestGameActions:
             
             if state_response2.status_code == 200:
                 # Try to buy canvas (slot 0 costs 1 cube)
+                game_state = state_response2.json()["gameState"]
+                player_cubes = game_state["playerPaintCubes"].get(current_player_id, [])
+                cube_ids = [player_cubes[0]["id"]] if player_cubes else []
                 buy_response = session.post(
                     f"{BASE_URL}/game/{active_game['gameId']}/action/buy-canvas",
-                    json={"slotIndex": 0},
+                    json={"slotIndex": 0, "cubeIds": cube_ids},
                     headers={"Content-Type": "application/json"}
                 )
                 

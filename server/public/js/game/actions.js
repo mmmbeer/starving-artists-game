@@ -33,14 +33,15 @@ class GameActions {
     }
   }
 
-  async buyCanvas(slotIndex) {
+  async buyCanvas(slotIndex, cubeIds) {
     if (this.isProcessing) return;
     
     this.isProcessing = true;
     
     try {
       const response = await api.post(`/game/${this.gameId}/action/buy-canvas`, {
-        slotIndex
+        slotIndex,
+        cubeIds
       });
       
       if (response.success) {

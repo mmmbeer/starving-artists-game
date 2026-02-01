@@ -233,6 +233,28 @@
             </div>
           </div>
 
+          <!-- Canvas Purchase Panel -->
+          <div id="canvasPurchasePanel" class="studio-section purchase-panel d-none" data-testid="canvas-purchase-panel">
+            <div class="purchase-header">
+              <div>
+                <div class="purchase-title">Buy Canvas</div>
+                <div class="purchase-subtitle" id="purchaseCanvasName">Select a canvas to buy</div>
+              </div>
+              <button id="cancelPurchaseBtn" class="btn btn-sm btn-secondary" type="button">Cancel</button>
+            </div>
+            <div class="purchase-body">
+              <div class="purchase-cost">Cost: <span id="purchaseCost">0</span> cube(s)</div>
+              <div class="purchase-instructions">Select cubes to pay for this canvas.</div>
+              <div id="purchaseCubePool" class="paint-cubes-selectable purchase-cubes"></div>
+              <div class="selected-cubes-info mt-2">
+                Selected: <span id="purchaseSelectedCount">0</span> cube(s)
+              </div>
+            </div>
+            <div class="purchase-actions mt-3">
+              <button id="confirmPurchaseBtn" class="btn btn-primary" type="button" disabled>Confirm Purchase</button>
+            </div>
+          </div>
+
           <!-- Action Buttons -->
           <div class="studio-section">
             <h6 class="section-title">⚡ Actions</h6>
@@ -398,6 +420,8 @@
     let gameUI;
     let gameActions;
     let selectedSellingCubes = [];
+    let pendingPurchase = null;
+    let selectedPurchaseCubeIds = [];
 
     // Initialize game
     document.addEventListener('DOMContentLoaded', () => {
@@ -460,6 +484,21 @@
       
       updateWaitingOverlay();
       updateDayNumber(newState.game.day_number);
+
+      if (!isCurrentTurn || newState.game.current_phase === 'selling') {
+        closeCanvasPurchase();
+      } else if (pendingPurchase) {
+        const canvas = newState.gameState.canvas_market[pendingPurchase.slotIndex];
+        if (!canvas) {
+          closeCanvasPurchase();
+        } else {
+          const cubes = newState.playerPaintCubes?.[playerId] || [];
+          const cubeIdSet = new Set(cubes.map(c => c.id));
+          selectedPurchaseCubeIds = selectedPurchaseCubeIds.filter(id => cubeIdSet.has(id));
+          pendingPurchase.canvasName = canvas.name;
+          renderPurchasePanel();
+        }
+      }
       
       if (newState.game.current_phase === 'selling') {
         showSellingPhase(newState);
@@ -603,7 +642,7 @@
         const card = e.target.closest('.market-canvas-card:not(.empty)');
         if (card) {
           const slotIndex = parseInt(card.dataset.slotIndex);
-          handleCanvasPurchase(slotIndex);
+          openCanvasPurchase(slotIndex);
         }
       });
     }
@@ -653,7 +692,7 @@
       });
     }
 
-    function handleCanvasPurchase(slotIndex) {
+    function openCanvasPurchase(slotIndex) {
       if (!isCurrentTurn) {
         showToast('Not Your Turn', 'Wait for your turn to buy canvases', 'warning');
         return;
@@ -666,10 +705,107 @@
       }
 
       const cost = [1, 2, 3][slotIndex];
-      if (confirm(`Buy "${canvas.name}" for ${cost} paint cube(s)?`)) {
-        if (gameActions) gameActions.buyCanvas(slotIndex);
+      const cubes = gameUI?.gameState?.playerPaintCubes?.[playerId] || [];
+      if (cubes.length < cost) {
+        showToast('Not Enough Cubes', `You need ${cost} paint cube(s) to buy this canvas`, 'warning');
+        return;
       }
+      pendingPurchase = {
+        slotIndex,
+        canvasName: canvas.name,
+        cost
+      };
+      selectedPurchaseCubeIds = [];
+      renderPurchasePanel();
     }
+
+    window.openCanvasPurchase = openCanvasPurchase;
+
+    function closeCanvasPurchase() {
+      pendingPurchase = null;
+      selectedPurchaseCubeIds = [];
+      const panel = document.getElementById('canvasPurchasePanel');
+      if (panel) panel.classList.add('d-none');
+    }
+
+    function renderPurchasePanel() {
+      const panel = document.getElementById('canvasPurchasePanel');
+      if (!panel || !pendingPurchase) return;
+
+      panel.classList.remove('d-none');
+      const nameEl = document.getElementById('purchaseCanvasName');
+      const costEl = document.getElementById('purchaseCost');
+      if (nameEl) nameEl.textContent = pendingPurchase.canvasName;
+      if (costEl) costEl.textContent = pendingPurchase.cost;
+
+      updatePurchaseCubePool();
+      updatePurchaseActions();
+    }
+
+    function updatePurchaseCubePool() {
+      const pool = document.getElementById('purchaseCubePool');
+      if (!pool) return;
+
+      const cubes = gameUI?.gameState?.playerPaintCubes?.[playerId] || [];
+      if (cubes.length === 0) {
+        pool.innerHTML = '<div class="text-muted text-center w-100 py-2">No cubes available</div>';
+        return;
+      }
+
+      const cost = pendingPurchase?.cost || 0;
+      pool.innerHTML = cubes.map(cube => `
+        <div 
+          class="paint-cube selectable ${selectedPurchaseCubeIds.includes(cube.id) ? 'selected' : ''} ${selectedPurchaseCubeIds.length >= cost && !selectedPurchaseCubeIds.includes(cube.id) ? 'disabled' : ''}"
+          data-cube-id="${cube.id}"
+          data-color="${cube.color}"
+          data-is-wild="${cube.is_wild}"
+          title="${cube.color}${cube.is_wild ? ' (Wild)' : ''}"
+        ></div>
+      `).join('');
+
+      pool.querySelectorAll('.paint-cube.selectable').forEach(el => {
+        el.addEventListener('click', () => {
+          togglePurchaseCube(el.dataset.cubeId);
+        });
+      });
+    }
+
+    function togglePurchaseCube(cubeId) {
+      if (!pendingPurchase) return;
+      const cost = pendingPurchase.cost;
+      const index = selectedPurchaseCubeIds.indexOf(cubeId);
+      if (index >= 0) {
+        selectedPurchaseCubeIds.splice(index, 1);
+      } else if (selectedPurchaseCubeIds.length < cost) {
+        selectedPurchaseCubeIds.push(cubeId);
+      }
+      updatePurchaseCubePool();
+      updatePurchaseActions();
+    }
+
+    function updatePurchaseActions() {
+      const countEl = document.getElementById('purchaseSelectedCount');
+      const confirmBtn = document.getElementById('confirmPurchaseBtn');
+      const selectedCount = selectedPurchaseCubeIds.length;
+      const cost = pendingPurchase?.cost || 0;
+
+      if (countEl) countEl.textContent = selectedCount;
+      if (confirmBtn) confirmBtn.disabled = !pendingPurchase || selectedCount !== cost;
+    }
+
+    document.getElementById('cancelPurchaseBtn')?.addEventListener('click', () => {
+      closeCanvasPurchase();
+    });
+
+    document.getElementById('confirmPurchaseBtn')?.addEventListener('click', async () => {
+      if (!pendingPurchase) return;
+      const cost = pendingPurchase.cost;
+      if (selectedPurchaseCubeIds.length !== cost) return;
+      if (gameActions) {
+        await gameActions.buyCanvas(pendingPurchase.slotIndex, selectedPurchaseCubeIds);
+      }
+      closeCanvasPurchase();
+    });
 
     function updatePhaseIndicator(phase) {
       const indicator = document.getElementById('phaseIndicator');

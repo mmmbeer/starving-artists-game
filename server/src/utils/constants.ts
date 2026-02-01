@@ -13,6 +13,17 @@ export const PAINT_COLORS = [
 
 export type PaintColor = (typeof PAINT_COLORS)[number];
 
+export const PAINT_CUBE_DISTRIBUTION: Record<PaintColor, number> = {
+  black: 20,
+  red: 15,
+  orange: 20,
+  yellow: 20,
+  green: 20,
+  blue: 30,
+  purple: 15,
+  wild: 10,
+};
+
 export const GAME_PHASES = {
   MORNING: 'morning',
   DAY: 'day',

@@ -115,14 +115,6 @@ class GameUI {
     });
     
     container.innerHTML = html;
-    
-    // Add click handlers
-    container.querySelectorAll('.market-canvas-card:not(.empty)').forEach(card => {
-      card.addEventListener('click', () => {
-        const slotIndex = parseInt(card.dataset.slotIndex);
-        this.handleCanvasPurchase(slotIndex);
-      });
-    });
   }
 
   renderMarketCanvas(canvas, cost, slotIndex) {
@@ -324,13 +316,8 @@ class GameUI {
       return;
     }
     
-    const canvas = this.gameState.gameState.canvas_market[slotIndex];
-    const cost = [1, 2, 3][slotIndex];
-    
-    if (confirm(`Buy "${canvas.name}" for ${cost} paint cube(s)?`)) {
-      if (window.gameActions) {
-        window.gameActions.buyCanvas(slotIndex);
-      }
+    if (window.openCanvasPurchase) {
+      window.openCanvasPurchase(slotIndex);
     }
   }
 

@@ -1,25 +1,18 @@
 // Paint bag and market management
 import { PaintCube, PaintColor } from '../../models/types';
-import { createPaintCube, drawFromBag } from '../../utils/helpers';
-import { PAINT_COLORS } from '../../utils/constants';
+import { createPaintCube, drawFromBag, shuffleArray } from '../../utils/helpers';
+import { PAINT_CUBE_DISTRIBUTION } from '../../utils/constants';
 
 export function createPaintBag(): PaintCube[] {
   const cubes: PaintCube[] = [];
   
-  // Regular colors: 18 of each (7 colors = 126 cubes)
-  const regularColors = PAINT_COLORS.filter(c => c !== 'wild');
-  for (const color of regularColors) {
-    for (let i = 0; i < 18; i++) {
-      cubes.push(createPaintCube(color));
+  Object.entries(PAINT_CUBE_DISTRIBUTION).forEach(([color, count]) => {
+    for (let i = 0; i < count; i++) {
+      cubes.push(createPaintCube(color as PaintColor));
     }
-  }
+  });
   
-  // Wild cubes: 24
-  for (let i = 0; i < 24; i++) {
-    cubes.push(createPaintCube('wild'));
-  }
-  
-  return cubes;
+  return shuffleArray(cubes);
 }
 
 export function drawPaintCubes(

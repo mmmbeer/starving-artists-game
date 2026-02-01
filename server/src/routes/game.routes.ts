@@ -81,7 +81,7 @@ router.post('/:gameId/action/work', async (req: Request<{ gameId: string }>, res
 router.post('/:gameId/action/buy-canvas', async (req: Request<{ gameId: string }>, res: Response) => {
   try {
     const { gameId } = req.params;
-    const { slotIndex } = req.body;
+    const { slotIndex, cubeIds } = req.body;
     const playerId = req.session.playerId;
     
     if (!playerId) {
@@ -91,11 +91,16 @@ router.post('/:gameId/action/buy-canvas', async (req: Request<{ gameId: string }
     if (typeof slotIndex !== 'number' || slotIndex < 0 || slotIndex > 2) {
       return res.status(400).json({ error: 'Invalid slot index' });
     }
+
+    if (!Array.isArray(cubeIds)) {
+      return res.status(400).json({ error: 'Invalid cube selection' });
+    }
     
     const gameState = await actionHandler.performBuyCanvasAction(
       gameId,
       playerId,
-      slotIndex
+      slotIndex,
+      cubeIds
     );
 
     const io = req.app.get('io');

@@ -55,7 +55,8 @@ export async function performWorkAction(
 export async function performBuyCanvasAction(
   gameId: string,
   playerId: string,
-  slotIndex: number
+  slotIndex: number,
+  cubeIds: string[]
 ): Promise<FullGameState> {
   // Verify player can act
   const canAct = await canPlayerAct(gameId, playerId);
@@ -72,16 +73,33 @@ export async function performBuyCanvasAction(
   const canvas = gameState.canvas_market[slotIndex];
   if (!canvas) throw new Error('No canvas in that slot');
   
-  // Check player has enough paint cubes
   const cost = getCanvasCost(slotIndex);
   const playerCubes = await playerDb.getPlayerPaintCubes(playerId);
   
+  if (!Array.isArray(cubeIds) || cubeIds.length !== cost) {
+    throw new Error(`Must select exactly ${cost} paint cube(s) to buy this canvas`);
+  }
+
   if (playerCubes.length < cost) {
     throw new Error(`Need ${cost} paint cubes to buy this canvas`);
   }
   
-  // Remove paint cubes from player (any color)
-  const cubesToRemove = playerCubes.slice(0, cost);
+  const uniqueCubeIds = new Set(cubeIds);
+  if (uniqueCubeIds.size !== cubeIds.length) {
+    throw new Error('Cannot use the same cube more than once');
+  }
+
+  const cubesById = new Map(playerCubes.map(cube => [cube.id, cube]));
+  const cubesToRemove: PaintCube[] = [];
+  for (const cubeId of cubeIds) {
+    const cube = cubesById.get(cubeId);
+    if (!cube) {
+      throw new Error('Selected cube not found in your studio');
+    }
+    cubesToRemove.push(cube);
+  }
+
+  // Remove selected paint cubes from player
   await playerDb.removePaintCubes(
     playerId,
     cubesToRemove.map(c => c.id)
