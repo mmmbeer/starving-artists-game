@@ -152,8 +152,14 @@ class DragDropManager {
     square.style.backgroundColor = getPaintColor(color);
     square.dataset.cubeColor = color;
     
-    // Add checkmark or indication
-    square.innerHTML = '<span class="paint-check">✓</span>';
+    const cube = document.createElement('div');
+    cube.className = 'paint-cube in-canvas';
+    cube.dataset.color = color;
+    if (this.draggedCubeData?.id) {
+      cube.dataset.cubeId = this.draggedCubeData.id;
+    }
+    square.innerHTML = '';
+    square.appendChild(cube);
     
     // Update progress bar
     this.updateCanvasProgress(square.closest('.canvas-card'));

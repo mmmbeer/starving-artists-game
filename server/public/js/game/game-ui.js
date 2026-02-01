@@ -107,14 +107,17 @@ class GameUI {
 
       return `
         <div class="turn-info-item ${isActive ? 'active' : ''} ${isMe ? 'me' : ''}" data-player-id="${player.id}" data-selling="${showSelling}">
-          <span class="turn-marker turn-marker-start">${isActive ? '>>' : ''}</span>
           <div class="turn-info-content">
             <span class="turn-field"><span class="turn-label">Name:</span> <span class="turn-name">${player.name}</span></span>
             <span class="turn-field"><span class="turn-label">Points:</span> <span class="turn-value">${player.score}</span></span>
             <span class="turn-field"><span class="turn-label">Nutrition:</span> <span class="turn-value">${player.nutrition}</span></span>
           </div>
-          ${showSelling ? '<span class="turn-selling">Selling</span>' : ''}
-          <span class="turn-marker turn-marker-end">${isActive ? '<<' : ''}</span>
+          ${isMe || showSelling ? `
+            <div class="turn-badges">
+              ${isMe ? '<span class="turn-you">You</span>' : ''}
+              ${showSelling ? '<span class="turn-selling">Selling</span>' : ''}
+            </div>
+          ` : ''}
         </div>
       `;
     }).join('');
@@ -184,8 +187,10 @@ class GameUI {
     if (canvas.filename) {
       return `
         <div class="market-canvas-media">
-          <img src="/assets/canvases/${canvas.filename}" alt="${canvas.name}" class="canvas-thumbnail">
-          ${this.renderMarketSquareMarkers(canvas)}
+          <div class="market-canvas-frame">
+            <img src="/assets/canvases/${canvas.filename}" alt="${canvas.name}" class="canvas-thumbnail">
+            ${this.renderMarketSquareMarkers(canvas)}
+          </div>
         </div>
       `;
     }
@@ -205,7 +210,8 @@ class GameUI {
       return `
         <div 
           class="canvas-square-marker" 
-          style="left: ${left / 3}px; top: ${top / 3}px;"
+          data-x="${left}"
+          data-y="${top}"
           data-allowed-colors="${square.allowedColors.join(',')}"
           title="${square.allowedColors.join(', ')}"
         ></div>
@@ -362,9 +368,9 @@ class GameUI {
   }
 
   refreshCanvasOverlays() {
-    const containers = document.querySelectorAll('.canvas-painting-container');
-    containers.forEach(container => {
-      const img = container.querySelector('img');
+    const frames = document.querySelectorAll('.canvas-painting-frame, .market-canvas-frame');
+    frames.forEach(frame => {
+      const img = frame.querySelector('img');
       if (!img) return;
 
       const applyPositions = () => {
@@ -373,13 +379,20 @@ class GameUI {
         const scaleX = rect.width / img.naturalWidth;
         const scaleY = rect.height / img.naturalHeight;
         const scale = Math.min(scaleX, scaleY) || 1;
-        container.style.setProperty('--overlay-scale', scale.toFixed(4));
+        frame.style.setProperty('--overlay-scale', scale.toFixed(4));
 
-        container.querySelectorAll('.paint-drop-zone').forEach(zone => {
+        frame.querySelectorAll('.paint-drop-zone').forEach(zone => {
           const x = parseFloat(zone.dataset.x || '0');
           const y = parseFloat(zone.dataset.y || '0');
           zone.style.left = `${x * scaleX}px`;
           zone.style.top = `${y * scaleY}px`;
+        });
+
+        frame.querySelectorAll('.canvas-square-marker').forEach(marker => {
+          const x = parseFloat(marker.dataset.x || '0');
+          const y = parseFloat(marker.dataset.y || '0');
+          marker.style.left = `${x * scaleX}px`;
+          marker.style.top = `${y * scaleY}px`;
         });
       };
 
@@ -418,6 +431,7 @@ class GameUI {
       const isPainted = !!painted;
       const paintedStyle = isPainted ? `background-color: ${getPaintColor(painted.color)};` : '';
       const cubeColor = isPainted ? `data-cube-color="${painted.color}"` : '';
+      const cubeMarkup = isPainted ? `<div class="paint-cube in-canvas" data-color="${painted.color}"></div>` : '';
       const left = (square.position && square.position.x !== undefined) ? square.position.x : (square.x || 0);
       const top = (square.position && square.position.y !== undefined) ? square.position.y : (square.y || 0);
       return `
@@ -431,16 +445,18 @@ class GameUI {
           ${cubeColor}
           title="${isPainted ? 'Painted: ' + painted.color : 'Allowed: ' + square.allowedColors.join(', ')}"
         >
-          ${isPainted ? '<span class="paint-check">&#10003;</span>' : ''}
+          ${cubeMarkup}
         </div>
       `;
     }).join('');
 
     return `
       <div class="canvas-painting-container" data-orientation="${canvas.definition.layout_json?.orientation || 'landscape'}">
-        <img src="/assets/canvases/${canvas.definition.filename}" alt="${canvas.definition.name}" class="canvas-painting-img">
-        <div class="canvas-paint-overlay">
-          ${overlaySquares}
+        <div class="canvas-painting-frame">
+          <img src="/assets/canvases/${canvas.definition.filename}" alt="${canvas.definition.name}" class="canvas-painting-img">
+          <div class="canvas-paint-overlay">
+            ${overlaySquares}
+          </div>
         </div>
       </div>
     `;
@@ -473,7 +489,7 @@ class GameUI {
           "
           ${isPainted ? `data-cube-color="${painted.color}"` : ''}
         >
-          ${isPainted ? '<span class="paint-check">&#10003;</span>' : ''}
+          ${isPainted ? `<div class="paint-cube in-canvas" data-color="${painted.color}"></div>` : ''}
         </div>
       `;
     });

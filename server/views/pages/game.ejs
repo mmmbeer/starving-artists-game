@@ -120,19 +120,22 @@
                     <div class="canvas-cost">Cost <%= costs[index] %></div>
                     <% if (canvas.filename) { %>
                       <div class="market-canvas-media">
-                        <img src="/assets/canvases/<%= canvas.filename %>" alt="<%= canvas.name %>" class="canvas-thumbnail">
-                        <% if (canvas.layout_json && canvas.layout_json.squares) { %>
-                          <div class="canvas-squares-overlay preview">
-                            <% canvas.layout_json.squares.forEach(square => { %>
-                              <div 
-                                class="canvas-square-marker" 
-                                style="left: <%= (square.position?.x || 0) / 3 %>px; top: <%= (square.position?.y || 0) / 3 %>px;"
-                                data-allowed-colors="<%= square.allowedColors.join(',') %>"
-                                title="<%= square.allowedColors.join(', ') %>"
-                              ></div>
-                            <% }); %>
-                          </div>
-                        <% } %>
+                        <div class="market-canvas-frame">
+                          <img src="/assets/canvases/<%= canvas.filename %>" alt="<%= canvas.name %>" class="canvas-thumbnail">
+                          <% if (canvas.layout_json && canvas.layout_json.squares) { %>
+                            <div class="canvas-squares-overlay preview">
+                              <% canvas.layout_json.squares.forEach(square => { %>
+                                <div 
+                                  class="canvas-square-marker" 
+                                  data-x="<%= square.position?.x || square.x || 0 %>"
+                                  data-y="<%= square.position?.y || square.y || 0 %>"
+                                  data-allowed-colors="<%= square.allowedColors.join(',') %>"
+                                  title="<%= square.allowedColors.join(', ') %>"
+                                ></div>
+                              <% }); %>
+                            </div>
+                          <% } %>
+                        </div>
                       </div>
                     <% } else if (canvas.layout_json && canvas.layout_json.squares) { %>
                       <div class="market-canvas-media">
@@ -191,14 +194,17 @@
                 const showSelling = (game.current_phase === 'night' || game.current_phase === 'selling') && hasCompleted;
               %>
                 <div class="turn-info-item <%= isActive ? 'active' : '' %> <%= isMe ? 'me' : '' %>" data-player-id="<%= player.id %>" data-selling="<%= showSelling ? 'true' : 'false' %>">
-                  <span class="turn-marker turn-marker-start"><%= isActive ? '>>' : '' %></span>
                   <div class="turn-info-content">
                     <span class="turn-field"><span class="turn-label">Name:</span> <span class="turn-name"><%= player.name %></span></span>
                     <span class="turn-field"><span class="turn-label">Points:</span> <span class="turn-value"><%= player.score %></span></span>
                     <span class="turn-field"><span class="turn-label">Nutrition:</span> <span class="turn-value"><%= player.nutrition %></span></span>
                   </div>
-                  <% if (showSelling) { %><span class="turn-selling">Selling</span><% } %>
-                  <span class="turn-marker turn-marker-end"><%= isActive ? '<<' : '' %></span>
+                  <% if (isMe || showSelling) { %>
+                    <div class="turn-badges">
+                      <% if (isMe) { %><span class="turn-you">You</span><% } %>
+                      <% if (showSelling) { %><span class="turn-selling">Selling</span><% } %>
+                    </div>
+                  <% } %>
                 </div>
               <% }); %>
             </div>
@@ -312,29 +318,31 @@
                 <div class="canvas-card <%= canvas.completed ? 'completed' : '' %>" data-canvas-id="<%= canvas.id %>" data-testid="player-canvas-<%= canvas.id %>">
                   <% if (canvas.definition && canvas.definition.filename) { %>
                     <div class="canvas-painting-container" data-orientation="<%= canvas.definition.layout_json?.orientation || 'landscape' %>">
-                      <img src="/assets/canvases/<%= canvas.definition.filename %>" alt="<%= canvas.definition.name %>" class="canvas-painting-img">
-                      <% if (canvas.definition.layout_json && canvas.definition.layout_json.squares) { %>
-                        <div class="canvas-paint-overlay">
-                          <% 
-                            const paintedMap = new Map(canvas.painted_squares.map(ps => [ps.squareId, ps]));
-                          %>
-                          <% canvas.definition.layout_json.squares.forEach(square => { %>
-                            <% const painted = paintedMap.get(square.id); %>
-                              <div 
-                                class="paint-drop-zone <%= painted ? 'painted' : 'drop-zone' %>" 
-                                data-square-id="<%= square.id %>"
-                                data-allowed-colors="<%= square.allowedColors.join(',') %>"
-                                data-x="<%= square.position?.x || 0 %>"
-                                data-y="<%= square.position?.y || 0 %>"
-                                style="<%= painted ? 'background-color: var(--paint-' + painted.color + ');' : '' %>"
-                                <%= painted ? 'data-cube-color="' + painted.color + '"' : '' %>
-                                title="<%= painted ? 'Painted: ' + painted.color : 'Allowed: ' + square.allowedColors.join(', ') %>"
-                              >
-                              <% if (painted) { %><span class="paint-check">&#10003;</span><% } %>
-                            </div>
-                          <% }); %>
-                        </div>
-                      <% } %>
+                      <div class="canvas-painting-frame">
+                        <img src="/assets/canvases/<%= canvas.definition.filename %>" alt="<%= canvas.definition.name %>" class="canvas-painting-img">
+                        <% if (canvas.definition.layout_json && canvas.definition.layout_json.squares) { %>
+                          <div class="canvas-paint-overlay">
+                            <% 
+                              const paintedMap = new Map(canvas.painted_squares.map(ps => [ps.squareId, ps]));
+                            %>
+                            <% canvas.definition.layout_json.squares.forEach(square => { %>
+                              <% const painted = paintedMap.get(square.id); %>
+                                <div 
+                                  class="paint-drop-zone <%= painted ? 'painted' : 'drop-zone' %>" 
+                                  data-square-id="<%= square.id %>"
+                                  data-allowed-colors="<%= square.allowedColors.join(',') %>"
+                                  data-x="<%= square.position?.x || 0 %>"
+                                  data-y="<%= square.position?.y || 0 %>"
+                                  style="<%= painted ? 'background-color: var(--paint-' + painted.color + ');' : '' %>"
+                                  <%= painted ? 'data-cube-color="' + painted.color + '"' : '' %>
+                                  title="<%= painted ? 'Painted: ' + painted.color : 'Allowed: ' + square.allowedColors.join(', ') %>"
+                                >
+                                <% if (painted) { %><div class="paint-cube in-canvas" data-color="<%= painted.color %>"></div><% } %>
+                              </div>
+                            <% }); %>
+                          </div>
+                        <% } %>
+                      </div>
                     </div>
                   <% } else if (canvas.definition && canvas.definition.layout_json && canvas.definition.layout_json.squares) { %>
                     <% 
@@ -353,7 +361,7 @@
                           style="<%= painted ? 'background-color: var(--paint-' + painted.color + ');' : '' %>"
                           title="<%= painted ? 'Painted: ' + painted.color : 'Allowed: ' + square.allowedColors.join(', ') %>"
                         >
-                          <% if (painted) { %><span style="color: white; font-size: 16px;">&#10003;</span><% } %>
+                          <% if (painted) { %><div class="paint-cube in-canvas" data-color="<%= painted.color %>"></div><% } %>
                         </div>
                       <% }); %>
                     </div>
