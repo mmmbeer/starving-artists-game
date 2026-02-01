@@ -17,12 +17,45 @@
 <body>
   <!-- Header -->
   <header class="app-header">
-    <div class="container-fluid">
-      <a href="/" class="app-logo">SA <span>Starving Artists</span></a>
-      <div class="header-game-info">
-  <span class="day-indicator">Day <span id="dayNumber"><%= game.day_number %></span></span>
-  <span id="headerStatus" class="header-status">Multiplayer Session</span>
-</div>
+    <div class="container-fluid header-structure">
+      <a href="/" class="app-logo app-logo--full">STARVING ARTISTS</a>
+      <div class="header-phase-line">
+        <div class="header-phase-core">
+          <span class="header-day">(DAY <span id="dayNumber"><%= game.day_number %></span>)</span>
+          <span class="header-divider">:</span>
+          <div id="phaseIndicator" class="phase-indicator header-phase-indicator" data-phase="<%= game.current_phase %>">
+            <div class="phase-icon">
+              <svg class="phase-svg phase-morning" viewBox="0 0 64 64" role="img" aria-label="Morning">
+                <circle cx="32" cy="32" r="14"></circle>
+                <g class="rays">
+                  <line x1="32" y1="4" x2="32" y2="14"></line>
+                  <line x1="32" y1="50" x2="32" y2="60"></line>
+                  <line x1="4" y1="32" x2="14" y2="32"></line>
+                  <line x1="50" y1="32" x2="60" y2="32"></line>
+                  <line x1="12" y1="12" x2="19" y2="19"></line>
+                  <line x1="45" y1="45" x2="52" y2="52"></line>
+                  <line x1="12" y1="52" x2="19" y2="45"></line>
+                  <line x1="45" y1="19" x2="52" y2="12"></line>
+                </g>
+              </svg>
+              <svg class="phase-svg phase-day" viewBox="0 0 64 64" role="img" aria-label="Afternoon">
+                <circle cx="24" cy="28" r="10"></circle>
+                <path d="M36 44c0-8 8-14 16-14h6v14H36z"></path>
+              </svg>
+              <svg class="phase-svg phase-night" viewBox="0 0 64 64" role="img" aria-label="Evening">
+                <path d="M40 10a18 18 0 1 0 14 30A20 20 0 1 1 40 10z"></path>
+              </svg>
+              <svg class="phase-svg phase-selling" viewBox="0 0 64 64" role="img" aria-label="Selling">
+                <rect x="12" y="28" width="40" height="20" rx="4"></rect>
+                <rect x="18" y="20" width="28" height="12" rx="4"></rect>
+                <circle cx="32" cy="38" r="6"></circle>
+              </svg>
+            </div>
+            <div id="phaseLabel" class="phase-label"><%= game.current_phase === 'morning' ? 'Morning' : game.current_phase === 'day' ? 'Afternoon' : game.current_phase === 'night' ? 'Evening' : 'Selling' %></div>
+          </div>
+          <span class="header-current-player">(<span id="currentTurnName"><%= players.find(p => p.id === game.current_player_id)?.name || 'Player' %></span>)</span>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -78,7 +111,7 @@
       <section class="shared-space" data-testid="shared-space">
         <div class="shared-top">
           <div class="canvas-market-block" data-testid="canvas-market-section">
-            <div class="section-label">Canvas Market</div>
+            <div class="section-label">Canvas Market Cards</div>
             <div id="canvasMarket" class="canvas-market-row">
               <% const costs = [1, 2, 3]; %>
               <% gameState.canvas_market.forEach((canvas, index) => { %>
@@ -137,40 +170,38 @@
           </div>
 
           <div class="canvas-deck-block" data-testid="canvas-deck">
-            <div class="deck-stack" aria-hidden="true">
-              <span></span><span></span><span></span><span></span>
+            <div class="section-label">Canvas Draw Pile</div>
+            <div class="canvas-deck-card">
+              <img src="/assets/canvas-back.png" alt="Canvas draw pile" class="canvas-deck-image">
             </div>
-            <div class="deck-label">Canvas Draw Deck</div>
             <div class="deck-count"><span id="canvasDeckCount"><%= gameState.canvas_deck?.length || 0 %></span> cards</div>
           </div>
 
-          <div class="status-cluster" data-testid="status-cluster">
-            <div id="phaseIndicator" class="phase-indicator" data-phase="<%= game.current_phase %>">
-              <div class="phase-icon">
-                <svg class="phase-svg phase-morning" viewBox="0 0 64 64" role="img" aria-label="Morning">
-                  <circle cx="32" cy="32" r="14"></circle>
-                  <g class="rays">
-                    <line x1="32" y1="4" x2="32" y2="14"></line>
-                    <line x1="32" y1="50" x2="32" y2="60"></line>
-                    <line x1="4" y1="32" x2="14" y2="32"></line>
-                    <line x1="50" y1="32" x2="60" y2="32"></line>
-                    <line x1="12" y1="12" x2="19" y2="19"></line>
-                    <line x1="45" y1="45" x2="52" y2="52"></line>
-                    <line x1="12" y1="52" x2="19" y2="45"></line>
-                    <line x1="45" y1="19" x2="52" y2="12"></line>
-                  </g>
-                </svg>
-                <svg class="phase-svg phase-day" viewBox="0 0 64 64" role="img" aria-label="Afternoon">
-                  <circle cx="24" cy="28" r="10"></circle>
-                  <path d="M36 44c0-8 8-14 16-14h6v14H36z"></path>
-                </svg>
-                <svg class="phase-svg phase-night" viewBox="0 0 64 64" role="img" aria-label="Evening">
-                  <path d="M40 10a18 18 0 1 0 14 30A20 20 0 1 1 40 10z"></path>
-                </svg>
-              </div>
-              <div id="phaseLabel" class="phase-label"><%= game.current_phase === 'morning' ? 'Morning' : game.current_phase === 'day' ? 'Afternoon' : game.current_phase === 'night' ? 'Evening' : 'Selling' %></div>
+          <div class="turn-info-block" data-testid="turn-info">
+            <div class="section-label">Turn Information</div>
+            <div id="turnInfoList" class="turn-info-list">
+              <% 
+                const orderedPlayers = [...players].sort((a, b) => (a.turn_order || 0) - (b.turn_order || 0));
+              %>
+              <% orderedPlayers.forEach(player => { 
+                const isActive = player.id === game.current_player_id;
+                const isMe = player.id === currentPlayer.id;
+                const canvases = allPlayerCanvases[player.id] || [];
+                const hasCompleted = canvases.some(canvas => canvas.completed);
+                const showSelling = (game.current_phase === 'night' || game.current_phase === 'selling') && hasCompleted;
+              %>
+                <div class="turn-info-item <%= isActive ? 'active' : '' %> <%= isMe ? 'me' : '' %>" data-player-id="<%= player.id %>" data-selling="<%= showSelling ? 'true' : 'false' %>">
+                  <span class="turn-marker turn-marker-start"><%= isActive ? '>>' : '' %></span>
+                  <div class="turn-info-content">
+                    <span class="turn-field"><span class="turn-label">Name:</span> <span class="turn-name"><%= player.name %></span></span>
+                    <span class="turn-field"><span class="turn-label">Points:</span> <span class="turn-value"><%= player.score %></span></span>
+                    <span class="turn-field"><span class="turn-label">Nutrition:</span> <span class="turn-value"><%= player.nutrition %></span></span>
+                  </div>
+                  <% if (showSelling) { %><span class="turn-selling">Selling</span><% } %>
+                  <span class="turn-marker turn-marker-end"><%= isActive ? '<<' : '' %></span>
+                </div>
+              <% }); %>
             </div>
-            <div id="playerOrderTracker" class="player-order-tracker"></div>
           </div>
         </div>
 
@@ -429,10 +460,11 @@
     function initializeGame() {
       console.log('Initializing game...', { gameId, playerId });
       
-      // Initialize UI manager
-      gameUI = new GameUI(initialGameState);
-      gameUI.setMyPlayerId(playerId);
-      window.gameUI = gameUI;
+        // Initialize UI manager
+        gameUI = new GameUI(initialGameState);
+        gameUI.setMyPlayerId(playerId);
+        window.gameUI = gameUI;
+        gameUI.updateCanvasMarketOverlap();
       
       // Initialize actions handler
       gameActions = new GameActions(gameId, playerId);
@@ -946,12 +978,16 @@
 
     function updateTurnIndicator(state) {
       const indicator = document.getElementById('turnStatus');
-      if (!indicator) return;
+      const headerName = document.getElementById('currentTurnName');
+      if (!indicator && !headerName) return;
 
       if (isCurrentTurn) {
-        indicator.textContent = 'Your turn';
+        if (indicator) indicator.textContent = 'Your turn';
+        if (headerName) headerName.textContent = getPlayerName(state.game.current_player_id);
       } else {
-        indicator.textContent = `Waiting for ${getPlayerName(state.game.current_player_id)}`;
+        const currentName = getPlayerName(state.game.current_player_id);
+        if (indicator) indicator.textContent = `Waiting for ${currentName}`;
+        if (headerName) headerName.textContent = currentName;
       }
     }
 

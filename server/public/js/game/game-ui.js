@@ -9,6 +9,7 @@ class GameUI {
     if (!window.__canvasOverlayResizeBound) {
       window.addEventListener('resize', () => {
         this.refreshCanvasOverlays();
+        this.updateCanvasMarketOverlap();
       });
       window.__canvasOverlayResizeBound = true;
     }
@@ -57,46 +58,68 @@ class GameUI {
 
   updateTurnIndicator() {
     const indicator = document.getElementById('turnStatus');
-    if (!indicator) return;
+    const headerName = document.getElementById('currentTurnName');
+    if (!indicator && !headerName) return;
 
     const currentPlayer = this.gameState.players.find(
       p => p.id === this.currentPlayerId
     );
 
     if (this.isMyTurn()) {
-      indicator.textContent = 'Your turn';
+      if (indicator) indicator.textContent = 'Your turn';
+      if (headerName) headerName.textContent = currentPlayer?.name || 'You';
     } else if (currentPlayer) {
-      indicator.textContent = `Waiting for ${currentPlayer.name}`;
+      if (indicator) indicator.textContent = `Waiting for ${currentPlayer.name}`;
+      if (headerName) headerName.textContent = currentPlayer.name;
     }
   }
 
   updatePlayersList() {
-    const container = document.getElementById('playerOrderTracker');
+    const container = document.getElementById('turnInfoList');
     if (!container) return;
 
-    const nutritionMax = 5;
-    let html = '';
-    this.gameState.players.forEach((player, index) => {
+    const orderedPlayers = [...this.gameState.players].sort(
+      (a, b) => (a.turn_order || 0) - (b.turn_order || 0)
+    );
+    const phase = this.gameState.game.current_phase;
+    const canvasesByPlayer = this.gameState.playerCanvases || {};
+    const sellingCandidates = new Set();
+
+    if (phase === 'night' || phase === 'selling') {
+      orderedPlayers.forEach(player => {
+        const canvases = canvasesByPlayer[player.id] || [];
+        if (canvases.some(canvas => canvas.completed)) {
+          sellingCandidates.add(player.id);
+        }
+      });
+    }
+
+    if (phase === 'selling' && this.gameState.gameState.selling_phase_data?.order) {
+      this.gameState.gameState.selling_phase_data.order.forEach(entry => {
+        sellingCandidates.add(entry.playerId);
+      });
+    }
+
+    const html = orderedPlayers.map(player => {
       const isActive = player.id === this.currentPlayerId;
       const isMe = player.id === this.myPlayerId;
-      const nutritionPct = Math.max(0, Math.min(1, player.nutrition / nutritionMax)) * 100;
+      const showSelling = sellingCandidates.has(player.id);
 
-      html += `
-        <div class="player-order-item ${isActive ? 'active' : ''} ${isMe ? 'me' : ''}" data-player-id="${player.id}">
-          <span class="player-index">#${index + 1}</span>
-          <span class="player-name">${player.name}</span>
-          <span class="player-score">[${player.score}]</span>
-          <div class="nutrition-bar"><span style="width: ${nutritionPct}%"></span></div>
+      return `
+        <div class="turn-info-item ${isActive ? 'active' : ''} ${isMe ? 'me' : ''}" data-player-id="${player.id}" data-selling="${showSelling}">
+          <span class="turn-marker turn-marker-start">${isActive ? '>>' : ''}</span>
+          <div class="turn-info-content">
+            <span class="turn-field"><span class="turn-label">Name:</span> <span class="turn-name">${player.name}</span></span>
+            <span class="turn-field"><span class="turn-label">Points:</span> <span class="turn-value">${player.score}</span></span>
+            <span class="turn-field"><span class="turn-label">Nutrition:</span> <span class="turn-value">${player.nutrition}</span></span>
+          </div>
+          ${showSelling ? '<span class="turn-selling">Selling</span>' : ''}
+          <span class="turn-marker turn-marker-end">${isActive ? '<<' : ''}</span>
         </div>
       `;
-    });
+    }).join('');
 
     container.innerHTML = html;
-
-    const activeEl = container.querySelector('.player-order-item.active');
-    if (activeEl) {
-      activeEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-    }
   }
 
   updateMarkets() {
@@ -125,6 +148,7 @@ class GameUI {
     });
     
     container.innerHTML = html;
+    this.updateCanvasMarketOverlap();
   }
 
   updateCanvasDeckCount() {
@@ -132,6 +156,18 @@ class GameUI {
     if (!countEl) return;
     const count = this.gameState.gameState.canvas_deck?.length || 0;
     countEl.textContent = count;
+  }
+
+  updateCanvasMarketOverlap() {
+    const container = document.getElementById('canvasMarket');
+    if (!container) return;
+
+    const applyState = () => {
+      const needsOverlap = container.scrollWidth > container.clientWidth + 4;
+      container.classList.toggle('is-overflowing', needsOverlap);
+    };
+
+    requestAnimationFrame(applyState);
   }
 
   renderMarketCanvas(canvas, cost, slotIndex) {
