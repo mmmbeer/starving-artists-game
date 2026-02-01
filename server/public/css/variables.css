@@ -59,6 +59,7 @@
 
   /* Game specific */
   --canvas-size: 200px;
-  --cube-size: 80px;
+  --cube-size: 64px;
+  --cube-sprite-scale: 0.32;
   --market-card-width: 180px;
 }
