@@ -197,13 +197,12 @@
 .paint-cube[data-color="red"] { background-position: calc(70px * var(--cube-sprite-scale) * -1) calc(55px * var(--cube-sprite-scale) * -1); }
 .paint-cube[data-color="orange"] { background-position: calc(410px * var(--cube-sprite-scale) * -1) calc(55px * var(--cube-sprite-scale) * -1); }
 .paint-cube[data-color="yellow"] { background-position: calc(750px * var(--cube-sprite-scale) * -1) calc(55px * var(--cube-sprite-scale) * -1); }
-.paint-cube[data-color="green"] { background-position: calc(70px * var(--cube-sprite-scale) * -1) calc(505px * var(--cube-sprite-scale) * -1); }
-.paint-cube[data-color="blue"] { background-position: calc(410px * var(--cube-sprite-scale) * -1) calc(505px * var(--cube-sprite-scale) * -1); }
-.paint-cube[data-color="purple"] { background-position: calc(750px * var(--cube-sprite-scale) * -1) calc(505px * var(--cube-sprite-scale) * -1); }
-.paint-cube[data-color="black"] { background-position: calc(70px * var(--cube-sprite-scale) * -1) calc(850px * var(--cube-sprite-scale) * -1); }
-.paint-cube[data-color="wild"] { background-position: calc(410px * var(--cube-sprite-scale) * -1) calc(850px * var(--cube-sprite-scale) * -1); }
-.paint-cube[data-color="wild"] { 
-}
+.paint-cube[data-color="green"] { background-position: calc(70px * var(--cube-sprite-scale) * -1) calc(405px * var(--cube-sprite-scale) * -1); }
+.paint-cube[data-color="blue"] { background-position: calc(410px * var(--cube-sprite-scale) * -1) calc(405px * var(--cube-sprite-scale) * -1); }
+.paint-cube[data-color="purple"] { background-position: calc(750px * var(--cube-sprite-scale) * -1) calc(405px * var(--cube-sprite-scale) * -1); }
+.paint-cube[data-color="black"] { background-position: calc(70px * var(--cube-sprite-scale) * -1) calc(740px * var(--cube-sprite-scale) * -1); }
+.paint-cube[data-color="wild"] { background-position: calc(750px * var(--cube-sprite-scale) * -1) calc(740px * var(--cube-sprite-scale) * -1); }
+
 
 /* Player Canvases */
 .player-canvases {
