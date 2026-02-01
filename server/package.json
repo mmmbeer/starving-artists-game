@@ -4,7 +4,7 @@
   "private": true,
   "main": "../dist/server/index.js",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json  && node scripts/copy-static.js",
     "start": "node ../dist/server/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "watch": "tsc --watch"

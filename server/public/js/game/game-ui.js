@@ -175,7 +175,7 @@ class GameUI {
 
   renderMarketCanvas(canvas, cost, slotIndex) {
     return `
-      <div class="market-canvas-card" tabindex="0" aria-label="Canvas ${canvas.name}" data-slot-index="${slotIndex}" title="${canvas.name}">
+      <div class="market-canvas-card" tabindex="0" aria-label="Canvas ${canvas.name}" data-slot-index="${slotIndex}">
         <div class="canvas-cost">Cost ${cost}</div>
         ${this.renderMarketCanvasMedia(canvas)}
         <div class="canvas-hover-meta">Stars ${canvas.star_value} | Paint ${canvas.paint_value} | Food ${canvas.food_value}</div>
@@ -408,7 +408,6 @@ class GameUI {
     return `
       <div class="canvas-card ${canvas.completed ? 'completed' : ''}" data-canvas-id="${canvas.id}">
         ${this.renderPlayerCanvasBody(canvas)}
-        <div class="canvas-caption"><span class="canvas-title">${canvas.definition.name}</span></div>
       </div>
     `;
   }
@@ -432,16 +431,24 @@ class GameUI {
       const paintedStyle = isPainted ? `background-color: ${getPaintColor(painted.color)};` : '';
       const cubeColor = isPainted ? `data-cube-color="${painted.color}"` : '';
       const cubeMarkup = isPainted ? `<div class="paint-cube in-canvas" data-color="${painted.color}"></div>` : '';
+      const allowedColors = square.allowedColors || [];
+      const borderColors = allowedColors.map(color => getPaintColor(color));
+      const isMulti = borderColors.length > 1;
+      const borderStyle = borderColors.length
+        ? (isMulti
+          ? `border: 2px solid transparent; border-image: linear-gradient(135deg, ${borderColors.join(', ')}); border-image-slice: 1;`
+          : `border-color: ${borderColors[0]};`)
+        : '';
       const left = (square.position && square.position.x !== undefined) ? square.position.x : (square.x || 0);
       const top = (square.position && square.position.y !== undefined) ? square.position.y : (square.y || 0);
       return `
         <div 
-          class="paint-drop-zone ${isPainted ? 'painted' : 'drop-zone'}" 
+          class="paint-drop-zone ${isPainted ? 'painted' : 'drop-zone'} ${isMulti ? 'multi-color' : ''}" 
           data-square-id="${square.id}"
           data-allowed-colors="${square.allowedColors.join(',')}"
           data-x="${left}"
           data-y="${top}"
-          style="${paintedStyle}"
+          style="${paintedStyle} ${borderStyle}"
           ${cubeColor}
           title="${isPainted ? 'Painted: ' + painted.color : 'Allowed: ' + square.allowedColors.join(', ')}"
         >
@@ -479,13 +486,16 @@ class GameUI {
       
       html += `
         <div 
-          class="canvas-square ${isPainted ? 'painted' : 'drop-zone'}" 
+          class="canvas-square ${isPainted ? 'painted' : 'drop-zone'} ${square.allowedColors.length > 1 ? 'multi-color' : ''}" 
           data-square-id="${square.id}"
           data-allowed-colors="${square.allowedColors.join(',')}"
           style="
             grid-column: ${square.x + 1}; 
             grid-row: ${square.y + 1};
             ${isPainted ? `background-color: ${getPaintColor(painted.color)};` : ''}
+            ${square.allowedColors.length > 1
+              ? `border: 2px solid transparent; border-image: linear-gradient(135deg, ${square.allowedColors.map(color => getPaintColor(color)).join(', ')}); border-image-slice: 1;`
+              : `border-color: ${getPaintColor(square.allowedColors[0])};`}
           "
           ${isPainted ? `data-cube-color="${painted.color}"` : ''}
         >

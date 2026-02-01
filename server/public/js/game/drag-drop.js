@@ -55,6 +55,7 @@ class DragDropManager {
 
   handleDragEnd(e) {
     e.target.classList.remove('dragging');
+    e.target.classList.remove('drag-valid');
     this.removeAllHighlights();
     this.draggedCube = null;
     this.draggedCubeData = null;
@@ -73,6 +74,9 @@ class DragDropManager {
     if (square && !square.classList.contains('painted')) {
       if (this.canPaintSquare(square)) {
         square.classList.add('drag-over');
+        if (this.draggedCube) {
+          this.draggedCube.classList.add('drag-valid');
+        }
       }
     }
   }
@@ -81,6 +85,9 @@ class DragDropManager {
     const square = e.target.closest('.canvas-square, .paint-drop-zone');
     if (square) {
       square.classList.remove('drag-over');
+    }
+    if (this.draggedCube) {
+      this.draggedCube.classList.remove('drag-valid');
     }
   }
 
@@ -112,6 +119,7 @@ class DragDropManager {
     
     // Remove cube from studio
     if (this.draggedCube) {
+      this.draggedCube.classList.remove('drag-valid');
       this.draggedCube.remove();
     }
     

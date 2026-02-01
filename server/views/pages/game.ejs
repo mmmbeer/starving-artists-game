@@ -18,7 +18,6 @@
   <!-- Header -->
   <header class="app-header">
     <div class="container-fluid header-structure">
-      <a href="/" class="app-logo app-logo--full">STARVING ARTISTS</a>
       <div class="header-phase-line">
         <div class="header-phase-core">
           <span class="header-day">(DAY <span id="dayNumber"><%= game.day_number %></span>)</span>
@@ -327,13 +326,16 @@
                             %>
                             <% canvas.definition.layout_json.squares.forEach(square => { %>
                               <% const painted = paintedMap.get(square.id); %>
+                              <% const allowedColors = square.allowedColors || []; %>
+                              <% const borderColors = allowedColors.map(color => getColorStyle(color)); %>
+                              <% const isMulti = borderColors.length > 1; %>
                                 <div 
-                                  class="paint-drop-zone <%= painted ? 'painted' : 'drop-zone' %>" 
+                                  class="paint-drop-zone <%= painted ? 'painted' : 'drop-zone' %> <%= isMulti ? 'multi-color' : '' %>" 
                                   data-square-id="<%= square.id %>"
                                   data-allowed-colors="<%= square.allowedColors.join(',') %>"
                                   data-x="<%= square.position?.x || 0 %>"
                                   data-y="<%= square.position?.y || 0 %>"
-                                  style="<%= painted ? 'background-color: var(--paint-' + painted.color + ');' : '' %>"
+                                  style="<%= painted ? 'background-color: var(--paint-' + painted.color + ');' : '' %><%= borderColors.length ? (isMulti ? 'border: 2px solid transparent; border-image: linear-gradient(135deg, ' + borderColors.join(', ') + '); border-image-slice: 1;' : 'border-color: ' + borderColors[0] + ';') : '' %>"
                                   <%= painted ? 'data-cube-color="' + painted.color + '"' : '' %>
                                   title="<%= painted ? 'Painted: ' + painted.color : 'Allowed: ' + square.allowedColors.join(', ') %>"
                                 >
@@ -354,11 +356,14 @@
                     <div class="canvas-grid" style="grid-template-columns: repeat(<%= cols %>, 40px);">
                       <% squares.forEach(square => { %>
                         <% const painted = paintedMap.get(square.id); %>
+                        <% const allowedColors = square.allowedColors || []; %>
+                        <% const borderColors = allowedColors.map(color => getColorStyle(color)); %>
+                        <% const isMulti = borderColors.length > 1; %>
                         <div 
-                          class="canvas-square <%= painted ? 'painted' : 'drop-zone' %>" 
+                          class="canvas-square <%= painted ? 'painted' : 'drop-zone' %> <%= isMulti ? 'multi-color' : '' %>" 
                           data-square-id="<%= square.id %>"
                           data-allowed-colors="<%= square.allowedColors.join(',') %>"
-                          style="<%= painted ? 'background-color: var(--paint-' + painted.color + ');' : '' %>"
+                          style="<%= painted ? 'background-color: var(--paint-' + painted.color + ');' : '' %><%= borderColors.length ? (isMulti ? 'border: 2px solid transparent; border-image: linear-gradient(135deg, ' + borderColors.join(', ') + '); border-image-slice: 1;' : 'border-color: ' + borderColors[0] + ';') : '' %>"
                           title="<%= painted ? 'Painted: ' + painted.color : 'Allowed: ' + square.allowedColors.join(', ') %>"
                         >
                           <% if (painted) { %><div class="paint-cube in-canvas" data-color="<%= painted.color %>"></div><% } %>
@@ -366,9 +371,6 @@
                       <% }); %>
                     </div>
                   <% } %>
-                  <div class="canvas-caption">
-                    <span class="canvas-title"><%= canvas.definition?.name || 'Canvas' %></span>
-                  </div>
                 </div>
               <% }); %>
             <% } else { %>
