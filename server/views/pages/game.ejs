@@ -18,18 +18,11 @@
   <!-- Header -->
   <header class="app-header">
     <div class="container-fluid">
-      <a href="/" class="app-logo">🎨 <span>Starving Artists</span></a>
+      <a href="/" class="app-logo">SA <span>Starving Artists</span></a>
       <div class="header-game-info">
-        <span class="day-indicator">Day <span id="dayNumber"><%= game.day_number %></span></span>
-        <span id="phaseIndicator" class="phase-indicator <%= game.current_phase %>" data-testid="phase-indicator">
-          <%= game.current_phase === 'morning' ? '☀️ Morning' : 
-              game.current_phase === 'day' ? '🌤️ Day' : 
-              game.current_phase === 'night' ? '🌙 Night' : '💰 Selling' %>
-        </span>
-        <span id="turnIndicator" class="turn-indicator <%= isCurrentTurn ? 'your-turn' : 'not-your-turn' %>" data-testid="turn-indicator">
-          <%= isCurrentTurn ? '✨ Your Turn!' : (players.find(p => p.id === game.current_player_id)?.name || 'Unknown') + "'s Turn" %>
-        </span>
-      </div>
+  <span class="day-indicator">Day <span id="dayNumber"><%= game.day_number %></span></span>
+  <span id="headerStatus" class="header-status">Multiplayer Session</span>
+</div>
     </div>
   </header>
 
@@ -46,7 +39,7 @@
   <!-- Selling Phase Modal -->
   <div id="sellingPhaseModal" class="selling-modal <%= game.current_phase === 'selling' ? '' : 'd-none' %>" data-testid="selling-modal">
     <div class="selling-content">
-      <h3>💰 Selling Phase</h3>
+      <h3>Selling Phase</h3>
       <p class="selling-instructions">
         Players collect paint cubes based on their completed paintings.<br>
         <strong>Highest Paint Value:</strong> 4 cubes per turn<br>
@@ -80,57 +73,19 @@
   </div>
 
   <main class="game-container">
-    <div class="container-fluid">
-      <div class="game-board">
-        <!-- Left Sidebar - Players List -->
-        <aside class="players-sidebar" data-testid="players-sidebar">
-          <h5 class="sidebar-title">👥 Players</h5>
-          <div id="playersList">
-            <% players.forEach(player => { %>
-              <div class="sidebar-player <%= player.id === game.current_player_id ? 'active' : '' %>" data-player-id="<%= player.id %>">
-                <div class="sidebar-player-name">
-                  <%= player.name %>
-                  <% if (player.id === currentPlayer.id) { %>
-                    <span class="badge bg-primary ms-1">You</span>
-                  <% } %>
-                  <% if (player.is_host) { %>
-                    <span class="badge bg-warning text-dark ms-1">Host</span>
-                  <% } %>
-                </div>
-                <div class="sidebar-player-stats">
-                  <span title="Nutrition">❤️ <%= player.nutrition %></span>
-                  <span title="Score">⭐ <%= player.score %></span>
-                  <span title="Paintings">🎨 <%= player.paintings_completed %></span>
-                </div>
-                <% if (player.id !== currentPlayer.id && player.id === game.current_player_id) { %>
-                  <div class="player-waiting-indicator">
-                    <span class="waiting-dot"></span> Taking turn...
-                  </div>
-                <% } %>
-              </div>
-            <% }); %>
-          </div>
-        </aside>
-
-        <!-- Center - Main Game Area -->
-        <section class="game-main-area">
-          <!-- Canvas Market -->
-          <div class="market-section" data-testid="canvas-market-section">
-            <h4 class="market-header">🖼️ Canvas Market</h4>
-            <div id="canvasMarket" class="canvas-market">
+  <div class="container-fluid">
+    <div class="game-board">
+      <section class="shared-space" data-testid="shared-space">
+        <div class="shared-top">
+          <div class="canvas-market-block" data-testid="canvas-market-section">
+            <div class="section-label">Canvas Market</div>
+            <div id="canvasMarket" class="canvas-market-row">
               <% const costs = [1, 2, 3]; %>
               <% gameState.canvas_market.forEach((canvas, index) => { %>
                 <% if (canvas) { %>
-                  <div class="market-canvas-card" data-slot-index="<%= index %>" data-testid="market-canvas-<%= index %>">
-                    <div class="canvas-cost">💎 <%= costs[index] %></div>
-                    <div class="canvas-header">
-                      <div class="canvas-name"><%= canvas.name %></div>
-                      <% if (canvas.artist) { %>
-                        <div class="canvas-artist"><%= canvas.artist %></div>
-                      <% } %>
-                    </div>
+                  <div class="market-canvas-card" tabindex="0" aria-label="Canvas <%= canvas.name %>" data-slot-index="<%= index %>" data-testid="market-canvas-<%= index %>">
+                    <div class="canvas-cost">Cost <%= costs[index] %></div>
                     <% if (canvas.filename) { %>
-                      <!-- Canvas with image -->
                       <div class="market-canvas-media">
                         <img src="/assets/canvases/<%= canvas.filename %>" alt="<%= canvas.name %>" class="canvas-thumbnail">
                         <% if (canvas.layout_json && canvas.layout_json.squares) { %>
@@ -145,244 +100,277 @@
                             <% }); %>
                           </div>
                         <% } %>
-                        <div class="market-canvas-metrics">
-                          <span title="Stars">⭐ <%= canvas.star_value %></span>
-                          <span title="Paint">🎨 <%= canvas.paint_value %></span>
-                          <span title="Food">🍎 <%= canvas.food_value %></span>
-                        </div>
                       </div>
                     <% } else if (canvas.layout_json && canvas.layout_json.squares) { %>
-                      <!-- Canvas without image - grid preview -->
                       <div class="market-canvas-media">
-                      <div class="canvas-grid canvas-preview">
-                        <% 
-                          const squares = canvas.layout_json.squares;
-                          const maxX = Math.max(...squares.map(s => s.position?.x || s.x || 0));
-                          const maxY = Math.max(...squares.map(s => s.position?.y || s.y || 0));
-                          const cols = Math.ceil((maxX + 40) / 44);
-                        %>
-                        <div style="display: grid; grid-template-columns: repeat(<%= cols %>, 24px); gap: 2px;">
-                          <% squares.forEach((square, idx) => { %>
-                            <div 
-                              class="canvas-square preview-square" 
-                              style="background: linear-gradient(135deg, <%= getColorStyle(square.allowedColors[0]) %>);"
-                              data-allowed-colors="<%= square.allowedColors.join(',') %>"
-                              title="<%= square.allowedColors.join(', ') %>"
-                            ></div>
-                          <% }); %>
-                        </div>
-                      </div>
-                        <div class="market-canvas-metrics">
-                          <span title="Stars">⭐ <%= canvas.star_value %></span>
-                          <span title="Paint">🎨 <%= canvas.paint_value %></span>
-                          <span title="Food">🍎 <%= canvas.food_value %></span>
+                        <div class="canvas-grid canvas-preview">
+                          <% 
+                            const squares = canvas.layout_json.squares;
+                            const maxX = Math.max(...squares.map(s => s.position?.x || s.x || 0));
+                            const maxY = Math.max(...squares.map(s => s.position?.y || s.y || 0));
+                            const cols = Math.ceil((maxX + 40) / 44);
+                          %>
+                          <div style="display: grid; grid-template-columns: repeat(<%= cols %>, 24px); gap: 2px;">
+                            <% squares.forEach(square => { %>
+                              <div 
+                                class="canvas-square preview-square" 
+                                style="background: linear-gradient(135deg, <%= getColorStyle(square.allowedColors[0]) %>);"
+                                data-allowed-colors="<%= square.allowedColors.join(',') %>"
+                                title="<%= square.allowedColors.join(', ') %>"
+                              ></div>
+                            <% }); %>
+                          </div>
                         </div>
                       </div>
                     <% } %>
+                    <div class="canvas-hover-meta">
+                      Stars <%= canvas.star_value %> ? Paint <%= canvas.paint_value %> ? Food <%= canvas.food_value %>
+                    </div>
                   </div>
                 <% } else { %>
                   <div class="market-canvas-card empty" data-testid="market-canvas-empty-<%= index %>">
-                    <div class="text-center text-muted py-5">Empty Slot</div>
+                    <div class="text-muted">Empty Slot</div>
                   </div>
                 <% } %>
               <% }); %>
             </div>
           </div>
 
-          <!-- Paint Market -->
-          <div class="market-section" data-testid="paint-market-section">
-            <h4 class="market-header">🎨 Paint Market <span class="badge bg-secondary"><%= gameState.paint_market.length %> cubes</span></h4>
-            <div id="paintMarket" class="paint-market">
-              <% gameState.paint_market.forEach(cube => { %>
-                <div 
-                  class="paint-cube in-market" 
-                  data-cube-id="<%= cube.id %>"
-                  data-color="<%= cube.color %>"
-                  data-is-wild="<%= cube.is_wild %>"
-                  title="<%= cube.color %><%= cube.is_wild ? ' (Wild)' : '' %>"
-                ></div>
-              <% }); %>
+          <div class="canvas-deck-block" data-testid="canvas-deck">
+            <div class="deck-stack" aria-hidden="true">
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <div class="deck-label">Canvas Draw Deck</div>
+            <div class="deck-count"><span id="canvasDeckCount"><%= gameState.canvas_deck?.length || 0 %></span> cards</div>
+          </div>
+
+          <div class="status-cluster" data-testid="status-cluster">
+            <div id="phaseIndicator" class="phase-indicator" data-phase="<%= game.current_phase %>">
+              <div class="phase-icon">
+                <svg class="phase-svg phase-morning" viewBox="0 0 64 64" role="img" aria-label="Morning">
+                  <circle cx="32" cy="32" r="14"></circle>
+                  <g class="rays">
+                    <line x1="32" y1="4" x2="32" y2="14"></line>
+                    <line x1="32" y1="50" x2="32" y2="60"></line>
+                    <line x1="4" y1="32" x2="14" y2="32"></line>
+                    <line x1="50" y1="32" x2="60" y2="32"></line>
+                    <line x1="12" y1="12" x2="19" y2="19"></line>
+                    <line x1="45" y1="45" x2="52" y2="52"></line>
+                    <line x1="12" y1="52" x2="19" y2="45"></line>
+                    <line x1="45" y1="19" x2="52" y2="12"></line>
+                  </g>
+                </svg>
+                <svg class="phase-svg phase-day" viewBox="0 0 64 64" role="img" aria-label="Afternoon">
+                  <circle cx="24" cy="28" r="10"></circle>
+                  <path d="M36 44c0-8 8-14 16-14h6v14H36z"></path>
+                </svg>
+                <svg class="phase-svg phase-night" viewBox="0 0 64 64" role="img" aria-label="Evening">
+                  <path d="M40 10a18 18 0 1 0 14 30A20 20 0 1 1 40 10z"></path>
+                </svg>
+              </div>
+              <div id="phaseLabel" class="phase-label"><%= game.current_phase === 'morning' ? 'Morning' : game.current_phase === 'day' ? 'Afternoon' : game.current_phase === 'night' ? 'Evening' : 'Selling' %></div>
+            </div>
+            <div id="playerOrderTracker" class="player-order-tracker"></div>
+          </div>
+        </div>
+
+        <div class="paint-market-block" data-testid="paint-market-section">
+          <div class="section-label">Paint Market</div>
+          <div id="paintMarket" class="paint-market-rail">
+            <% 
+              const colorOrder = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'black', 'wild'];
+              const marketGroups = {};
+              colorOrder.forEach(color => { marketGroups[color] = []; });
+              gameState.paint_market.forEach(cube => { marketGroups[cube.color].push(cube); });
+            %>
+            <% colorOrder.forEach(color => { %>
+              <div class="paint-slot" data-color="<%= color %>">
+                <div class="paint-slot-header">
+                  <span class="color-label"><%= color.slice(0, 1).toUpperCase() %></span>
+                  <span class="slot-count"><%= marketGroups[color].length %></span>
+                </div>
+                <div class="paint-slot-cubes">
+                  <% marketGroups[color].forEach(cube => { %>
+                    <div 
+                      class="paint-cube in-market" 
+                      data-cube-id="<%= cube.id %>"
+                      data-color="<%= cube.color %>"
+                      data-is-wild="<%= cube.is_wild %>"
+                      title="<%= cube.color %><%= cube.is_wild ? ' (Wild)' : '' %>"
+                    ></div>
+                  <% }); %>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+      </section>
+
+      <section class="action-bar" data-testid="action-bar">
+        <div class="action-buttons">
+          <button id="actionPaintBtn" class="btn action-btn" data-action="paint" data-testid="paint-btn" <%= !isCurrentTurn || game.current_phase === 'selling' ? 'disabled' : '' %>>Paint</button>
+          <button id="actionWorkBtn" class="btn action-btn" data-action="work" data-testid="work-btn" <%= !isCurrentTurn || game.current_phase === 'selling' ? 'disabled' : '' %>>Work</button>
+          <button id="actionBuyBtn" class="btn action-btn" data-action="buy" data-testid="buy-btn" <%= !isCurrentTurn || game.current_phase === 'selling' ? 'disabled' : '' %>>Buy</button>
+          <button id="actionPassBtn" class="btn action-btn" data-action="pass" data-testid="pass-btn" <%= !isCurrentTurn || game.current_phase === 'selling' ? 'disabled' : '' %>>Pass</button>
+          <button id="actionSellBtn" class="btn action-btn" data-action="sell" data-testid="sell-btn" <%= !isCurrentTurn || game.current_phase !== 'night' ? 'disabled' : '' %>>Sell</button>
+          <div class="action-dropdown">
+            <button id="actionFreeBtn" class="btn action-btn" data-action="free" data-testid="free-btn">Free</button>
+            <div id="freeActionMenu" class="dropdown-menu">
+              <button class="dropdown-item" data-free-action="trade" disabled>Trade</button>
+              <button class="dropdown-item" data-free-action="reset-market" disabled>Reset Market</button>
             </div>
           </div>
-        </section>
+        </div>
+        <div class="action-meta">
+          <span id="turnStatus" class="turn-status"><%= isCurrentTurn ? "Your turn" : "Waiting for " + (players.find(p => p.id === game.current_player_id)?.name || "player") %></span>
+          <div class="pending-paints">
+            <span>Pending: <strong id="pendingPaintsCount">0</strong></span>
+            <button id="commitPaintsBtn" class="btn btn-sm btn-accent" disabled data-testid="commit-paints-btn">Apply Paints</button>
+          </div>
+        </div>
+      </section>
 
-        <!-- Right Sidebar - Player's Studio -->
-        <aside class="player-studio current-player" data-testid="player-studio">
-          <div class="studio-header">
+      <section class="player-space" data-testid="player-space">
+        <div class="player-space-header">
+          <div class="player-identity">
+            <div class="player-name"><%= currentPlayer.name %></div>
+            <div class="player-stats">
+              <span>Score <strong id="playerScore"><%= currentPlayer.score %></strong></span>
+              <span>Nutrition <strong id="nutritionValue"><%= currentPlayer.nutrition %></strong></span>
+            </div>
+          </div>
+        </div>
+
+        <div id="canvasPurchasePanel" class="purchase-panel d-none" data-testid="canvas-purchase-panel">
+          <div class="purchase-header">
             <div>
-              <span class="studio-player-name"><%= currentPlayer.name %>'s Studio</span>
-              <div class="score-display">Score: <span id="playerScore"><%= currentPlayer.score %></span> pts</div>
+              <div class="purchase-title">Buy Canvas</div>
+              <div class="purchase-subtitle" id="purchaseCanvasName">Select a canvas to buy</div>
             </div>
-            <div class="nutrition-display">
-              <span>❤️</span>
-              <span id="nutritionValue"><%= currentPlayer.nutrition %></span>
+            <button id="cancelPurchaseBtn" class="btn btn-sm btn-secondary" type="button">Cancel</button>
+          </div>
+          <div class="purchase-body">
+            <div class="purchase-cost">Cost: <span id="purchaseCost">0</span> cube(s)</div>
+            <div class="purchase-instructions">Select cubes to pay for this canvas.</div>
+            <div id="purchaseCubePool" class="paint-cubes-selectable purchase-cubes"></div>
+            <div class="selected-cubes-info mt-2">
+              Selected: <span id="purchaseSelectedCount">0</span> cube(s)
             </div>
           </div>
-
-          <!-- Paint Cubes -->
-          <div class="studio-section">
-            <h6 class="section-title">🎨 Your Paint Cubes (<span id="cubesCount"><%= playerPaintCubes.length %></span>)</h6>
-            <div id="playerCubes" class="paint-cubes-container">
-              <% if (playerPaintCubes.length > 0) { %>
-                <% playerPaintCubes.forEach(cube => { %>
-                  <div 
-                    class="paint-cube" 
-                    draggable="true"
-                    data-cube-id="<%= cube.id %>"
-                    data-color="<%= cube.color %>"
-                    data-is-wild="<%= cube.is_wild %>"
-                    title="<%= cube.color %><%= cube.is_wild ? ' (Wild)' : '' %>"
-                  ></div>
-                <% }); %>
-              <% } else { %>
-                <div class="text-muted text-center w-100 py-3">No paint cubes. Use "Work" to draw some!</div>
-              <% } %>
-            </div>
+          <div class="purchase-actions mt-3">
+            <button id="confirmPurchaseBtn" class="btn btn-primary" type="button" disabled>Confirm Purchase</button>
           </div>
+        </div>
 
-          <!-- Canvas Purchase Panel -->
-          <div id="canvasPurchasePanel" class="studio-section purchase-panel d-none" data-testid="canvas-purchase-panel">
-            <div class="purchase-header">
-              <div>
-                <div class="purchase-title">Buy Canvas</div>
-                <div class="purchase-subtitle" id="purchaseCanvasName">Select a canvas to buy</div>
-              </div>
-              <button id="cancelPurchaseBtn" class="btn btn-sm btn-secondary" type="button">Cancel</button>
-            </div>
-            <div class="purchase-body">
-              <div class="purchase-cost">Cost: <span id="purchaseCost">0</span> cube(s)</div>
-              <div class="purchase-instructions">Select cubes to pay for this canvas.</div>
-              <div id="purchaseCubePool" class="paint-cubes-selectable purchase-cubes"></div>
-              <div class="selected-cubes-info mt-2">
-                Selected: <span id="purchaseSelectedCount">0</span> cube(s)
-              </div>
-            </div>
-            <div class="purchase-actions mt-3">
-              <button id="confirmPurchaseBtn" class="btn btn-primary" type="button" disabled>Confirm Purchase</button>
-            </div>
+        <div id="sellSelectionPanel" class="sell-selection d-none" data-testid="sell-selection-panel">
+          <div class="sell-selection-header">
+            <div class="sell-title">Select completed canvases to sell</div>
+            <button id="cancelSellBtn" class="btn btn-sm btn-secondary" type="button">Cancel</button>
           </div>
-
-          <!-- Action Buttons -->
-          <div class="studio-section">
-            <h6 class="section-title">⚡ Actions</h6>
-            <div class="action-buttons">
-              <button 
-                id="workBtn" 
-                class="btn btn-primary action-btn" 
-                <%= !isCurrentTurn || game.current_phase === 'selling' ? 'disabled' : '' %>
-                data-testid="work-btn"
-              >
-                <span class="btn-text">🖌️ Work</span>
-                <span class="spinner-border spinner-border-sm d-none" role="status"></span>
-              </button>
-              <button 
-                id="endTurnBtn" 
-                class="btn btn-secondary action-btn" 
-                <%= !isCurrentTurn || game.current_phase === 'selling' ? 'disabled' : '' %>
-                data-testid="end-turn-btn"
-              >
-                <span class="btn-text">⏭️ End Turn</span>
-                <span class="spinner-border spinner-border-sm d-none" role="status"></span>
-              </button>
-            </div>
-            <div class="pending-paints-info mt-2">
-              <span>Pending paints: <strong id="pendingPaintsCount">0</strong></span>
-              <button 
-                id="commitPaintsBtn" 
-                class="btn btn-sm btn-accent ms-2" 
-                disabled
-                data-testid="commit-paints-btn"
-              >
-                Apply Paints
-              </button>
-            </div>
+          <div id="sellSelectionList" class="sell-selection-list"></div>
+          <div class="sell-selection-actions">
+            <button id="confirmSellBtn" class="btn btn-primary" type="button" disabled>Submit Sell</button>
           </div>
+        </div>
 
-          <!-- Player's Canvases -->
-          <div class="studio-section">
-            <h6 class="section-title">🖼️ Your Canvases (<span id="canvasesCount"><%= playerCanvases.length %></span>)</h6>
-            <div id="playerCanvases" class="player-canvases">
-              <% if (playerCanvases.length > 0) { %>
-                <% playerCanvases.forEach(canvas => { %>
-                  <div class="canvas-card <%= canvas.completed ? 'completed' : '' %>" data-canvas-id="<%= canvas.id %>" data-testid="player-canvas-<%= canvas.id %>">
-                    <div class="canvas-header">
-                      <div class="canvas-name"><%= canvas.definition?.name || 'Canvas' %></div>
-                      <div class="canvas-values">
-                        <span>⭐ <%= canvas.definition?.star_value || 0 %></span>
-                        <span>🎨 <%= canvas.definition?.paint_value || 0 %></span>
-                        <span>🍎 <%= canvas.definition?.food_value || 0 %></span>
-                      </div>
+        <div class="canvas-carousel">
+          <button id="canvasPrevBtn" class="carousel-nav" type="button" aria-label="Previous canvas">&lsaquo;</button>
+          <div id="playerCanvases" class="canvas-carousel-track">
+            <% if (playerCanvases.length > 0) { %>
+              <% playerCanvases.forEach((canvas, index) => { %>
+                <div class="canvas-card <%= canvas.completed ? 'completed' : '' %>" data-canvas-id="<%= canvas.id %>" data-testid="player-canvas-<%= canvas.id %>">
+                  <% if (canvas.definition && canvas.definition.filename) { %>
+                    <div class="canvas-painting-container" data-orientation="<%= canvas.definition.layout_json?.orientation || 'landscape' %>">
+                      <img src="/assets/canvases/<%= canvas.definition.filename %>" alt="<%= canvas.definition.name %>" class="canvas-painting-img">
+                      <% if (canvas.definition.layout_json && canvas.definition.layout_json.squares) { %>
+                        <div class="canvas-paint-overlay">
+                          <% 
+                            const paintedMap = new Map(canvas.painted_squares.map(ps => [ps.squareId, ps]));
+                          %>
+                          <% canvas.definition.layout_json.squares.forEach(square => { %>
+                            <% const painted = paintedMap.get(square.id); %>
+                            <div 
+                              class="paint-drop-zone <%= painted ? 'painted' : 'drop-zone' %>" 
+                              data-square-id="<%= square.id %>"
+                              data-allowed-colors="<%= square.allowedColors.join(',') %>"
+                              style="left: <%= square.position?.x || 0 %>px; top: <%= square.position?.y || 0 %>px;<%= painted ? ' background-color: var(--paint-' + painted.color + ');' : '' %>"
+                              <%= painted ? 'data-cube-color="' + painted.color + '"' : '' %>
+                              title="<%= painted ? 'Painted: ' + painted.color : 'Allowed: ' + square.allowedColors.join(', ') %>"
+                            >
+                              <% if (painted) { %><span class="paint-check">&#10003;</span><% } %>
+                            </div>
+                          <% }); %>
+                        </div>
+                      <% } %>
                     </div>
-                    <% if (canvas.definition && canvas.definition.filename) { %>
-                      <!-- Canvas with image - pixel perfect rendering -->
-                      <div class="canvas-painting-container" data-orientation="<%= canvas.definition.layout_json?.orientation || 'landscape' %>">
-                        <img src="/assets/canvases/<%= canvas.definition.filename %>" alt="<%= canvas.definition.name %>" class="canvas-painting-img">
-                        <% if (canvas.definition.layout_json && canvas.definition.layout_json.squares) { %>
-                          <div class="canvas-paint-overlay">
-                            <% 
-                              const paintedMap = new Map(canvas.painted_squares.map(ps => [ps.squareId, ps]));
-                            %>
-                            <% canvas.definition.layout_json.squares.forEach(square => { %>
-                              <% const painted = paintedMap.get(square.id); %>
-                              <div 
-                                class="paint-drop-zone <%= painted ? 'painted' : 'drop-zone' %>" 
-                                data-square-id="<%= square.id %>"
-                                data-allowed-colors="<%= square.allowedColors.join(',') %>"
-                                style="left: <%= square.position?.x || 0 %>px; top: <%= square.position?.y || 0 %>px;<%= painted ? ' background-color: var(--paint-' + painted.color + ');' : '' %>"
-                                <%= painted ? 'data-cube-color="' + painted.color + '"' : '' %>
-                                title="<%= painted ? 'Painted: ' + painted.color : 'Allowed: ' + square.allowedColors.join(', ') %>"
-                              >
-                                <% if (painted) { %><span class="paint-check">✓</span><% } %>
-                              </div>
-                            <% }); %>
-                          </div>
-                        <% } %>
-                      </div>
-                    <% } else if (canvas.definition && canvas.definition.layout_json && canvas.definition.layout_json.squares) { %>
-                      <!-- Canvas without image - grid rendering -->
-                      <% 
-                        const squares = canvas.definition.layout_json.squares;
-                        const paintedMap = new Map(canvas.painted_squares.map(ps => [ps.squareId, ps]));
-                        const maxX = Math.max(...squares.map(s => s.position?.x || s.x || 0));
-                        const cols = Math.ceil((maxX + 40) / 44);
-                      %>
-                      <div class="canvas-grid" style="grid-template-columns: repeat(<%= cols %>, 40px);">
-                        <% squares.forEach(square => { %>
-                          <% const painted = paintedMap.get(square.id); %>
-                          <div 
-                            class="canvas-square <%= painted ? 'painted' : 'drop-zone' %>" 
-                            data-square-id="<%= square.id %>"
-                            data-allowed-colors="<%= square.allowedColors.join(',') %>"
-                            style="<%= painted ? 'background-color: var(--paint-' + painted.color + ');' : '' %>"
-                            title="<%= painted ? 'Painted: ' + painted.color : 'Allowed: ' + square.allowedColors.join(', ') %>"
-                          >
-                            <% if (painted) { %><span style="color: white; font-size: 16px;">✓</span><% } %>
-                          </div>
-                        <% }); %>
-                      </div>
-                    <% } %>
+                  <% } else if (canvas.definition && canvas.definition.layout_json && canvas.definition.layout_json.squares) { %>
                     <% 
-                      const totalSquares = canvas.definition?.layout_json?.squares?.length || 1;
-                      const paintedCount = canvas.painted_squares.length;
-                      const percentage = (paintedCount / totalSquares) * 100;
+                      const squares = canvas.definition.layout_json.squares;
+                      const paintedMap = new Map(canvas.painted_squares.map(ps => [ps.squareId, ps]));
+                      const maxX = Math.max(...squares.map(s => s.position?.x || s.x || 0));
+                      const cols = Math.ceil((maxX + 40) / 44);
                     %>
-                    <div class="progress-bar-container">
-                      <div class="progress-bar" style="width: <%= percentage %>%"></div>
+                    <div class="canvas-grid" style="grid-template-columns: repeat(<%= cols %>, 40px);">
+                      <% squares.forEach(square => { %>
+                        <% const painted = paintedMap.get(square.id); %>
+                        <div 
+                          class="canvas-square <%= painted ? 'painted' : 'drop-zone' %>" 
+                          data-square-id="<%= square.id %>"
+                          data-allowed-colors="<%= square.allowedColors.join(',') %>"
+                          style="<%= painted ? 'background-color: var(--paint-' + painted.color + ');' : '' %>"
+                          title="<%= painted ? 'Painted: ' + painted.color : 'Allowed: ' + square.allowedColors.join(', ') %>"
+                        >
+                          <% if (painted) { %><span style="color: white; font-size: 16px;">&#10003;</span><% } %>
+                        </div>
+                      <% }); %>
                     </div>
-                    <div class="text-center mt-1">
-                      <small class="progress-text"><%= paintedCount %>/<%= totalSquares %> painted</small>
-                    </div>
+                  <% } %>
+                  <div class="canvas-caption">
+                    <span class="canvas-title"><%= canvas.definition?.name || 'Canvas' %></span>
                   </div>
-                <% }); %>
-              <% } else { %>
-                <div class="text-muted text-center py-3">No canvases yet. Buy one from the market!</div>
-              <% } %>
-            </div>
+                </div>
+              <% }); %>
+            <% } else { %>
+              <div class="text-muted text-center py-4">No canvases yet. Buy one from the market!</div>
+            <% } %>
           </div>
-        </aside>
-      </div>
+          <button id="canvasNextBtn" class="carousel-nav" type="button" aria-label="Next canvas">&rsaquo;</button>
+        </div>
+
+        <div class="paint-tray-block">
+          <div class="section-label">Your Paint</div>
+          <div id="playerCubes" class="paint-tray">
+            <% 
+              const playerGroups = {};
+              colorOrder.forEach(color => { playerGroups[color] = []; });
+              playerPaintCubes.forEach(cube => { playerGroups[cube.color].push(cube); });
+            %>
+            <% colorOrder.forEach(color => { %>
+              <div class="paint-slot" data-color="<%= color %>">
+                <div class="paint-slot-header">
+                  <span class="color-label"><%= color.slice(0, 1).toUpperCase() %></span>
+                  <span class="slot-count"><%= playerGroups[color].length %></span>
+                </div>
+                <div class="paint-slot-cubes">
+                  <% playerGroups[color].forEach(cube => { %>
+                    <div 
+                      class="paint-cube in-tray" 
+                      draggable="true"
+                      data-cube-id="<%= cube.id %>"
+                      data-color="<%= cube.color %>"
+                      data-is-wild="<%= cube.is_wild %>"
+                      title="<%= cube.color %><%= cube.is_wild ? ' (Wild)' : '' %>"
+                    ></div>
+                  <% }); %>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+      </section>
     </div>
-  </main>
+  </div>
+</main>
 
   <!-- Toast Container -->
   <div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer"></div>
@@ -513,6 +501,10 @@
       } else {
         hideSellingPhase();
       }
+
+      if (newState.game.current_phase !== 'night') {
+        closeSellSelection();
+      }
       
       if (window.dragDropManager) {
         setTimeout(() => window.dragDropManager.refresh(), 100);
@@ -557,8 +549,8 @@
         // Handle completions
         if (data.completions && data.completions.length > 0) {
           data.completions.forEach(completion => {
-            showToast('🎨 Painting Complete!', 
-              `${getPlayerName(data.playerId)} completed a painting! +${completion.rewards.stars}⭐`, 
+            showToast('Painting Complete!', 
+              `${getPlayerName(data.playerId)} completed a painting! +${completion.rewards.stars} stars`, 
               'success', 5000);
           });
         }
@@ -583,21 +575,21 @@
         console.log('Phase changed:', data);
         
         if (data.newPhase === 'selling') {
-          showToast('💰 Selling Phase', 'Collect paint cubes for completed paintings!', 'info');
+          showToast('Selling Phase', 'Collect paint cubes for completed paintings!', 'info');
         } else if (data.newPhase === 'morning' && data.newDay) {
-          showToast(`☀️ Day ${data.newDay}`, 'A new day begins!', 'info');
+          showToast(`Day ${data.newDay}`, 'A new day begins!', 'info');
           
           if (data.nutritionChanges) {
             const myChange = data.nutritionChanges.find(c => c.playerId === playerId);
             if (myChange) {
-              showToast('❤️ Nutrition', `Your nutrition is now ${myChange.newNutrition}`, 'warning');
+              showToast('Nutrition', `Your nutrition is now ${myChange.newNutrition}`, 'warning');
             }
           }
         }
         
         if (data.eliminatedPlayers && data.eliminatedPlayers.length > 0) {
           data.eliminatedPlayers.forEach(p => {
-            showToast('💀 Player Eliminated', `${p.name} has starved!`, 'danger');
+            showToast('Player Eliminated', `${p.name} has starved!`, 'danger');
           });
         }
       });
@@ -631,17 +623,55 @@
       }, 30000);
     }
 
+    let activeAction = null;
+    let selectedSellCanvasIds = [];
+
+    function setActiveAction(action) {
+      activeAction = action;
+      document.querySelectorAll('.action-btn').forEach(btn => {
+        if (btn.dataset.action === action) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    }
+
     function setupActionButtons() {
-      document.getElementById('workBtn')?.addEventListener('click', () => {
+      document.getElementById('actionWorkBtn')?.addEventListener('click', () => {
+        setActiveAction('work');
         if (gameActions) gameActions.performWork();
       });
 
-      document.getElementById('endTurnBtn')?.addEventListener('click', () => {
+      document.getElementById('actionPassBtn')?.addEventListener('click', () => {
+        setActiveAction('pass');
         if (gameActions) gameActions.endTurn();
+      });
+
+      document.getElementById('actionPaintBtn')?.addEventListener('click', () => {
+        setActiveAction('paint');
+      });
+
+      document.getElementById('actionBuyBtn')?.addEventListener('click', () => {
+        setActiveAction('buy');
+        document.getElementById('canvasMarket')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+
+      document.getElementById('actionSellBtn')?.addEventListener('click', () => {
+        setActiveAction('sell');
+        toggleSellSelection();
       });
 
       document.getElementById('commitPaintsBtn')?.addEventListener('click', () => {
         if (window.dragDropManager) window.dragDropManager.commitPaints();
+      });
+
+      document.getElementById('cancelSellBtn')?.addEventListener('click', () => {
+        closeSellSelection();
+      });
+
+      document.getElementById('confirmSellBtn')?.addEventListener('click', () => {
+        submitSellSelection();
       });
     }
 
@@ -815,30 +845,107 @@
       closeCanvasPurchase();
     });
 
+    function toggleSellSelection() {
+      const panel = document.getElementById('sellSelectionPanel');
+      if (!panel) return;
+      if (panel.classList.contains('d-none')) {
+        openSellSelection();
+      } else {
+        closeSellSelection();
+      }
+    }
+
+    function openSellSelection() {
+      const phase = gameUI?.gameState?.game?.current_phase || initialGameState.game.current_phase;
+      if (phase !== 'night') {
+        showToast('Not Available', 'Sell selections are only available at night', 'warning');
+        return;
+      }
+
+      const canvases = gameUI?.gameState?.playerCanvases?.[playerId] || [];
+      const completed = canvases.filter(c => c.completed);
+      if (completed.length === 0) {
+        showToast('No Completed Canvases', 'Finish a canvas before selling', 'info');
+        return;
+      }
+
+      selectedSellCanvasIds = [];
+      renderSellSelection(completed);
+
+      const panel = document.getElementById('sellSelectionPanel');
+      if (panel) panel.classList.remove('d-none');
+    }
+
+    function closeSellSelection() {
+      selectedSellCanvasIds = [];
+      const panel = document.getElementById('sellSelectionPanel');
+      if (panel) panel.classList.add('d-none');
+      updateSellConfirm();
+    }
+
+    function renderSellSelection(completedCanvases) {
+      const list = document.getElementById('sellSelectionList');
+      if (!list) return;
+
+      list.innerHTML = completedCanvases.map(canvas => `
+        <button class="sell-selection-item" type="button" data-canvas-id="${canvas.id}">
+          ${canvas.definition?.name || 'Canvas'}
+        </button>
+      `).join('');
+
+      list.querySelectorAll('.sell-selection-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const canvasId = item.dataset.canvasId;
+          if (!canvasId) return;
+          if (selectedSellCanvasIds.includes(canvasId)) {
+            selectedSellCanvasIds = selectedSellCanvasIds.filter(id => id !== canvasId);
+            item.classList.remove('selected');
+          } else {
+            selectedSellCanvasIds.push(canvasId);
+            item.classList.add('selected');
+          }
+          updateSellConfirm();
+        });
+      });
+      updateSellConfirm();
+    }
+
+    function updateSellConfirm() {
+      const confirmBtn = document.getElementById('confirmSellBtn');
+      if (confirmBtn) confirmBtn.disabled = selectedSellCanvasIds.length === 0;
+    }
+
+    async function submitSellSelection() {
+      if (selectedSellCanvasIds.length === 0) return;
+      if (gameActions) {
+        await gameActions.submitSellIntents(selectedSellCanvasIds);
+      }
+      closeSellSelection();
+    }
+
     function updatePhaseIndicator(phase) {
       const indicator = document.getElementById('phaseIndicator');
+      const label = document.getElementById('phaseLabel');
       if (!indicator) return;
-      
-      indicator.className = 'phase-indicator ' + phase;
+
+      indicator.setAttribute('data-phase', phase);
       const phaseText = {
-        morning: '☀️ Morning',
-        day: '🌤️ Day',
-        night: '🌙 Night',
-        selling: '💰 Selling'
+        morning: 'Morning',
+        day: 'Afternoon',
+        night: 'Evening',
+        selling: 'Selling'
       };
-      indicator.textContent = phaseText[phase] || phase;
+      if (label) label.textContent = phaseText[phase] || phase;
     }
 
     function updateTurnIndicator(state) {
-      const indicator = document.getElementById('turnIndicator');
+      const indicator = document.getElementById('turnStatus');
       if (!indicator) return;
-      
+
       if (isCurrentTurn) {
-        indicator.className = 'turn-indicator your-turn';
-        indicator.textContent = '✨ Your Turn!';
+        indicator.textContent = 'Your turn';
       } else {
-        indicator.className = 'turn-indicator not-your-turn';
-        indicator.textContent = getPlayerName(state.game.current_player_id) + "'s Turn";
+        indicator.textContent = `Waiting for ${getPlayerName(state.game.current_player_id)}`;
       }
     }
 
@@ -868,14 +975,20 @@
     }
 
     function updateActionButtons() {
-      const workBtn = document.getElementById('workBtn');
-      const endTurnBtn = document.getElementById('endTurnBtn');
+      const workBtn = document.getElementById('actionWorkBtn');
+      const passBtn = document.getElementById('actionPassBtn');
+      const buyBtn = document.getElementById('actionBuyBtn');
+      const paintBtn = document.getElementById('actionPaintBtn');
+      const sellBtn = document.getElementById('actionSellBtn');
       const phase = gameUI?.gameState?.game?.current_phase || initialGameState.game.current_phase;
-      
+
       const disabled = !isCurrentTurn || phase === 'selling';
-      
+
       if (workBtn) workBtn.disabled = disabled;
-      if (endTurnBtn) endTurnBtn.disabled = disabled;
+      if (passBtn) passBtn.disabled = disabled;
+      if (buyBtn) buyBtn.disabled = disabled;
+      if (paintBtn) paintBtn.disabled = disabled;
+      if (sellBtn) sellBtn.disabled = !isCurrentTurn || phase !== 'night';
     }
 
     function showSellingPhase(state) {
@@ -910,10 +1023,10 @@
         
         html += `
           <div class="selling-order-item ${isActive ? 'active' : ''} ${isDone ? 'done' : ''}">
-            <span class="rank-badge rank-${entry.rank}">${entry.rank === 'first' ? '🥇' : entry.rank === 'second' ? '🥈' : '🎨'}</span>
+            <span class="rank-badge rank-${entry.rank}">${entry.rank === 'first' ? '1st' : entry.rank === 'second' ? '2nd' : '3rd'}</span>
             <span class="player-name">${player?.name || 'Unknown'} ${entry.playerId === playerId ? '(You)' : ''}</span>
             <span class="cubes-info">${entry.cubesPerAction}/turn, ${entry.remainingCubes} left</span>
-            ${isDone ? '<span class="done-badge">✓ Done</span>' : ''}
+            ${isDone ? '<span class="done-badge">Done</span>' : ''}
           </div>
         `;
       });
@@ -994,15 +1107,15 @@
         .forEach((player, index) => {
           scoresHTML += `
             <div class="score-item ${player.id === winner.id ? 'winner' : ''}">
-              <span>${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : ''} ${player.name} ${player.id === playerId ? '(You)' : ''}</span>
-              <span>⭐ ${player.score} pts | 🎨 ${player.paintings_completed} paintings</span>
+              <span>${index === 0 ? '1st' : index === 1 ? '2nd' : index === 2 ? '3rd' : ''} ${player.name} ${player.id === playerId ? '(You)' : ''}</span>
+              <span>${player.score} pts | ${player.paintings_completed} paintings</span>
             </div>
           `;
         });
       
       modal.innerHTML = `
         <div class="win-content">
-          <div class="win-icon">🏆</div>
+          <div class="win-icon">Winner</div>
           <h2 class="win-title">${winner.name} ${winner.id === playerId ? '(You) ' : ''}Wins!</h2>
           <p class="lead">Final Score: ${winner.score} points<br>Completed Paintings: ${winner.paintings_completed}</p>
           <div class="final-scores"><h4>Final Standings</h4>${scoresHTML}</div>
@@ -1029,3 +1142,15 @@
   %>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+

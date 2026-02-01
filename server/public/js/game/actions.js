@@ -10,7 +10,7 @@ class GameActions {
   async performWork() {
     if (this.isProcessing) return;
     
-    const btn = document.getElementById('workBtn');
+    const btn = document.getElementById('actionWorkBtn');
     if (!btn) return;
     
     this.isProcessing = true;
@@ -60,7 +60,7 @@ class GameActions {
   async endTurn() {
     if (this.isProcessing) return;
     
-    const btn = document.getElementById('endTurnBtn');
+    const btn = document.getElementById('actionPassBtn');
     if (!btn) return;
     
     this.isProcessing = true;

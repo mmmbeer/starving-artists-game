@@ -32,66 +32,68 @@ class GameUI {
 
   updatePhaseIndicator() {
     const indicator = document.getElementById('phaseIndicator');
+    const label = document.getElementById('phaseLabel');
     if (!indicator) return;
-    
+
     const phase = this.gameState.game.current_phase;
     const phaseNames = {
-      morning: '☀️ Morning',
-      day: '🌤️ Day',
-      night: '🌙 Night',
-      selling: '💰 Selling'
+      morning: 'Morning',
+      day: 'Afternoon',
+      night: 'Evening',
+      selling: 'Selling'
     };
-    
-    indicator.textContent = phaseNames[phase] || phase;
-    indicator.className = `phase-indicator ${phase}`;
+
+    indicator.setAttribute('data-phase', phase);
+    if (label) label.textContent = phaseNames[phase] || phase;
   }
 
   updateTurnIndicator() {
-    const indicator = document.getElementById('turnIndicator');
+    const indicator = document.getElementById('turnStatus');
     if (!indicator) return;
-    
+
     const currentPlayer = this.gameState.players.find(
       p => p.id === this.currentPlayerId
     );
-    
+
     if (this.isMyTurn()) {
-      indicator.textContent = '✨ Your Turn!';
-      indicator.className = 'turn-indicator your-turn';
+      indicator.textContent = 'Your turn';
     } else if (currentPlayer) {
-      indicator.textContent = `${currentPlayer.name}'s Turn`;
-      indicator.className = 'turn-indicator not-your-turn';
+      indicator.textContent = `Waiting for ${currentPlayer.name}`;
     }
   }
 
   updatePlayersList() {
-    const container = document.getElementById('playersList');
+    const container = document.getElementById('playerOrderTracker');
     if (!container) return;
-    
+
+    const nutritionMax = 5;
     let html = '';
-    this.gameState.players.forEach(player => {
+    this.gameState.players.forEach((player, index) => {
       const isActive = player.id === this.currentPlayerId;
       const isMe = player.id === this.myPlayerId;
-      
+      const nutritionPct = Math.max(0, Math.min(1, player.nutrition / nutritionMax)) * 100;
+
       html += `
-        <div class="sidebar-player ${isActive ? 'active' : ''}">
-          <div class="sidebar-player-name">
-            ${player.name}
-            ${isMe ? '<span class="badge bg-primary ms-2">You</span>' : ''}
-          </div>
-          <div class="sidebar-player-stats">
-            <span>❤️ ${player.nutrition}</span>
-            <span>⭐ ${player.score}</span>
-            <span>🎨 ${player.paintings_completed}</span>
-          </div>
+        <div class="player-order-item ${isActive ? 'active' : ''} ${isMe ? 'me' : ''}" data-player-id="${player.id}">
+          <span class="player-index">#${index + 1}</span>
+          <span class="player-name">${player.name}</span>
+          <span class="player-score">[${player.score}]</span>
+          <div class="nutrition-bar"><span style="width: ${nutritionPct}%"></span></div>
         </div>
       `;
     });
-    
+
     container.innerHTML = html;
+
+    const activeEl = container.querySelector('.player-order-item.active');
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
   }
 
   updateMarkets() {
     this.updateCanvasMarket();
+    this.updateCanvasDeckCount();
     this.updatePaintMarket();
   }
 
@@ -117,33 +119,29 @@ class GameUI {
     container.innerHTML = html;
   }
 
+  updateCanvasDeckCount() {
+    const countEl = document.getElementById('canvasDeckCount');
+    if (!countEl) return;
+    const count = this.gameState.gameState.canvas_deck?.length || 0;
+    countEl.textContent = count;
+  }
+
   renderMarketCanvas(canvas, cost, slotIndex) {
-    const artistHTML = canvas.artist ? `<div class="canvas-artist">${canvas.artist}</div>` : '';
     return `
-      <div class="market-canvas-card" data-slot-index="${slotIndex}">
-        <div class="canvas-cost">💎 ${cost}</div>
-        <div class="canvas-header">
-          <div class="canvas-name">${canvas.name}</div>
-          ${artistHTML}
-        </div>
+      <div class="market-canvas-card" tabindex="0" aria-label="Canvas ${canvas.name}" data-slot-index="${slotIndex}" title="${canvas.name}">
+        <div class="canvas-cost">Cost ${cost}</div>
         ${this.renderMarketCanvasMedia(canvas)}
+        <div class="canvas-hover-meta">Stars ${canvas.star_value} | Paint ${canvas.paint_value} | Food ${canvas.food_value}</div>
       </div>
     `;
   }
 
   renderMarketCanvasMedia(canvas) {
-    const valuesHTML = `
-      <span title="Stars">⭐ ${canvas.star_value}</span>
-      <span title="Paint">🎨 ${canvas.paint_value}</span>
-      <span title="Food">🍎 ${canvas.food_value}</span>
-    `;
-
     if (canvas.filename) {
       return `
         <div class="market-canvas-media">
           <img src="/assets/canvases/${canvas.filename}" alt="${canvas.name}" class="canvas-thumbnail">
           ${this.renderMarketSquareMarkers(canvas)}
-          <div class="market-canvas-metrics">${valuesHTML}</div>
         </div>
       `;
     }
@@ -151,7 +149,6 @@ class GameUI {
     return `
       <div class="market-canvas-media">
         ${this.renderCanvasGrid(canvas.layout_json.squares, true)}
-        <div class="market-canvas-metrics">${valuesHTML}</div>
       </div>
     `;
   }
@@ -179,7 +176,9 @@ class GameUI {
     const maxX = Math.max(...squares.map(s => s.x));
     const maxY = Math.max(...squares.map(s => s.y));
     
-    let html = `<div class="canvas-grid" style="grid-template-columns: repeat(${maxX + 1}, 40px);">`;
+    const gridClass = isMarket ? 'canvas-grid canvas-preview' : 'canvas-grid';
+    const gridSize = isMarket ? 24 : 40;
+    let html = `<div class="${gridClass}" style="grid-template-columns: repeat(${maxX + 1}, ${gridSize}px);">`;
     
     squares.forEach(square => {
       const colors = square.allowedColors.map(c => getPaintColor(c)).join(', ');
@@ -200,30 +199,59 @@ class GameUI {
   updatePaintMarket() {
     const container = document.getElementById('paintMarket');
     if (!container) return;
-    
-    let html = '';
+
+    const colorOrder = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'black', 'wild'];
+    const marketGroups = {};
+    colorOrder.forEach(color => { marketGroups[color] = []; });
     this.gameState.gameState.paint_market.forEach(cube => {
-      html += this.renderPaintCube(cube, true);
+      marketGroups[cube.color].push(cube);
     });
-    
+
+    const html = colorOrder.map(color => {
+      const cubes = marketGroups[color];
+      const cubesHtml = cubes.map(cube => this.renderPaintCube(cube, true)).join('');
+      return `
+        <div class="paint-slot" data-color="${color}">
+          <div class="paint-slot-header">
+            <span class="color-label">${color.slice(0, 1).toUpperCase()}</span>
+            <span class="slot-count">${cubes.length}</span>
+          </div>
+          <div class="paint-slot-cubes">${cubesHtml}</div>
+        </div>
+      `;
+    }).join('');
+
     container.innerHTML = html;
   }
 
   renderPaintCube(cube, inMarket = false) {
+    const tilt = inMarket ? 0 : getCubeTilt(cube.id);
     return `
       <div 
-        class="paint-cube ${inMarket ? 'in-market' : ''}" 
+        class="paint-cube ${inMarket ? 'in-market' : 'in-tray'}" 
+        draggable="${inMarket ? 'false' : 'true'}"
         data-cube-id="${cube.id}"
         data-color="${cube.color}"
         data-is-wild="${cube.is_wild}"
-        title="${cube.color}"
+        style="--cube-tilt: ${tilt}deg;"
+        title="${cube.color}${cube.is_wild ? ' (Wild)' : ''}"
       ></div>
     `;
   }
 
   updatePlayerStudio() {
+    this.updatePlayerStats();
     this.updatePlayerCubes();
     this.updatePlayerCanvases();
+  }
+
+  updatePlayerStats() {
+    const scoreEl = document.getElementById('playerScore');
+    const nutritionEl = document.getElementById('nutritionValue');
+    const player = this.gameState.players.find(p => p.id === this.myPlayerId);
+    if (!player) return;
+    if (scoreEl) scoreEl.textContent = player.score;
+    if (nutritionEl) nutritionEl.textContent = player.nutrition;
   }
 
   updatePlayerCubes() {
@@ -231,17 +259,30 @@ class GameUI {
     if (!container) return;
     
     const cubes = this.gameState.playerPaintCubes[this.myPlayerId] || [];
-    
-    let html = '';
-    cubes.forEach(cube => {
-      html += this.renderPaintCube(cube, false);
-    });
-    
+
+    const colorOrder = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'black', 'wild'];
+    const playerGroups = {};
+    colorOrder.forEach(color => { playerGroups[color] = []; });
+    cubes.forEach(cube => { playerGroups[cube.color].push(cube); });
+
     if (cubes.length === 0) {
-      html = '<div class="text-muted text-center">No paint cubes</div>';
+      container.innerHTML = '<div class="text-muted text-center">No paint cubes</div>';
+    } else {
+      const html = colorOrder.map(color => {
+        const colorCubes = playerGroups[color];
+        const cubesHtml = colorCubes.map(cube => this.renderPaintCube(cube, false)).join('');
+        return `
+          <div class="paint-slot" data-color="${color}">
+            <div class="paint-slot-header">
+              <span class="color-label">${color.slice(0, 1).toUpperCase()}</span>
+              <span class="slot-count">${colorCubes.length}</span>
+            </div>
+            <div class="paint-slot-cubes">${cubesHtml}</div>
+          </div>
+        `;
+      }).join('');
+      container.innerHTML = html;
     }
-    
-    container.innerHTML = html;
     
     // Refresh drag and drop
     if (window.dragDropManager) {
@@ -265,6 +306,8 @@ class GameUI {
     }
     
     container.innerHTML = html;
+
+    this.bindCarouselInteractions();
     
     // Refresh drag and drop
     if (window.dragDropManager) {
@@ -273,27 +316,10 @@ class GameUI {
   }
 
   renderPlayerCanvas(canvas) {
-    const painted = canvas.painted_squares.length;
-    const total = canvas.definition.layout_json.squares.length;
-    const percentage = (painted / total) * 100;
-    
     return `
       <div class="canvas-card ${canvas.completed ? 'completed' : ''}" data-canvas-id="${canvas.id}">
-        <div class="canvas-header">
-          <div class="canvas-name">${canvas.definition.name}</div>
-          <div class="canvas-values">
-            <span>⭐ ${canvas.definition.star_value}</span>
-            <span>🎨 ${canvas.definition.paint_value}</span>
-            <span>🍎 ${canvas.definition.food_value}</span>
-          </div>
-        </div>
         ${this.renderPlayerCanvasBody(canvas)}
-        <div class="progress-bar-container">
-          <div class="progress-bar" style="width: ${percentage}%"></div>
-        </div>
-        <div class="text-center mt-2">
-          <small class="progress-text">${painted}/${total} painted</small>
-        </div>
+        <div class="canvas-caption"><span class="canvas-title">${canvas.definition.name}</span></div>
       </div>
     `;
   }
@@ -327,7 +353,7 @@ class GameUI {
           ${cubeColor}
           title="${isPainted ? 'Painted: ' + painted.color : 'Allowed: ' + square.allowedColors.join(', ')}"
         >
-          ${isPainted ? '<span class="paint-check">✓</span>' : ''}
+          ${isPainted ? '<span class="paint-check">&#10003;</span>' : ''}
         </div>
       `;
     }).join('');
@@ -369,7 +395,7 @@ class GameUI {
           "
           ${isPainted ? `data-cube-color="${painted.color}"` : ''}
         >
-          ${isPainted ? '<span class="paint-check">✓</span>' : ''}
+          ${isPainted ? '<span class="paint-check">&#10003;</span>' : ''}
         </div>
       `;
     });
@@ -378,20 +404,46 @@ class GameUI {
     return html;
   }
 
+  bindCarouselInteractions() {
+    const container = document.getElementById('playerCanvases');
+    if (!container) return;
+
+    const cards = Array.from(container.querySelectorAll('.canvas-card'));
+    if (cards.length === 0) return;
+
+    cards.forEach((card, index) => {
+      card.addEventListener('click', () => {
+        cards.forEach(el => el.classList.remove('is-active'));
+        card.classList.add('is-active');
+        card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      });
+      if (index === 0) card.classList.add('is-active');
+    });
+
+    const prevBtn = document.getElementById('canvasPrevBtn');
+    const nextBtn = document.getElementById('canvasNextBtn');
+    const scrollBy = () => container.clientWidth * 0.7;
+
+    if (prevBtn) {
+      prevBtn.onclick = () => container.scrollBy({ left: -scrollBy(), behavior: 'smooth' });
+    }
+
+    if (nextBtn) {
+      nextBtn.onclick = () => container.scrollBy({ left: scrollBy(), behavior: 'smooth' });
+    }
+  }
+
   updateActionButtons() {
     const isMyTurn = this.isMyTurn();
     const phase = this.gameState.game.current_phase;
     
-    const workBtn = document.getElementById('workBtn');
-    const endTurnBtn = document.getElementById('endTurnBtn');
+    const workBtn = document.getElementById('actionWorkBtn');
+    const passBtn = document.getElementById('actionPassBtn');
+    const sellBtn = document.getElementById('actionSellBtn');
     
-    if (workBtn) {
-      workBtn.disabled = !isMyTurn || phase === 'selling';
-    }
-    
-    if (endTurnBtn) {
-      endTurnBtn.disabled = !isMyTurn || phase === 'selling';
-    }
+    if (workBtn) workBtn.disabled = !isMyTurn || phase === 'selling';
+    if (passBtn) passBtn.disabled = !isMyTurn || phase === 'selling';
+    if (sellBtn) sellBtn.disabled = !isMyTurn || phase !== 'night';
   }
 
   handleCanvasPurchase(slotIndex) {
@@ -411,4 +463,13 @@ class GameUI {
       window.socket.emit('request-game-state', { gameId: this.gameState.game.id });
     }
   }
+}
+
+function getCubeTilt(id) {
+  let hash = 0;
+  for (let i = 0; i < id.length; i += 1) {
+    hash = (hash * 31 + id.charCodeAt(i)) % 360;
+  }
+  const tilt = (hash % 9) - 4;
+  return tilt;
 }

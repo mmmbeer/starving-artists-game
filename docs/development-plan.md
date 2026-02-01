@@ -78,4 +78,7 @@ Next priorities
 - Audit security (rate limits, input validation consistency, session hardening).
 - Final UI polish and accessibility pass.
 
+Design documentation
+- In-game single-screen layout spec: `docs/in-game-ui.md`.
+
 Keep this document updated whenever a phase concludes or architecture changes, so future work stays aligned with the codebase.
