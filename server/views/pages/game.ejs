@@ -289,14 +289,16 @@
                           %>
                           <% canvas.definition.layout_json.squares.forEach(square => { %>
                             <% const painted = paintedMap.get(square.id); %>
-                            <div 
-                              class="paint-drop-zone <%= painted ? 'painted' : 'drop-zone' %>" 
-                              data-square-id="<%= square.id %>"
-                              data-allowed-colors="<%= square.allowedColors.join(',') %>"
-                              style="left: <%= square.position?.x || 0 %>px; top: <%= square.position?.y || 0 %>px;<%= painted ? ' background-color: var(--paint-' + painted.color + ');' : '' %>"
-                              <%= painted ? 'data-cube-color="' + painted.color + '"' : '' %>
-                              title="<%= painted ? 'Painted: ' + painted.color : 'Allowed: ' + square.allowedColors.join(', ') %>"
-                            >
+                              <div 
+                                class="paint-drop-zone <%= painted ? 'painted' : 'drop-zone' %>" 
+                                data-square-id="<%= square.id %>"
+                                data-allowed-colors="<%= square.allowedColors.join(',') %>"
+                                data-x="<%= square.position?.x || 0 %>"
+                                data-y="<%= square.position?.y || 0 %>"
+                                style="<%= painted ? 'background-color: var(--paint-' + painted.color + ');' : '' %>"
+                                <%= painted ? 'data-cube-color="' + painted.color + '"' : '' %>
+                                title="<%= painted ? 'Painted: ' + painted.color : 'Allowed: ' + square.allowedColors.join(', ') %>"
+                              >
                               <% if (painted) { %><span class="paint-check">&#10003;</span><% } %>
                             </div>
                           <% }); %>
@@ -460,6 +462,10 @@
       // Initialize drag and drop
       if (window.dragDropManager) {
         window.dragDropManager.initialize();
+      }
+
+      if (gameUI) {
+        gameUI.refreshCanvasOverlays();
       }
       
       // Update waiting overlay

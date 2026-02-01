@@ -5,6 +5,13 @@ class GameUI {
     this.gameState = gameState;
     this.currentPlayerId = gameState.game.current_player_id;
     this.myPlayerId = null;
+
+    if (!window.__canvasOverlayResizeBound) {
+      window.addEventListener('resize', () => {
+        this.refreshCanvasOverlays();
+      });
+      window.__canvasOverlayResizeBound = true;
+    }
   }
 
   setMyPlayerId(playerId) {
@@ -28,6 +35,7 @@ class GameUI {
     this.updateMarkets();
     this.updatePlayerStudio();
     this.updateActionButtons();
+    this.refreshCanvasOverlays();
   }
 
   updatePhaseIndicator() {
@@ -173,8 +181,8 @@ class GameUI {
 
   renderCanvasGrid(squares, isMarket = false) {
     // Calculate grid dimensions
-    const maxX = Math.max(...squares.map(s => s.x));
-    const maxY = Math.max(...squares.map(s => s.y));
+    const maxX = Math.max(...squares.map(s => (s.position && s.position.x !== undefined) ? s.position.x : (s.x || 0)));
+    const maxY = Math.max(...squares.map(s => (s.position && s.position.y !== undefined) ? s.position.y : (s.y || 0)));
     
     const gridClass = isMarket ? 'canvas-grid canvas-preview' : 'canvas-grid';
     const gridSize = isMarket ? 24 : 40;
@@ -182,12 +190,14 @@ class GameUI {
     
     squares.forEach(square => {
       const colors = square.allowedColors.map(c => getPaintColor(c)).join(', ');
+      const gridX = (square.position && square.position.x !== undefined) ? square.position.x : (square.x || 0);
+      const gridY = (square.position && square.position.y !== undefined) ? square.position.y : (square.y || 0);
       html += `
         <div 
           class="canvas-square ${isMarket ? '' : 'drop-zone'}" 
           data-square-id="${square.id}"
           data-allowed-colors="${square.allowedColors.join(',')}"
-          style="grid-column: ${square.x + 1}; grid-row: ${square.y + 1}; background: linear-gradient(45deg, ${colors});"
+          style="grid-column: ${gridX + 1}; grid-row: ${gridY + 1}; background: linear-gradient(45deg, ${colors});"
         ></div>
       `;
     });
@@ -225,7 +235,7 @@ class GameUI {
   }
 
   renderPaintCube(cube, inMarket = false) {
-    const tilt = inMarket ? 0 : getCubeTilt(cube.id);
+    const tilt = getCubeTilt(cube.id) * (inMarket ? 0.7 : 1);
     return `
       <div 
         class="paint-cube ${inMarket ? 'in-market' : 'in-tray'}" 
@@ -315,6 +325,36 @@ class GameUI {
     }
   }
 
+  refreshCanvasOverlays() {
+    const containers = document.querySelectorAll('.canvas-painting-container');
+    containers.forEach(container => {
+      const img = container.querySelector('img');
+      if (!img) return;
+
+      const applyPositions = () => {
+        if (!img.naturalWidth || !img.naturalHeight) return;
+        const rect = img.getBoundingClientRect();
+        const scaleX = rect.width / img.naturalWidth;
+        const scaleY = rect.height / img.naturalHeight;
+        const scale = Math.min(scaleX, scaleY) || 1;
+        container.style.setProperty('--overlay-scale', scale.toFixed(4));
+
+        container.querySelectorAll('.paint-drop-zone').forEach(zone => {
+          const x = parseFloat(zone.dataset.x || '0');
+          const y = parseFloat(zone.dataset.y || '0');
+          zone.style.left = `${x * scaleX}px`;
+          zone.style.top = `${y * scaleY}px`;
+        });
+      };
+
+      if (img.complete) {
+        applyPositions();
+      } else {
+        img.addEventListener('load', applyPositions, { once: true });
+      }
+    });
+  }
+
   renderPlayerCanvas(canvas) {
     return `
       <div class="canvas-card ${canvas.completed ? 'completed' : ''}" data-canvas-id="${canvas.id}">
@@ -340,16 +380,18 @@ class GameUI {
     const overlaySquares = squares.map(square => {
       const painted = paintedMap.get(square.id);
       const isPainted = !!painted;
-      const left = (square.position && square.position.x !== undefined) ? square.position.x : (square.x || 0);
-      const top = (square.position && square.position.y !== undefined) ? square.position.y : (square.y || 0);
       const paintedStyle = isPainted ? `background-color: ${getPaintColor(painted.color)};` : '';
       const cubeColor = isPainted ? `data-cube-color="${painted.color}"` : '';
+      const left = (square.position && square.position.x !== undefined) ? square.position.x : (square.x || 0);
+      const top = (square.position && square.position.y !== undefined) ? square.position.y : (square.y || 0);
       return `
         <div 
           class="paint-drop-zone ${isPainted ? 'painted' : 'drop-zone'}" 
           data-square-id="${square.id}"
           data-allowed-colors="${square.allowedColors.join(',')}"
-          style="left: ${left}px; top: ${top}px; ${paintedStyle}"
+          data-x="${left}"
+          data-y="${top}"
+          style="${paintedStyle}"
           ${cubeColor}
           title="${isPainted ? 'Painted: ' + painted.color : 'Allowed: ' + square.allowedColors.join(', ')}"
         >
