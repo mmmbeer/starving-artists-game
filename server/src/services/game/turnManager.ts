@@ -2,7 +2,7 @@
 import * as gameDb from '../../database/gameDb';
 import * as playerDb from '../../database/playerDb';
 import { Game, Player } from '../../models/types';
-import { GAME_PHASES } from '../../utils/constants';
+import { GAME_PHASES, MAX_ACTIONS_PER_TURN } from '../../utils/constants';
 
 export async function initializeTurnOrder(
   gameId: string,
@@ -39,6 +39,7 @@ export async function advanceToNextPlayer(gameId: string): Promise<Player> {
   
   await gameDb.updateCurrentPlayer(gameId, nextPlayer.id);
   await gameDb.incrementTurnCount(gameId);
+  await gameDb.resetActionCount(gameId);
   
   return nextPlayer;
 }
@@ -101,6 +102,23 @@ export async function canPlayerAct(
   if (game.current_phase === 'selling') return false;
   
   // Must be current player's turn
+  if (game.current_player_id !== playerId) return false;
+
+  const gameState = await gameDb.getGameState(gameId);
+  if (!gameState) return false;
+
+  return gameState.actions_taken < MAX_ACTIONS_PER_TURN;
+}
+
+export async function canPlayerEndTurn(
+  gameId: string,
+  playerId: string
+): Promise<boolean> {
+  const game = await gameDb.getGame(gameId);
+  if (!game || game.status !== 'playing') return false;
+
+  if (game.current_phase === 'selling') return false;
+
   return game.current_player_id === playerId;
 }
 
@@ -127,8 +145,5 @@ export async function hasActionAvailable(
   const gameState = await gameDb.getGameState(gameId);
   if (!gameState) return false;
   
-  // Each phase allows 1 action per player
-  // In a turn-based system, each player gets 1 action per phase
-  // After action, turn advances to next player
-  return true;
+  return gameState.actions_taken < MAX_ACTIONS_PER_TURN;
 }

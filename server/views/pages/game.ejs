@@ -197,6 +197,7 @@
                     <span class="turn-field"><span class="turn-label">Name:</span> <span class="turn-name"><%= player.name %></span></span>
                     <span class="turn-field"><span class="turn-label">Points:</span> <span class="turn-value"><%= player.score %></span></span>
                     <span class="turn-field"><span class="turn-label">Nutrition:</span> <span class="turn-value"><%= player.nutrition %></span></span>
+                    <span class="turn-field turn-actions"><span class="turn-label">Actions:</span> <span class="turn-value"><%= isActive ? gameState.actions_taken + '/2' : '-' %></span></span>
                   </div>
                   <% if (isMe || showSelling) { %>
                     <div class="turn-badges">
@@ -259,6 +260,7 @@
         </div>
         <div class="action-meta">
           <span id="turnStatus" class="turn-status"><%= isCurrentTurn ? "Your turn" : "Waiting for " + (players.find(p => p.id === game.current_player_id)?.name || "player") %></span>
+          <span id="actionCount" class="action-count">Actions: <strong id="actionCountValue"><%= gameState.actions_taken %></strong>/2</span>
           <div class="pending-paints">
             <span>Pending: <strong id="pendingPaintsCount">0</strong></span>
             <button id="commitPaintsBtn" class="btn btn-sm btn-accent" disabled data-testid="commit-paints-btn">Apply Paints</button>
@@ -989,6 +991,7 @@
     function updateTurnIndicator(state) {
       const indicator = document.getElementById('turnStatus');
       const headerName = document.getElementById('currentTurnName');
+      const actionCountValue = document.getElementById('actionCountValue');
       if (!indicator && !headerName) return;
 
       if (isCurrentTurn) {
@@ -998,6 +1001,10 @@
         const currentName = getPlayerName(state.game.current_player_id);
         if (indicator) indicator.textContent = `Waiting for ${currentName}`;
         if (headerName) headerName.textContent = currentName;
+      }
+
+      if (actionCountValue) {
+        actionCountValue.textContent = state.gameState.actions_taken;
       }
     }
 

@@ -44,6 +44,7 @@ export const CANVAS_MARKET_SIZE = 3;
 export const INITIAL_PAINT_MARKET_SIZE = 4;
 export const PAINT_MARKET_REFILL_SIZE = 4;
 export const MAX_PAINT_CUBES_PER_ACTION = 4;
+export const MAX_ACTIONS_PER_TURN = 2;
 
 export const WIN_CONDITIONS = {
   2: { paintings: 7, points: 16 },

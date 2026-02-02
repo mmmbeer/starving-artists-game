@@ -45,6 +45,7 @@ export async function handleEndTurn(
 
   await gameDb.updateCurrentPlayer(gameId, nextPlayer.id);
   await gameDb.incrementTurnCount(gameId);
+  await gameDb.resetActionCount(gameId);
 
   if (isRoundComplete) {
     // Advance to next phase

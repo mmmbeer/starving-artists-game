@@ -616,6 +616,15 @@
   color: var(--game-ink);
 }
 
+.action-count {
+  font-weight: var(--font-weight-semibold);
+  color: var(--game-ink);
+}
+
+.turn-actions .turn-value {
+  font-weight: var(--font-weight-semibold);
+}
+
 .pending-paints {
   display: flex;
   align-items: center;

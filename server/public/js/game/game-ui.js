@@ -36,6 +36,7 @@ class GameUI {
     this.updateMarkets();
     this.updatePlayerStudio();
     this.updateActionButtons();
+    this.updateActionCount();
     this.refreshCanvasOverlays();
   }
 
@@ -74,6 +75,12 @@ class GameUI {
     }
   }
 
+  updateActionCount() {
+    const countEl = document.getElementById('actionCountValue');
+    if (!countEl) return;
+    countEl.textContent = this.gameState.gameState.actions_taken;
+  }
+
   updatePlayersList() {
     const container = document.getElementById('turnInfoList');
     if (!container) return;
@@ -104,6 +111,7 @@ class GameUI {
       const isActive = player.id === this.currentPlayerId;
       const isMe = player.id === this.myPlayerId;
       const showSelling = sellingCandidates.has(player.id);
+      const actionsText = isActive ? `${this.gameState.gameState.actions_taken}/2` : '-';
 
       return `
         <div class="turn-info-item ${isActive ? 'active' : ''} ${isMe ? 'me' : ''}" data-player-id="${player.id}" data-selling="${showSelling}">
@@ -111,6 +119,7 @@ class GameUI {
             <span class="turn-field"><span class="turn-label">Name:</span> <span class="turn-name">${player.name}</span></span>
             <span class="turn-field"><span class="turn-label">Points:</span> <span class="turn-value">${player.score}</span></span>
             <span class="turn-field"><span class="turn-label">Nutrition:</span> <span class="turn-value">${player.nutrition}</span></span>
+            <span class="turn-field turn-actions"><span class="turn-label">Actions:</span> <span class="turn-value">${actionsText}</span></span>
           </div>
           ${isMe || showSelling ? `
             <div class="turn-badges">

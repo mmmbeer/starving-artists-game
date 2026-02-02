@@ -4,14 +4,14 @@ import * as playerDb from '../../database/playerDb';
 import * as canvasDb from '../../database/canvasDb';
 import { drawPaintCubes } from '../paint/paintBag';
 import { refillMarketSlot, getCanvasCost, shiftMarketLeft } from '../canvas/canvasMarket';
-import { canPlayerAct, advanceToNextPlayer } from './turnManager';
+import { canPlayerAct, canPlayerEndTurn } from './turnManager';
 import { checkWinCondition, declareWinner } from '../score/scoreTracker';
 import { getFullGameState } from './gameEngine';
 import { checkAndProcessCompletion, validatePaintPlacement } from './canvasCompletion';
 import { handleEndTurn } from './dayNightCycle';
 import { collectPaintCubes, skipCollection, canCollectPaint, getCurrentCollector } from './sellingPhase';
 import { FullGameState, PaintCube, PlayerCanvas } from '../../models/types';
-import { CUBES_PER_WORK_ACTION, MAX_PAINT_CUBES_PER_ACTION } from '../../utils/constants';
+import { CUBES_PER_WORK_ACTION, MAX_ACTIONS_PER_TURN, MAX_PAINT_CUBES_PER_ACTION } from '../../utils/constants';
 
 export async function performWorkAction(
   gameId: string,
@@ -45,9 +45,10 @@ export async function performWorkAction(
   
   // Increment action count
   await gameDb.incrementActionCount(gameId);
-  
-  // Advance to next player
-  await advanceToNextPlayer(gameId);
+  const nextActionCount = gameState.actions_taken + 1;
+  if (nextActionCount >= MAX_ACTIONS_PER_TURN) {
+    await handleEndTurn(gameId, playerId);
+  }
   
   return getFullGameState(gameId);
 }
@@ -132,9 +133,10 @@ export async function performBuyCanvasAction(
   
   // Increment action count
   await gameDb.incrementActionCount(gameId);
-  
-  // Advance to next player
-  await advanceToNextPlayer(gameId);
+  const nextActionCount = gameState.actions_taken + 1;
+  if (nextActionCount >= MAX_ACTIONS_PER_TURN) {
+    await handleEndTurn(gameId, playerId);
+  }
   
   return getFullGameState(gameId);
 }
@@ -234,9 +236,10 @@ export async function performPaintAction(
   
   // Increment action count
   await gameDb.incrementActionCount(gameId);
-  
-  // Advance to next player
-  await advanceToNextPlayer(gameId);
+  const nextActionCount = gameState.actions_taken + 1;
+  if (nextActionCount >= MAX_ACTIONS_PER_TURN) {
+    await handleEndTurn(gameId, playerId);
+  }
   
   return {
     gameState: await getFullGameState(gameId),
@@ -249,7 +252,7 @@ export async function performEndTurnAction(
   playerId: string
 ): Promise<{ gameState: FullGameState; phaseResult?: any }> {
   // Verify player can act
-  const canAct = await canPlayerAct(gameId, playerId);
+  const canAct = await canPlayerEndTurn(gameId, playerId);
   if (!canAct) throw new Error('Not your turn');
   
   const result = await handleEndTurn(gameId, playerId);
@@ -361,8 +364,13 @@ export async function getAvailableActions(
   const gameState = await gameDb.getGameState(gameId);
   const playerCubes = await playerDb.getPlayerPaintCubes(playerId);
   const playerCanvases = await canvasDb.getPlayerCanvases(playerId);
-  
+  const actionsTaken = gameState?.actions_taken ?? 0;
+
   const actions: string[] = ['end_turn'];
+
+  if (actionsTaken >= MAX_ACTIONS_PER_TURN) {
+    return { canAct: true, availableActions: actions, reason: 'No actions remaining' };
+  }
   
   // Work: always available if bag not empty
   if (gameState && gameState.paint_bag.length > 0) {

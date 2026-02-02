@@ -555,6 +555,40 @@ class TestGameActions:
             data = end_response.json()
             assert data["success"] == True
             print("✓ End turn action completed successfully")
+
+    def test_two_actions_per_turn(self, active_game):
+        """Player should get two actions before turn advances"""
+        state_response = active_game["hostSession"].get(
+            f"{BASE_URL}/game/{active_game['gameId']}/state"
+        )
+
+        assert state_response.status_code == 200
+        state_data = state_response.json()
+        current_player_id = state_data.get("gameState", {}).get("game", {}).get("current_player_id")
+
+        if current_player_id == active_game["hostPlayerId"]:
+            session = active_game["hostSession"]
+        else:
+            session = active_game["player2Session"]
+
+        first_action = session.post(
+            f"{BASE_URL}/game/{active_game['gameId']}/action/work",
+            headers={"Content-Type": "application/json"}
+        )
+        assert first_action.status_code == 200
+        first_state = first_action.json()["gameState"]
+        assert first_state["game"]["current_player_id"] == current_player_id
+        assert first_state["gameState"]["actions_taken"] == 1
+
+        second_action = session.post(
+            f"{BASE_URL}/game/{active_game['gameId']}/action/work",
+            headers={"Content-Type": "application/json"}
+        )
+        assert second_action.status_code == 200
+        second_state = second_action.json()["gameState"]
+        assert second_state["game"]["current_player_id"] != current_player_id
+        assert second_state["gameState"]["actions_taken"] == 0
+        print("✓ Two actions allowed before advancing turn")
     
     def test_buy_canvas_action(self, active_game):
         """Buy canvas action should work with enough paint cubes"""
