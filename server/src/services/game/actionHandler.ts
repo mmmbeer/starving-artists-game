@@ -233,6 +233,9 @@ export async function performPaintAction(
   
   // Remove used cubes from player
   await playerDb.removePaintCubes(playerId, cubesUsed);
+
+  const gameState = await gameDb.getGameState(gameId);
+  if (!gameState) throw new Error('Game state not found');
   
   // Increment action count
   await gameDb.incrementActionCount(gameId);
