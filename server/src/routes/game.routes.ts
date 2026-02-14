@@ -307,6 +307,83 @@ router.post('/:gameId/action/skip-collection', async (req: Request<{ gameId: str
   }
 });
 
+// Trade for paint cubes (free action)
+router.post('/:gameId/action/trade-paint', async (req: Request<{ gameId: string }>, res: Response) => {
+  try {
+    const { gameId } = req.params;
+    const { tradeCubeIds, marketCubeIds } = req.body;
+    const playerId = req.session.playerId;
+
+    if (!playerId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    if (!Array.isArray(tradeCubeIds) || !Array.isArray(marketCubeIds)) {
+      return res.status(400).json({ error: 'Invalid trade selection' });
+    }
+
+    const gameState = await actionHandler.performTradeForPaintAction(
+      gameId,
+      playerId,
+      tradeCubeIds,
+      marketCubeIds
+    );
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`game:${gameId}`).emit('game-state', gameState);
+      io.to(`game:${gameId}`).emit('action-performed', {
+        action: 'trade-paint',
+        playerId,
+        traded: tradeCubeIds.length,
+        received: marketCubeIds.length,
+      });
+    }
+
+    res.json({ success: true, gameState });
+  } catch (error: any) {
+    console.error('Trade paint error:', error);
+    res.status(400).json({ error: error.message || 'Failed to trade paint' });
+  }
+});
+
+// Reset canvas market (free action)
+router.post('/:gameId/action/reset-canvas-market', async (req: Request<{ gameId: string }>, res: Response) => {
+  try {
+    const { gameId } = req.params;
+    const { cubeIds } = req.body;
+    const playerId = req.session.playerId;
+
+    if (!playerId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    if (!Array.isArray(cubeIds)) {
+      return res.status(400).json({ error: 'Invalid cube selection' });
+    }
+
+    const gameState = await actionHandler.performResetCanvasMarketAction(
+      gameId,
+      playerId,
+      cubeIds
+    );
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`game:${gameId}`).emit('game-state', gameState);
+      io.to(`game:${gameId}`).emit('action-performed', {
+        action: 'reset-canvas-market',
+        playerId,
+      });
+    }
+
+    res.json({ success: true, gameState });
+  } catch (error: any) {
+    console.error('Reset canvas market error:', error);
+    res.status(400).json({ error: error.message || 'Failed to reset canvas market' });
+  }
+});
+
 // Get available actions for current player
 router.get('/:gameId/available-actions', async (req: Request<{ gameId: string }>, res: Response) => {
   try {

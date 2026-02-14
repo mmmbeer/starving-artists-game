@@ -586,9 +586,18 @@ class TestGameActions:
         )
         assert second_action.status_code == 200
         second_state = second_action.json()["gameState"]
-        assert second_state["game"]["current_player_id"] != current_player_id
-        assert second_state["gameState"]["actions_taken"] == 0
-        print("✓ Two actions allowed before advancing turn")
+        assert second_state["game"]["current_player_id"] == current_player_id
+        assert second_state["gameState"]["actions_taken"] == 2
+
+        end_response = session.post(
+            f"{BASE_URL}/game/{active_game['gameId']}/action/end-turn",
+            headers={"Content-Type": "application/json"}
+        )
+        assert end_response.status_code == 200
+        end_state = end_response.json()["gameState"]
+        assert end_state["game"]["current_player_id"] != current_player_id
+        assert end_state["gameState"]["actions_taken"] == 0
+        print("✓ Two actions allowed before manual turn advance")
     
     def test_buy_canvas_action(self, active_game):
         """Buy canvas action should work with enough paint cubes"""
@@ -631,6 +640,71 @@ class TestGameActions:
                 # May succeed or fail depending on turn order
                 assert buy_response.status_code in [200, 400]
                 print("✓ Buy canvas endpoint accessible")
+
+    def test_trade_for_paint_action(self, active_game):
+        """Trade for paint should swap cubes at allowed ratios"""
+        state_response = active_game["hostSession"].get(
+            f"{BASE_URL}/game/{active_game['gameId']}/state"
+        )
+
+        assert state_response.status_code == 200
+        state_data = state_response.json()
+        current_player_id = state_data.get("gameState", {}).get("game", {}).get("current_player_id")
+
+        if current_player_id == active_game["hostPlayerId"]:
+            session = active_game["hostSession"]
+        else:
+            session = active_game["player2Session"]
+
+        player_cubes = state_data["gameState"]["playerPaintCubes"].get(current_player_id, [])
+        market_cubes = state_data["gameState"]["gameState"]["paint_market"]
+
+        trade_cubes = [c["id"] for c in player_cubes[:2]]
+        non_wild_market = [c for c in market_cubes if c["color"] != "wild"]
+        if len(non_wild_market) == 0:
+            pytest.skip("No non-wild cubes in market to trade")
+
+        market_cube = non_wild_market[0]["id"]
+
+        trade_response = session.post(
+            f"{BASE_URL}/game/{active_game['gameId']}/action/trade-paint",
+            json={"tradeCubeIds": trade_cubes, "marketCubeIds": [market_cube]},
+            headers={"Content-Type": "application/json"}
+        )
+
+        assert trade_response.status_code == 200
+        data = trade_response.json()
+        assert data["success"] == True
+        print("✓ Trade for paint action completed successfully")
+
+    def test_reset_canvas_market_action(self, active_game):
+        """Reset canvas market should pay 2 cubes and draw new canvases"""
+        state_response = active_game["hostSession"].get(
+            f"{BASE_URL}/game/{active_game['gameId']}/state"
+        )
+
+        assert state_response.status_code == 200
+        state_data = state_response.json()
+        current_player_id = state_data.get("gameState", {}).get("game", {}).get("current_player_id")
+
+        if current_player_id == active_game["hostPlayerId"]:
+            session = active_game["hostSession"]
+        else:
+            session = active_game["player2Session"]
+
+        player_cubes = state_data["gameState"]["playerPaintCubes"].get(current_player_id, [])
+        reset_cubes = [c["id"] for c in player_cubes[:2]]
+
+        reset_response = session.post(
+            f"{BASE_URL}/game/{active_game['gameId']}/action/reset-canvas-market",
+            json={"cubeIds": reset_cubes},
+            headers={"Content-Type": "application/json"}
+        )
+
+        assert reset_response.status_code == 200
+        data = reset_response.json()
+        assert data["success"] == True
+        print("✓ Reset canvas market action completed successfully")
 
 
 class TestGameState:

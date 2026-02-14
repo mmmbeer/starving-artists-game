@@ -621,6 +621,12 @@
   color: var(--game-ink);
 }
 
+.action-left,
+.free-action-status {
+  font-weight: var(--font-weight-semibold);
+  color: var(--game-ink);
+}
+
 .turn-actions .turn-value {
   font-weight: var(--font-weight-semibold);
 }
@@ -994,6 +1000,55 @@
   padding: var(--spacing-md);
 }
 
+.free-action-panel {
+  background-color: var(--game-surface-alt);
+  border: 1px solid var(--game-edge);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+}
+
+.free-action-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.free-action-title {
+  font-weight: var(--font-weight-semibold);
+}
+
+.free-action-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--game-ink-muted);
+}
+
+.trade-ratio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-sm);
+}
+
+.trade-section {
+  background: var(--game-surface);
+  border: 1px dashed var(--game-edge-strong);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.trade-section-title {
+  font-size: var(--font-size-sm);
+  color: var(--game-ink-muted);
+  margin-bottom: var(--spacing-xs);
+}
+
+.trade-pool {
+  min-height: 64px;
+}
+
 .purchase-header {
   display: flex;
   justify-content: space-between;
@@ -1028,6 +1083,44 @@
   padding: var(--spacing-xs);
   border-radius: var(--radius-md);
   border: 1px dashed var(--game-edge-strong);
+}
+
+.buy-canvas-modal-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) 1fr;
+  gap: var(--spacing-md);
+  align-items: start;
+}
+
+.buy-canvas-preview {
+  background: var(--game-surface-alt);
+  border: 1px solid var(--game-edge);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+}
+
+.buy-canvas-preview .market-canvas-card {
+  width: 100%;
+  margin: 0;
+  cursor: default;
+}
+
+.buy-canvas-preview .market-canvas-card:hover {
+  transform: none;
+}
+
+.buy-canvas-selection {
+  min-width: 0;
+}
+
+.buy-canvas-meta {
+  margin-bottom: var(--spacing-sm);
+}
+
+@media (max-width: 768px) {
+  .buy-canvas-modal-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 .selected-cubes-info {
@@ -1138,6 +1231,39 @@
   align-items: center;
   justify-content: center;
   z-index: var(--z-modal);
+}
+
+.turn-complete-modal {
+  position: fixed;
+  right: var(--spacing-lg);
+  bottom: calc(var(--action-bar-height) + var(--spacing-lg));
+  z-index: var(--z-fixed);
+}
+
+.turn-complete-content {
+  background: var(--game-surface);
+  border: 1px solid var(--game-edge);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  box-shadow: var(--shadow-md);
+  min-width: 260px;
+}
+
+.turn-complete-title {
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: 4px;
+}
+
+.turn-complete-text {
+  font-size: var(--font-size-sm);
+  color: var(--game-ink-muted);
+  margin-bottom: var(--spacing-sm);
+}
+
+.turn-complete-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  justify-content: flex-end;
 }
 
 .selling-content {

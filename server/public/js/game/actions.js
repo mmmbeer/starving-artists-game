@@ -111,4 +111,57 @@ class GameActions {
       this.isProcessing = false;
     }
   }
+
+  async tradeForPaint(tradeCubeIds, marketCubeIds) {
+    if (this.isProcessing) return;
+
+    this.isProcessing = true;
+    let success = false;
+
+    try {
+      const response = await api.post(`/game/${this.gameId}/action/trade-paint`, {
+        tradeCubeIds,
+        marketCubeIds
+      });
+
+      if (response.success) {
+        success = true;
+        showToast('Trade Complete', `Traded ${tradeCubeIds.length} cubes for ${marketCubeIds.length}`, 'success');
+        if (window.applyGameState && response.gameState) {
+          window.applyGameState(response.gameState);
+        }
+      }
+    } catch (error) {
+      showToast('Error', error.message, 'danger');
+    } finally {
+      this.isProcessing = false;
+    }
+    return success;
+  }
+
+  async resetCanvasMarket(cubeIds) {
+    if (this.isProcessing) return;
+
+    this.isProcessing = true;
+    let success = false;
+
+    try {
+      const response = await api.post(`/game/${this.gameId}/action/reset-canvas-market`, {
+        cubeIds
+      });
+
+      if (response.success) {
+        success = true;
+        showToast('Canvas Market Reset', 'Three new canvases have been revealed', 'success');
+        if (window.applyGameState && response.gameState) {
+          window.applyGameState(response.gameState);
+        }
+      }
+    } catch (error) {
+      showToast('Error', error.message, 'danger');
+    } finally {
+      this.isProcessing = false;
+    }
+    return success;
+  }
 }

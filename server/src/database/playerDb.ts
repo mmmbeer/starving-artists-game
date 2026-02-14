@@ -15,6 +15,7 @@ type PlayerRow = {
   is_host: number | boolean;
   connected: number | boolean;
   last_seen: Date;
+  last_free_action_day: number;
 };
 
 type PaintCubeRow = {
@@ -32,9 +33,9 @@ export async function createPlayer(
 ): Promise<Player> {
   const id = playerId ?? uuidv4();
   await execute(
-    `INSERT INTO players (id, game_id, name, nutrition, score, paintings_completed, food_earned, turn_order, is_host, connected, last_seen)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
-    [id, gameId, name, 5, 0, 0, 0, turnOrder, isHost, true]
+    `INSERT INTO players (id, game_id, name, nutrition, score, paintings_completed, food_earned, turn_order, is_host, connected, last_seen, last_free_action_day)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)`,
+    [id, gameId, name, 5, 0, 0, 0, turnOrder, isHost, true, 0]
   );
   const player = await getPlayer(id);
   if (!player) {
@@ -56,12 +57,13 @@ function mapPlayerRow(row: PlayerRow): Player {
     is_host: Boolean(row.is_host),
     connected: Boolean(row.connected),
     last_seen: row.last_seen,
+    last_free_action_day: row.last_free_action_day ?? 0,
   };
 }
 
 export async function getPlayer(playerId: string): Promise<Player | null> {
   const row = await queryOne<PlayerRow>(
-    'SELECT id, game_id, name, nutrition, score, paintings_completed, food_earned, turn_order, is_host, connected, last_seen FROM players WHERE id = ?',
+    'SELECT id, game_id, name, nutrition, score, paintings_completed, food_earned, turn_order, is_host, connected, last_seen, last_free_action_day FROM players WHERE id = ?',
     [playerId]
   );
   return row ? mapPlayerRow(row) : null;
@@ -69,7 +71,7 @@ export async function getPlayer(playerId: string): Promise<Player | null> {
 
 export async function getGamePlayers(gameId: string): Promise<Player[]> {
   const rows = await query<PlayerRow>(
-    'SELECT id, game_id, name, nutrition, score, paintings_completed, food_earned, turn_order, is_host, connected, last_seen FROM players WHERE game_id = ? ORDER BY turn_order ASC',
+    'SELECT id, game_id, name, nutrition, score, paintings_completed, food_earned, turn_order, is_host, connected, last_seen, last_free_action_day FROM players WHERE game_id = ? ORDER BY turn_order ASC',
     [gameId]
   );
   return rows.map(mapPlayerRow);
@@ -116,6 +118,13 @@ export async function updatePlayerConnection(
     'UPDATE players SET connected = ?, last_seen = NOW() WHERE id = ?',
     [connected, playerId]
   );
+}
+
+export async function updatePlayerFreeActionDay(
+  playerId: string,
+  dayNumber: number
+): Promise<void> {
+  await execute('UPDATE players SET last_free_action_day = ? WHERE id = ?', [dayNumber, playerId]);
 }
 
 export async function deletePlayer(playerId: string): Promise<void> {

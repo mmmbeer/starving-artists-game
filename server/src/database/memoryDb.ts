@@ -134,6 +134,7 @@ export const memoryDb = {
       is_host: isHost,
       connected: true,
       last_seen: new Date(),
+      last_free_action_day: 0,
     };
     players.set(playerId, player);
     playerPaintCubes.set(playerId, []);

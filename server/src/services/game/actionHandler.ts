@@ -2,13 +2,12 @@
 import * as gameDb from '../../database/gameDb';
 import * as playerDb from '../../database/playerDb';
 import * as canvasDb from '../../database/canvasDb';
-import { drawPaintCubes } from '../paint/paintBag';
-import { refillMarketSlot, getCanvasCost, shiftMarketLeft } from '../canvas/canvasMarket';
+import { drawPaintCubes, validateTradeRatio } from '../paint/paintBag';
+import { refillMarketSlot, getCanvasCost, shiftMarketLeft, resetMarket } from '../canvas/canvasMarket';
 import { canPlayerAct, canPlayerEndTurn } from './turnManager';
 import { checkWinCondition, declareWinner } from '../score/scoreTracker';
 import { getFullGameState } from './gameEngine';
 import { checkAndProcessCompletion, validatePaintPlacement } from './canvasCompletion';
-import { handleEndTurn } from './dayNightCycle';
 import { collectPaintCubes, skipCollection, canCollectPaint, getCurrentCollector } from './sellingPhase';
 import { FullGameState, PaintCube, PlayerCanvas } from '../../models/types';
 import { CUBES_PER_WORK_ACTION, MAX_ACTIONS_PER_TURN, MAX_PAINT_CUBES_PER_ACTION } from '../../utils/constants';
@@ -45,10 +44,6 @@ export async function performWorkAction(
   
   // Increment action count
   await gameDb.incrementActionCount(gameId);
-  const nextActionCount = gameState.actions_taken + 1;
-  if (nextActionCount >= MAX_ACTIONS_PER_TURN) {
-    await handleEndTurn(gameId, playerId);
-  }
   
   return getFullGameState(gameId);
 }
@@ -133,10 +128,6 @@ export async function performBuyCanvasAction(
   
   // Increment action count
   await gameDb.incrementActionCount(gameId);
-  const nextActionCount = gameState.actions_taken + 1;
-  if (nextActionCount >= MAX_ACTIONS_PER_TURN) {
-    await handleEndTurn(gameId, playerId);
-  }
   
   return getFullGameState(gameId);
 }
@@ -239,15 +230,164 @@ export async function performPaintAction(
   
   // Increment action count
   await gameDb.incrementActionCount(gameId);
-  const nextActionCount = gameState.actions_taken + 1;
-  if (nextActionCount >= MAX_ACTIONS_PER_TURN) {
-    await handleEndTurn(gameId, playerId);
-  }
   
   return {
     gameState: await getFullGameState(gameId),
     completions,
   };
+}
+
+async function assertFreeActionAvailable(gameId: string, playerId: string): Promise<void> {
+  const game = await gameDb.getGame(gameId);
+  if (!game || game.status !== 'playing') {
+    throw new Error('Game not active');
+  }
+
+  if (game.current_phase === 'selling') {
+    throw new Error('Free actions are not available during selling');
+  }
+
+  if (game.current_player_id !== playerId) {
+    throw new Error('Not your turn');
+  }
+
+  const player = await playerDb.getPlayer(playerId);
+  if (!player) throw new Error('Player not found');
+
+  if (player.last_free_action_day >= game.day_number) {
+    throw new Error('Free action already used today');
+  }
+}
+
+export async function performTradeForPaintAction(
+  gameId: string,
+  playerId: string,
+  tradedCubeIds: string[],
+  marketCubeIds: string[]
+): Promise<FullGameState> {
+  await assertFreeActionAvailable(gameId, playerId);
+
+  if (!Array.isArray(tradedCubeIds) || !Array.isArray(marketCubeIds)) {
+    throw new Error('Invalid trade selection');
+  }
+
+  if (!validateTradeRatio(tradedCubeIds.length, marketCubeIds.length)) {
+    throw new Error('Invalid trade ratio');
+  }
+
+  const tradedUnique = new Set(tradedCubeIds);
+  if (tradedUnique.size !== tradedCubeIds.length) {
+    throw new Error('Cannot trade the same cube more than once');
+  }
+
+  const marketUnique = new Set(marketCubeIds);
+  if (marketUnique.size !== marketCubeIds.length) {
+    throw new Error('Cannot take the same market cube more than once');
+  }
+
+  const playerCubes = await playerDb.getPlayerPaintCubes(playerId);
+  const cubesById = new Map(playerCubes.map(cube => [cube.id, cube]));
+  const cubesToTrade: PaintCube[] = [];
+  for (const cubeId of tradedCubeIds) {
+    const cube = cubesById.get(cubeId);
+    if (!cube) {
+      throw new Error('Selected trade cube not found in your studio');
+    }
+    cubesToTrade.push(cube);
+  }
+
+  const gameState = await gameDb.getGameState(gameId);
+  if (!gameState) throw new Error('Game state not found');
+
+  const marketById = new Map(gameState.paint_market.map(cube => [cube.id, cube]));
+  const cubesToReceive: PaintCube[] = [];
+  for (const cubeId of marketCubeIds) {
+    const cube = marketById.get(cubeId);
+    if (!cube) {
+      throw new Error('Selected market cube not found');
+    }
+    if (cube.is_wild || cube.color === 'wild') {
+      throw new Error('Cannot take wild cubes from the paint market');
+    }
+    cubesToReceive.push(cube);
+  }
+
+  await playerDb.removePaintCubes(
+    playerId,
+    cubesToTrade.map(c => c.id)
+  );
+
+  await playerDb.addPaintCubes(playerId, gameId, cubesToReceive);
+
+  const updatedMarket = [
+    ...gameState.paint_market.filter(cube => !marketCubeIds.includes(cube.id)),
+    ...cubesToTrade,
+  ];
+
+  await gameDb.updateGameState(gameId, {
+    paint_market: updatedMarket,
+  });
+
+  const game = await gameDb.getGame(gameId);
+  if (!game) throw new Error('Game not found');
+
+  await playerDb.updatePlayerFreeActionDay(playerId, game.day_number);
+
+  return getFullGameState(gameId);
+}
+
+export async function performResetCanvasMarketAction(
+  gameId: string,
+  playerId: string,
+  cubeIds: string[]
+): Promise<FullGameState> {
+  await assertFreeActionAvailable(gameId, playerId);
+
+  if (!Array.isArray(cubeIds) || cubeIds.length !== 2) {
+    throw new Error('Must select exactly 2 paint cubes to reset the market');
+  }
+
+  const uniqueCubeIds = new Set(cubeIds);
+  if (uniqueCubeIds.size !== cubeIds.length) {
+    throw new Error('Cannot use the same cube more than once');
+  }
+
+  const playerCubes = await playerDb.getPlayerPaintCubes(playerId);
+  const cubesById = new Map(playerCubes.map(cube => [cube.id, cube]));
+  const cubesToPay: PaintCube[] = [];
+  for (const cubeId of cubeIds) {
+    const cube = cubesById.get(cubeId);
+    if (!cube) {
+      throw new Error('Selected cube not found in your studio');
+    }
+    cubesToPay.push(cube);
+  }
+
+  const gameState = await gameDb.getGameState(gameId);
+  if (!gameState) throw new Error('Game state not found');
+
+  await playerDb.removePaintCubes(
+    playerId,
+    cubesToPay.map(c => c.id)
+  );
+
+  const updatedMarket = [...gameState.paint_market, ...cubesToPay];
+  const { market: newCanvasMarket, remaining: deckRemaining } = await resetMarket(
+    gameState.canvas_deck
+  );
+
+  await gameDb.updateGameState(gameId, {
+    paint_market: updatedMarket,
+    canvas_market: newCanvasMarket,
+    canvas_deck: deckRemaining,
+  });
+
+  const game = await gameDb.getGame(gameId);
+  if (!game) throw new Error('Game not found');
+
+  await playerDb.updatePlayerFreeActionDay(playerId, game.day_number);
+
+  return getFullGameState(gameId);
 }
 
 export async function performEndTurnAction(
@@ -367,9 +507,16 @@ export async function getAvailableActions(
   const gameState = await gameDb.getGameState(gameId);
   const playerCubes = await playerDb.getPlayerPaintCubes(playerId);
   const playerCanvases = await canvasDb.getPlayerCanvases(playerId);
+  const player = await playerDb.getPlayer(playerId);
   const actionsTaken = gameState?.actions_taken ?? 0;
 
   const actions: string[] = ['end_turn'];
+  const freeActionAvailable = player ? player.last_free_action_day < game.day_number : false;
+
+  if (freeActionAvailable) {
+    actions.push('trade_paint');
+    actions.push('reset_canvas_market');
+  }
 
   if (actionsTaken >= MAX_ACTIONS_PER_TURN) {
     return { canAct: true, availableActions: actions, reason: 'No actions remaining' };

@@ -18,7 +18,7 @@ export function validateGameAction(action: any): { valid: boolean; error?: strin
     return { valid: false, error: 'Invalid action format' };
   }
 
-  if (!['work', 'buy_canvas', 'paint', 'end_turn', 'sell'].includes(action.type)) {
+  if (!['work', 'buy_canvas', 'paint', 'end_turn', 'sell', 'trade_paint', 'reset_canvas_market'].includes(action.type)) {
     return { valid: false, error: 'Invalid action type' };
   }
 

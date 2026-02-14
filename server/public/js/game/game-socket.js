@@ -21,7 +21,9 @@ function setupGameSocket(socket, gameId, playerId) {
       work: `${getPlayerName(data.playerId)} drew ${data.cubesDrawn || 3} paint cubes`,
       'buy-canvas': `${getPlayerName(data.playerId)} bought a canvas`,
       paint: `${getPlayerName(data.playerId)} painted ${data.paintingsCount || 'some'} square(s)`,
-      'end-turn': `${getPlayerName(data.playerId)} ended their turn`
+      'end-turn': `${getPlayerName(data.playerId)} ended their turn`,
+      'trade-paint': `${getPlayerName(data.playerId)} traded paint cubes`,
+      'reset-canvas-market': `${getPlayerName(data.playerId)} reset the canvas market`
     };
     
     const message = actionMessages[data.action] || 'Action performed';

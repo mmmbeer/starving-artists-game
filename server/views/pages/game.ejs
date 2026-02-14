@@ -261,6 +261,8 @@
         <div class="action-meta">
           <span id="turnStatus" class="turn-status"><%= isCurrentTurn ? "Your turn" : "Waiting for " + (players.find(p => p.id === game.current_player_id)?.name || "player") %></span>
           <span id="actionCount" class="action-count">Actions: <strong id="actionCountValue"><%= gameState.actions_taken %></strong>/2</span>
+          <span id="actionsLeft" class="action-left">Left: <strong id="actionsLeftValue"><%= Math.max(0, 2 - gameState.actions_taken) %></strong></span>
+          <span id="freeActionStatus" class="free-action-status">Free: <strong id="freeActionValue">Unknown</strong></span>
           <div class="pending-paints">
             <span>Pending: <strong id="pendingPaintsCount">0</strong></span>
             <button id="commitPaintsBtn" class="btn btn-sm btn-accent" disabled data-testid="commit-paints-btn">Apply Paints</button>
@@ -279,24 +281,17 @@
           </div>
         </div>
 
-        <div id="canvasPurchasePanel" class="purchase-panel d-none" data-testid="canvas-purchase-panel">
-          <div class="purchase-header">
+        <div id="freeActionPanel" class="free-action-panel d-none" data-testid="free-action-panel">
+          <div class="free-action-header">
             <div>
-              <div class="purchase-title">Buy Canvas</div>
-              <div class="purchase-subtitle" id="purchaseCanvasName">Select a canvas to buy</div>
+              <div class="free-action-title" id="freeActionTitle">Free Action</div>
+              <div class="free-action-subtitle" id="freeActionSubtitle"></div>
             </div>
-            <button id="cancelPurchaseBtn" class="btn btn-sm btn-secondary" type="button">Cancel</button>
+            <button id="cancelFreeActionBtn" class="btn btn-sm btn-secondary" type="button">Cancel</button>
           </div>
-          <div class="purchase-body">
-            <div class="purchase-cost">Cost: <span id="purchaseCost">0</span> cube(s)</div>
-            <div class="purchase-instructions">Select cubes to pay for this canvas.</div>
-            <div id="purchaseCubePool" class="paint-cubes-selectable purchase-cubes"></div>
-            <div class="selected-cubes-info mt-2">
-              Selected: <span id="purchaseSelectedCount">0</span> cube(s)
-            </div>
-          </div>
-          <div class="purchase-actions mt-3">
-            <button id="confirmPurchaseBtn" class="btn btn-primary" type="button" disabled>Confirm Purchase</button>
+          <div id="freeActionBody" class="free-action-body"></div>
+          <div class="free-action-actions mt-3">
+            <button id="confirmFreeActionBtn" class="btn btn-primary" type="button" disabled>Confirm</button>
           </div>
         </div>
 
@@ -415,6 +410,18 @@
       </section>
     </div>
   </div>
+
+  <!-- Turn Complete Notice -->
+  <div id="turnCompleteModal" class="turn-complete-modal d-none" role="dialog" aria-modal="false" data-testid="turn-complete-modal">
+    <div class="turn-complete-content">
+      <div class="turn-complete-title">All actions used</div>
+      <div class="turn-complete-text">You have taken all available actions for this turn.</div>
+      <div class="turn-complete-actions">
+        <button id="turnCompleteEndBtn" class="btn btn-primary" type="button">End Turn</button>
+        <button id="turnCompleteCloseBtn" class="btn btn-secondary" type="button">Close</button>
+      </div>
+    </div>
+  </div>
 </main>
 
   <!-- Toast Container -->
@@ -463,6 +470,17 @@
     let selectedSellingCubes = [];
     let pendingPurchase = null;
     let selectedPurchaseCubeIds = [];
+    let purchaseModal = null;
+    let freeActionMode = null;
+    let selectedTradeGiveIds = [];
+    let selectedTradeTakeIds = [];
+    let selectedResetCubeIds = [];
+    let selectedTradeRatio = { give: 2, take: 1 };
+    const tradeRatios = [
+      { give: 2, take: 1, label: '2 for 1' },
+      { give: 5, take: 2, label: '5 for 2' },
+      { give: 9, take: 3, label: '9 for 3' }
+    ];
 
     // Initialize game
     document.addEventListener('DOMContentLoaded', () => {
@@ -514,6 +532,8 @@
       
       // Update waiting overlay
       updateWaitingOverlay();
+      updateActionMeta(getCurrentState());
+      updateTurnCompleteNotice(getCurrentState());
       
       console.log('Game initialized successfully');
     }
@@ -530,6 +550,8 @@
       
       updateWaitingOverlay();
       updateDayNumber(newState.game.day_number);
+      updateActionMeta(newState);
+      updateTurnCompleteNotice(newState);
 
       if (!isCurrentTurn || newState.game.current_phase === 'selling') {
         closeCanvasPurchase();
@@ -542,7 +564,7 @@
           const cubeIdSet = new Set(cubes.map(c => c.id));
           selectedPurchaseCubeIds = selectedPurchaseCubeIds.filter(id => cubeIdSet.has(id));
           pendingPurchase.canvasName = canvas.name;
-          renderPurchasePanel();
+          renderPurchaseModal();
         }
       }
       
@@ -554,6 +576,15 @@
 
       if (newState.game.current_phase !== 'night') {
         closeSellSelection();
+      }
+
+      const freeAvailable = isFreeActionAvailable(newState);
+      if (!isCurrentTurn || newState.game.current_phase === 'selling' || !freeAvailable) {
+        closeFreeActionPanel();
+      } else if (freeActionMode === 'trade') {
+        renderTradePanel();
+      } else if (freeActionMode === 'reset') {
+        renderResetPanel();
       }
       
       if (window.dragDropManager) {
@@ -591,7 +622,9 @@
             paint: `painted ${data.paintingsCount || 'some'} square(s)`,
             'end-turn': `ended their turn`,
             'collect-paint': `collected ${data.cubesCollected || 'some'} paint cubes`,
-            'skip-collection': `passed on collecting`
+            'skip-collection': `passed on collecting`,
+            'trade-paint': `traded paint cubes`,
+            'reset-canvas-market': `reset the canvas market`
           };
           showToast('Player Action', `${playerName} ${messages[data.action] || 'performed an action'}`, 'info', 3000);
         }
@@ -723,6 +756,44 @@
       document.getElementById('confirmSellBtn')?.addEventListener('click', () => {
         submitSellSelection();
       });
+
+      document.querySelectorAll('[data-free-action="trade"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          openFreeAction('trade');
+        });
+      });
+
+      document.querySelectorAll('[data-free-action="reset-market"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          openFreeAction('reset');
+        });
+      });
+
+      document.getElementById('cancelFreeActionBtn')?.addEventListener('click', () => {
+        closeFreeActionPanel();
+      });
+
+      document.getElementById('confirmFreeActionBtn')?.addEventListener('click', async () => {
+        if (!freeActionMode || !gameActions) return;
+        let success = false;
+        if (freeActionMode === 'trade') {
+          success = await gameActions.tradeForPaint(selectedTradeGiveIds, selectedTradeTakeIds);
+        } else if (freeActionMode === 'reset') {
+          success = await gameActions.resetCanvasMarket(selectedResetCubeIds);
+        }
+        if (success) {
+          closeFreeActionPanel();
+        }
+      });
+
+      document.getElementById('turnCompleteEndBtn')?.addEventListener('click', () => {
+        if (gameActions) gameActions.endTurn();
+      });
+
+      document.getElementById('turnCompleteCloseBtn')?.addEventListener('click', () => {
+        const modal = document.getElementById('turnCompleteModal');
+        if (modal) modal.classList.add('d-none');
+      });
     }
 
     function setupMarketHandlers() {
@@ -804,58 +875,104 @@
         cost
       };
       selectedPurchaseCubeIds = [];
-      renderPurchasePanel();
+      renderPurchaseModal();
     }
 
     window.openCanvasPurchase = openCanvasPurchase;
 
     function closeCanvasPurchase() {
-      pendingPurchase = null;
-      selectedPurchaseCubeIds = [];
-      const panel = document.getElementById('canvasPurchasePanel');
-      if (panel) panel.classList.add('d-none');
-    }
-
-    function renderPurchasePanel() {
-      const panel = document.getElementById('canvasPurchasePanel');
-      if (!panel || !pendingPurchase) return;
-
-      panel.classList.remove('d-none');
-      const nameEl = document.getElementById('purchaseCanvasName');
-      const costEl = document.getElementById('purchaseCost');
-      if (nameEl) nameEl.textContent = pendingPurchase.canvasName;
-      if (costEl) costEl.textContent = pendingPurchase.cost;
-
-      updatePurchaseCubePool();
-      updatePurchaseActions();
-    }
-
-    function updatePurchaseCubePool() {
-      const pool = document.getElementById('purchaseCubePool');
-      if (!pool) return;
-
-      const cubes = gameUI?.gameState?.playerPaintCubes?.[playerId] || [];
-      if (cubes.length === 0) {
-        pool.innerHTML = '<div class="text-muted text-center w-100 py-2">No cubes available</div>';
+      if (purchaseModal) {
+        const currentModal = purchaseModal;
+        purchaseModal = null;
+        currentModal.close('dismissed');
         return;
       }
+      pendingPurchase = null;
+      selectedPurchaseCubeIds = [];
+    }
 
-      const cost = pendingPurchase?.cost || 0;
-      pool.innerHTML = cubes.map(cube => `
-        <div 
-          class="paint-cube selectable ${selectedPurchaseCubeIds.includes(cube.id) ? 'selected' : ''} ${selectedPurchaseCubeIds.length >= cost && !selectedPurchaseCubeIds.includes(cube.id) ? 'disabled' : ''}"
-          data-cube-id="${cube.id}"
-          data-color="${cube.color}"
-          data-is-wild="${cube.is_wild}"
-          title="${cube.color}${cube.is_wild ? ' (Wild)' : ''}"
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function buildCanvasPreviewForPurchase(canvas, slotIndex) {
+      const cost = [1, 2, 3][slotIndex] || 0;
+      const overlaySquares = (canvas.layout_json?.squares || []).map(square => `
+        <div
+          class="canvas-square-marker"
+          data-x="${square.position?.x || square.x || 0}"
+          data-y="${square.position?.y || square.y || 0}"
+          data-allowed-colors="${(square.allowedColors || []).join(',')}"
+          title="${(square.allowedColors || []).join(', ')}"
         ></div>
       `).join('');
 
-      pool.querySelectorAll('.paint-cube.selectable').forEach(el => {
-        el.addEventListener('click', () => {
-          togglePurchaseCube(el.dataset.cubeId);
-        });
-      });
+      const media = canvas.filename
+        ? `
+          <div class="market-canvas-media">
+            <div class="market-canvas-frame">
+              <img src="/assets/canvases/${escapeHtml(canvas.filename)}" alt="${escapeHtml(canvas.name)}" class="canvas-thumbnail">
+              ${overlaySquares ? `<div class="canvas-squares-overlay preview">${overlaySquares}</div>` : ''}
+            </div>
+          </div>
+        `
+        : '<div class="text-muted text-center py-3">Canvas preview unavailable</div>';
+
+      return `
+        <div class="market-canvas-card">
+          <div class="canvas-cost">Cost ${cost}</div>
+          ${media}
+          <div class="canvas-hover-meta">
+            Stars ${canvas.star_value || 0} | Paint ${canvas.paint_value || 0} | Food ${canvas.food_value || 0}
+          </div>
+        </div>
+      `;
+    }
+
+    function buildPurchaseModalBody() {
+      const state = getCurrentState();
+      const canvas = state.gameState.canvas_market[pendingPurchase.slotIndex];
+      if (!canvas) {
+        return '<div class="text-muted text-center py-3">This canvas is no longer available.</div>';
+      }
+      const cubes = state.playerPaintCubes?.[playerId] || [];
+      const cost = pendingPurchase.cost;
+
+      const cubePool = cubes.length
+        ? cubes.map(cube => `
+          <div
+            class="paint-cube selectable ${selectedPurchaseCubeIds.includes(cube.id) ? 'selected' : ''} ${selectedPurchaseCubeIds.length >= cost && !selectedPurchaseCubeIds.includes(cube.id) ? 'disabled' : ''}"
+            data-cube-id="${cube.id}"
+            data-color="${cube.color}"
+            data-is-wild="${cube.is_wild}"
+            title="${cube.color}${cube.is_wild ? ' (Wild)' : ''}"
+          ></div>
+        `).join('')
+        : '<div class="text-muted text-center w-100 py-2">No cubes available</div>';
+
+      return `
+        <div class="buy-canvas-modal-layout">
+          <div class="buy-canvas-preview">
+            ${buildCanvasPreviewForPurchase(canvas, pendingPurchase.slotIndex)}
+          </div>
+          <div class="buy-canvas-selection">
+            <div class="buy-canvas-meta">
+              <div class="purchase-title">${escapeHtml(canvas.name)}</div>
+              <div class="purchase-subtitle">Cost: <strong>${cost}</strong> cube(s)</div>
+            </div>
+            <div class="purchase-instructions">Select exactly ${cost} cube(s) to buy this canvas.</div>
+            <div id="purchaseCubePool" class="paint-cubes-selectable purchase-cubes">${cubePool}</div>
+            <div class="selected-cubes-info mt-2">
+              Selected: <span id="purchaseSelectedCount">${selectedPurchaseCubeIds.length}</span>/<span>${cost}</span> cube(s)
+            </div>
+          </div>
+        </div>
+      `;
     }
 
     function togglePurchaseCube(cubeId) {
@@ -867,33 +984,307 @@
       } else if (selectedPurchaseCubeIds.length < cost) {
         selectedPurchaseCubeIds.push(cubeId);
       }
-      updatePurchaseCubePool();
-      updatePurchaseActions();
+      renderPurchaseModal();
     }
 
-    function updatePurchaseActions() {
-      const countEl = document.getElementById('purchaseSelectedCount');
-      const confirmBtn = document.getElementById('confirmPurchaseBtn');
-      const selectedCount = selectedPurchaseCubeIds.length;
-      const cost = pendingPurchase?.cost || 0;
-
-      if (countEl) countEl.textContent = selectedCount;
-      if (confirmBtn) confirmBtn.disabled = !pendingPurchase || selectedCount !== cost;
+    function bindPurchaseCubePool() {
+      if (!purchaseModal) return;
+      purchaseModal.getBodyElement().querySelectorAll('#purchaseCubePool .paint-cube.selectable').forEach(el => {
+        el.addEventListener('click', () => {
+          if (el.classList.contains('disabled')) return;
+          togglePurchaseCube(el.dataset.cubeId);
+        });
+      });
     }
 
-    document.getElementById('cancelPurchaseBtn')?.addEventListener('click', () => {
-      closeCanvasPurchase();
-    });
-
-    document.getElementById('confirmPurchaseBtn')?.addEventListener('click', async () => {
+    function renderPurchaseModal() {
       if (!pendingPurchase) return;
-      const cost = pendingPurchase.cost;
-      if (selectedPurchaseCubeIds.length !== cost) return;
-      if (gameActions) {
-        await gameActions.buyCanvas(pendingPurchase.slotIndex, selectedPurchaseCubeIds);
+      if (typeof window.openAppModal !== 'function') {
+        showToast('Error', 'Modal system is unavailable', 'danger');
+        return;
       }
-      closeCanvasPurchase();
-    });
+
+      const selectedCount = selectedPurchaseCubeIds.length;
+      const cost = pendingPurchase.cost;
+      const canBuy = selectedCount === cost;
+      const modalActions = [
+        {
+          label: 'Cancel',
+          variant: 'secondary',
+          iconType: 'cancel',
+          testId: 'cancel-canvas-purchase-btn',
+          onClick: () => closeCanvasPurchase()
+        },
+        {
+          label: 'Buy',
+          variant: 'primary',
+          iconType: 'buy',
+          disabled: !canBuy,
+          testId: 'confirm-canvas-purchase-btn',
+          onClick: async () => {
+            if (!pendingPurchase || selectedPurchaseCubeIds.length !== pendingPurchase.cost) return;
+            if (gameActions) {
+              await gameActions.buyCanvas(pendingPurchase.slotIndex, selectedPurchaseCubeIds);
+            }
+            closeCanvasPurchase();
+          }
+        }
+      ];
+
+      if (!purchaseModal) {
+        purchaseModal = window.openAppModal({
+          title: 'Buy Canvas',
+          bodyContent: buildPurchaseModalBody(),
+          actions: modalActions,
+          testId: 'canvas-purchase-modal',
+          maxWidth: '980px',
+          onClose: () => {
+            purchaseModal = null;
+            pendingPurchase = null;
+            selectedPurchaseCubeIds = [];
+          }
+        });
+      } else {
+        purchaseModal.setTitle('Buy Canvas');
+        purchaseModal.setBodyContent(buildPurchaseModalBody());
+        purchaseModal.setActions(modalActions);
+      }
+
+      bindPurchaseCubePool();
+    }
+
+    function openFreeAction(mode) {
+      const state = getCurrentState();
+      if (!isCurrentTurn || state.game.current_phase === 'selling') {
+        showToast('Not Available', 'Free actions are only available on your turn', 'warning');
+        return;
+      }
+
+      if (!isFreeActionAvailable(state)) {
+        showToast('Free Action Used', 'You already used your free action today', 'info');
+        return;
+      }
+
+      freeActionMode = mode;
+      selectedTradeGiveIds = [];
+      selectedTradeTakeIds = [];
+      selectedResetCubeIds = [];
+
+      const title = document.getElementById('freeActionTitle');
+      const subtitle = document.getElementById('freeActionSubtitle');
+      const confirmBtn = document.getElementById('confirmFreeActionBtn');
+
+      if (mode === 'trade') {
+        selectedTradeRatio = tradeRatios[0];
+        if (title) title.textContent = 'Trade for Paint';
+        if (subtitle) subtitle.textContent = 'Trade your cubes for paint market cubes (no wilds from market).';
+        if (confirmBtn) confirmBtn.textContent = 'Confirm Trade';
+        renderTradePanel();
+      } else {
+        if (title) title.textContent = 'Reset Canvas Market';
+        if (subtitle) subtitle.textContent = 'Pay 2 cubes to reveal three new canvases.';
+        if (confirmBtn) confirmBtn.textContent = 'Confirm Reset';
+        renderResetPanel();
+      }
+
+      updateFreeActionConfirm();
+      const panel = document.getElementById('freeActionPanel');
+      if (panel) panel.classList.remove('d-none');
+    }
+
+    function closeFreeActionPanel() {
+      freeActionMode = null;
+      selectedTradeGiveIds = [];
+      selectedTradeTakeIds = [];
+      selectedResetCubeIds = [];
+      const panel = document.getElementById('freeActionPanel');
+      if (panel) panel.classList.add('d-none');
+    }
+
+    function renderTradePanel() {
+      const body = document.getElementById('freeActionBody');
+      if (!body) return;
+
+      body.innerHTML = `
+        <div class="trade-ratio-row">
+          ${tradeRatios.map((ratio, index) => `
+            <button class="btn btn-sm ${selectedTradeRatio.give === ratio.give ? 'btn-primary' : 'btn-secondary'} trade-ratio-btn" data-ratio-index="${index}">
+              ${ratio.label}
+            </button>
+          `).join('')}
+        </div>
+        <div class="trade-section">
+          <div class="trade-section-title">Your Cubes (Give)</div>
+          <div id="tradeGivePool" class="paint-cubes-selectable trade-pool"></div>
+          <div class="selected-cubes-info mt-2">Selected: <span id="tradeGiveCount">0</span> / ${selectedTradeRatio.give}</div>
+        </div>
+        <div class="trade-section">
+          <div class="trade-section-title">Paint Market (Take)</div>
+          <div id="tradeTakePool" class="paint-cubes-selectable trade-pool"></div>
+          <div class="selected-cubes-info mt-2">Selected: <span id="tradeTakeCount">0</span> / ${selectedTradeRatio.take}</div>
+        </div>
+      `;
+
+      body.querySelectorAll('.trade-ratio-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const index = parseInt(btn.dataset.ratioIndex || '0');
+          selectedTradeRatio = tradeRatios[index] || tradeRatios[0];
+          selectedTradeGiveIds = [];
+          selectedTradeTakeIds = [];
+          renderTradePanel();
+          updateFreeActionConfirm();
+        });
+      });
+
+      updateTradePools();
+    }
+
+    function updateTradePools() {
+      const state = getCurrentState();
+      const givePool = document.getElementById('tradeGivePool');
+      const takePool = document.getElementById('tradeTakePool');
+      if (!givePool || !takePool) return;
+
+      const playerCubes = state.playerPaintCubes?.[playerId] || [];
+      const marketCubes = state.gameState.paint_market || [];
+
+      givePool.innerHTML = playerCubes.map(cube => `
+        <div 
+          class="paint-cube selectable ${selectedTradeGiveIds.includes(cube.id) ? 'selected' : ''} ${selectedTradeGiveIds.length >= selectedTradeRatio.give && !selectedTradeGiveIds.includes(cube.id) ? 'disabled' : ''}"
+          data-cube-id="${cube.id}"
+          data-color="${cube.color}"
+          data-is-wild="${cube.is_wild}"
+          title="${cube.color}${cube.is_wild ? ' (Wild)' : ''}"
+        ></div>
+      `).join('');
+
+      takePool.innerHTML = marketCubes.map(cube => {
+        const isWild = cube.is_wild || cube.color === 'wild';
+        const disabled = isWild || (selectedTradeTakeIds.length >= selectedTradeRatio.take && !selectedTradeTakeIds.includes(cube.id));
+        return `
+          <div 
+            class="paint-cube selectable ${selectedTradeTakeIds.includes(cube.id) ? 'selected' : ''} ${disabled ? 'disabled' : ''}"
+            data-cube-id="${cube.id}"
+            data-color="${cube.color}"
+            data-is-wild="${cube.is_wild}"
+            title="${cube.color}${cube.is_wild ? ' (Wild)' : ''}${isWild ? ' - Cannot take wild' : ''}"
+          ></div>
+        `;
+      }).join('');
+
+      givePool.querySelectorAll('.paint-cube.selectable').forEach(el => {
+        el.addEventListener('click', () => {
+          toggleTradeGiveCube(el.dataset.cubeId);
+        });
+      });
+
+      takePool.querySelectorAll('.paint-cube.selectable').forEach(el => {
+        el.addEventListener('click', () => {
+          if (el.classList.contains('disabled')) return;
+          toggleTradeTakeCube(el.dataset.cubeId);
+        });
+      });
+
+      updateTradeCounts();
+      updateFreeActionConfirm();
+    }
+
+    function toggleTradeGiveCube(cubeId) {
+      if (!cubeId) return;
+      const index = selectedTradeGiveIds.indexOf(cubeId);
+      if (index >= 0) {
+        selectedTradeGiveIds.splice(index, 1);
+      } else if (selectedTradeGiveIds.length < selectedTradeRatio.give) {
+        selectedTradeGiveIds.push(cubeId);
+      }
+      updateTradePools();
+    }
+
+    function toggleTradeTakeCube(cubeId) {
+      if (!cubeId) return;
+      const index = selectedTradeTakeIds.indexOf(cubeId);
+      if (index >= 0) {
+        selectedTradeTakeIds.splice(index, 1);
+      } else if (selectedTradeTakeIds.length < selectedTradeRatio.take) {
+        selectedTradeTakeIds.push(cubeId);
+      }
+      updateTradePools();
+    }
+
+    function updateTradeCounts() {
+      const giveCount = document.getElementById('tradeGiveCount');
+      const takeCount = document.getElementById('tradeTakeCount');
+      if (giveCount) giveCount.textContent = selectedTradeGiveIds.length;
+      if (takeCount) takeCount.textContent = selectedTradeTakeIds.length;
+    }
+
+    function renderResetPanel() {
+      const body = document.getElementById('freeActionBody');
+      if (!body) return;
+
+      body.innerHTML = `
+        <div class="trade-section">
+          <div class="trade-section-title">Select 2 cubes to pay</div>
+          <div id="resetCubePool" class="paint-cubes-selectable trade-pool"></div>
+          <div class="selected-cubes-info mt-2">Selected: <span id="resetCubeCount">0</span> / 2</div>
+        </div>
+      `;
+
+      updateResetPool();
+    }
+
+    function updateResetPool() {
+      const state = getCurrentState();
+      const pool = document.getElementById('resetCubePool');
+      if (!pool) return;
+
+      const cubes = state.playerPaintCubes?.[playerId] || [];
+      pool.innerHTML = cubes.map(cube => `
+        <div 
+          class="paint-cube selectable ${selectedResetCubeIds.includes(cube.id) ? 'selected' : ''} ${selectedResetCubeIds.length >= 2 && !selectedResetCubeIds.includes(cube.id) ? 'disabled' : ''}"
+          data-cube-id="${cube.id}"
+          data-color="${cube.color}"
+          data-is-wild="${cube.is_wild}"
+          title="${cube.color}${cube.is_wild ? ' (Wild)' : ''}"
+        ></div>
+      `).join('');
+
+      pool.querySelectorAll('.paint-cube.selectable').forEach(el => {
+        el.addEventListener('click', () => {
+          toggleResetCube(el.dataset.cubeId);
+        });
+      });
+
+      const countEl = document.getElementById('resetCubeCount');
+      if (countEl) countEl.textContent = selectedResetCubeIds.length;
+      updateFreeActionConfirm();
+    }
+
+    function toggleResetCube(cubeId) {
+      if (!cubeId) return;
+      const index = selectedResetCubeIds.indexOf(cubeId);
+      if (index >= 0) {
+        selectedResetCubeIds.splice(index, 1);
+      } else if (selectedResetCubeIds.length < 2) {
+        selectedResetCubeIds.push(cubeId);
+      }
+      updateResetPool();
+    }
+
+    function updateFreeActionConfirm() {
+      const confirmBtn = document.getElementById('confirmFreeActionBtn');
+      if (!confirmBtn) return;
+      if (freeActionMode === 'trade') {
+        confirmBtn.disabled = !(
+          selectedTradeGiveIds.length === selectedTradeRatio.give &&
+          selectedTradeTakeIds.length === selectedTradeRatio.take
+        );
+      } else if (freeActionMode === 'reset') {
+        confirmBtn.disabled = selectedResetCubeIds.length !== 2;
+      } else {
+        confirmBtn.disabled = true;
+      }
+    }
 
     function toggleSellSelection() {
       const panel = document.getElementById('sellSelectionPanel');
@@ -1008,6 +1399,46 @@
       }
     }
 
+    function getCurrentState() {
+      return gameUI?.gameState || initialGameState;
+    }
+
+    function isFreeActionAvailable(state) {
+      const player = state.players.find(p => p.id === playerId);
+      const lastUsed = player?.last_free_action_day || 0;
+      return !!player && lastUsed < state.game.day_number;
+    }
+
+    function updateActionMeta(state) {
+      const actionCountValue = document.getElementById('actionCountValue');
+      const actionsLeftValue = document.getElementById('actionsLeftValue');
+      const freeActionValue = document.getElementById('freeActionValue');
+      const actionsTaken = state.gameState.actions_taken || 0;
+      const actionsLeft = Math.max(0, 2 - actionsTaken);
+
+      if (actionCountValue) actionCountValue.textContent = actionsTaken;
+      if (actionsLeftValue) actionsLeftValue.textContent = actionsLeft;
+      if (freeActionValue) {
+        freeActionValue.textContent = isFreeActionAvailable(state) ? 'Available' : 'Used';
+      }
+    }
+
+    function updateTurnCompleteNotice(state) {
+      const modal = document.getElementById('turnCompleteModal');
+      if (!modal) return;
+
+      const phase = state.game.current_phase;
+      const myTurn = state.game.current_player_id === playerId;
+      const actionsTaken = state.gameState.actions_taken || 0;
+      const freeAvailable = isFreeActionAvailable(state);
+
+      if (myTurn && phase !== 'selling' && actionsTaken >= 2 && !freeAvailable) {
+        modal.classList.remove('d-none');
+      } else {
+        modal.classList.add('d-none');
+      }
+    }
+
     function updateWaitingOverlay() {
       const overlay = document.getElementById('waitingOverlay');
       const waitingName = document.getElementById('waitingPlayerName');
@@ -1039,15 +1470,27 @@
       const buyBtn = document.getElementById('actionBuyBtn');
       const paintBtn = document.getElementById('actionPaintBtn');
       const sellBtn = document.getElementById('actionSellBtn');
-      const phase = gameUI?.gameState?.game?.current_phase || initialGameState.game.current_phase;
+      const freeBtn = document.getElementById('actionFreeBtn');
+      const tradeBtn = document.querySelector('[data-free-action="trade"]');
+      const resetBtn = document.querySelector('[data-free-action="reset-market"]');
+      const state = getCurrentState();
+      const phase = state.game.current_phase;
+      const actionsTaken = state.gameState.actions_taken || 0;
+      const actionsExhausted = actionsTaken >= 2;
+      const freeAvailable = isFreeActionAvailable(state);
 
-      const disabled = !isCurrentTurn || phase === 'selling';
+      const regularDisabled = !isCurrentTurn || phase === 'selling' || actionsExhausted;
 
-      if (workBtn) workBtn.disabled = disabled;
-      if (passBtn) passBtn.disabled = disabled;
-      if (buyBtn) buyBtn.disabled = disabled;
-      if (paintBtn) paintBtn.disabled = disabled;
+      if (workBtn) workBtn.disabled = regularDisabled;
+      if (buyBtn) buyBtn.disabled = regularDisabled;
+      if (paintBtn) paintBtn.disabled = regularDisabled;
+      if (passBtn) passBtn.disabled = !isCurrentTurn || phase === 'selling';
       if (sellBtn) sellBtn.disabled = !isCurrentTurn || phase !== 'night';
+
+      const freeDisabled = !isCurrentTurn || phase === 'selling' || !freeAvailable;
+      if (freeBtn) freeBtn.disabled = freeDisabled;
+      if (tradeBtn) tradeBtn.disabled = freeDisabled;
+      if (resetBtn) resetBtn.disabled = freeDisabled;
     }
 
     function showSellingPhase(state) {

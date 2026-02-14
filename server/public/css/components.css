@@ -199,3 +199,133 @@
 .toast.info {
   border-left: 4px solid var(--color-info);
 }
+
+/* Reusable App Modal */
+body.app-modal-open {
+  overflow: hidden;
+}
+
+.app-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 8, 12, 0.62);
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+}
+
+.app-modal-dialog {
+  --app-modal-max-width: 900px;
+  width: min(96vw, var(--app-modal-max-width));
+  max-height: min(92vh, 860px);
+  background: var(--game-surface, var(--color-bg-primary, #fff));
+  color: var(--game-ink, var(--color-text-primary, #1f2933));
+  border: 1px solid var(--game-edge, var(--color-border-light, #d4d8dd));
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.app-modal-header,
+.app-modal-footer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: var(--game-surface-alt, var(--color-bg-secondary, #f7f8f9));
+}
+
+.app-modal-header {
+  justify-content: space-between;
+  border-bottom: 1px solid var(--game-edge, var(--color-border-light, #d4d8dd));
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.app-modal-title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.2;
+}
+
+.app-modal-close {
+  border: 0;
+  background: transparent;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--transition-fast);
+}
+
+.app-modal-close:hover,
+.app-modal-close:focus-visible {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.app-modal-close img {
+  width: 16px;
+  height: 16px;
+  opacity: 0.85;
+}
+
+.app-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+}
+
+.app-modal-footer {
+  justify-content: flex-end;
+  border-top: 1px solid var(--game-edge, var(--color-border-light, #d4d8dd));
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.app-modal-action-btn {
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.app-modal-action-btn.primary {
+  background: var(--color-primary, #111827);
+  color: var(--color-text-inverse, #fff);
+}
+
+.app-modal-action-btn.secondary {
+  background: var(--game-surface, var(--color-bg-primary, #fff));
+  color: var(--game-ink, var(--color-text-primary, #1f2933));
+  border-color: var(--game-edge, var(--color-border-light, #d4d8dd));
+}
+
+.app-modal-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.app-modal-action-icon {
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-modal-action-icon svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+  fill: currentColor;
+}

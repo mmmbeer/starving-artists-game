@@ -77,8 +77,16 @@ class GameUI {
 
   updateActionCount() {
     const countEl = document.getElementById('actionCountValue');
+    const leftEl = document.getElementById('actionsLeftValue');
+    const freeEl = document.getElementById('freeActionValue');
     if (!countEl) return;
-    countEl.textContent = this.gameState.gameState.actions_taken;
+    const actionsTaken = this.gameState.gameState.actions_taken || 0;
+    const actionsLeft = Math.max(0, 2 - actionsTaken);
+    countEl.textContent = actionsTaken;
+    if (leftEl) leftEl.textContent = actionsLeft;
+    if (freeEl) {
+      freeEl.textContent = this.isFreeActionAvailable() ? 'Available' : 'Used';
+    }
   }
 
   updatePlayersList() {
@@ -553,10 +561,27 @@ class GameUI {
     const workBtn = document.getElementById('actionWorkBtn');
     const passBtn = document.getElementById('actionPassBtn');
     const sellBtn = document.getElementById('actionSellBtn');
+    const buyBtn = document.getElementById('actionBuyBtn');
+    const paintBtn = document.getElementById('actionPaintBtn');
+    const freeBtn = document.getElementById('actionFreeBtn');
+    const tradeBtn = document.querySelector('[data-free-action="trade"]');
+    const resetBtn = document.querySelector('[data-free-action="reset-market"]');
+    const actionsTaken = this.gameState.gameState.actions_taken || 0;
+    const actionsExhausted = actionsTaken >= 2;
+    const freeAvailable = this.isFreeActionAvailable();
     
-    if (workBtn) workBtn.disabled = !isMyTurn || phase === 'selling';
+    const regularDisabled = !isMyTurn || phase === 'selling' || actionsExhausted;
+
+    if (workBtn) workBtn.disabled = regularDisabled;
+    if (buyBtn) buyBtn.disabled = regularDisabled;
+    if (paintBtn) paintBtn.disabled = regularDisabled;
     if (passBtn) passBtn.disabled = !isMyTurn || phase === 'selling';
     if (sellBtn) sellBtn.disabled = !isMyTurn || phase !== 'night';
+
+    const freeDisabled = !isMyTurn || phase === 'selling' || !freeAvailable;
+    if (freeBtn) freeBtn.disabled = freeDisabled;
+    if (tradeBtn) tradeBtn.disabled = freeDisabled;
+    if (resetBtn) resetBtn.disabled = freeDisabled;
   }
 
   handleCanvasPurchase(slotIndex) {
@@ -575,6 +600,13 @@ class GameUI {
     if (window.socket) {
       window.socket.emit('request-game-state', { gameId: this.gameState.game.id });
     }
+  }
+
+  isFreeActionAvailable() {
+    const player = this.gameState.players.find(p => p.id === this.myPlayerId);
+    if (!player) return false;
+    const lastUsed = player.last_free_action_day || 0;
+    return lastUsed < this.gameState.game.day_number;
   }
 }
 

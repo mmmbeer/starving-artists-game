@@ -38,6 +38,7 @@ CREATE TABLE players (
   turn_order INT NOT NULL,
   is_host BOOLEAN DEFAULT FALSE,
   connected BOOLEAN DEFAULT TRUE,
+  last_free_action_day INT DEFAULT 0,
   last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE,
   INDEX idx_game (game_id),

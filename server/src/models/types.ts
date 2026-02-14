@@ -33,6 +33,7 @@ export interface Player {
   is_host: boolean;
   connected: boolean;
   last_seen: Date;
+  last_free_action_day: number;
 }
 
 export interface PaintCube {
@@ -121,7 +122,7 @@ export interface SellingPhaseData {
 }
 
 export interface GameAction {
-  type: 'work' | 'buy_canvas' | 'paint' | 'end_turn' | 'sell' | 'collect_paint';
+  type: 'work' | 'buy_canvas' | 'paint' | 'end_turn' | 'sell' | 'collect_paint' | 'trade_paint' | 'reset_canvas_market';
   playerId: string;
   data?: any;
 }

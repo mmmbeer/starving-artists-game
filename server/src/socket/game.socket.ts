@@ -186,6 +186,53 @@ export function registerGameSocketHandlers(io: SocketIOServer) {
         socket.emit('action-error', { message: error.message });
       }
     });
+
+    // Trade for paint cubes (free action)
+    socket.on('action:trade-paint', async (data: { gameId: string; playerId: string; tradeCubeIds: string[]; marketCubeIds: string[] }) => {
+      try {
+        const { gameId, playerId, tradeCubeIds, marketCubeIds } = data;
+
+        const gameState = await actionHandler.performTradeForPaintAction(
+          gameId,
+          playerId,
+          tradeCubeIds,
+          marketCubeIds
+        );
+
+        io.to(`game:${gameId}`).emit('game-state', gameState);
+        io.to(`game:${gameId}`).emit('action-performed', {
+          action: 'trade-paint',
+          playerId,
+          traded: tradeCubeIds.length,
+          received: marketCubeIds.length,
+        });
+      } catch (error: any) {
+        console.error('Trade paint error:', error);
+        socket.emit('action-error', { message: error.message });
+      }
+    });
+
+    // Reset canvas market (free action)
+    socket.on('action:reset-canvas-market', async (data: { gameId: string; playerId: string; cubeIds: string[] }) => {
+      try {
+        const { gameId, playerId, cubeIds } = data;
+
+        const gameState = await actionHandler.performResetCanvasMarketAction(
+          gameId,
+          playerId,
+          cubeIds
+        );
+
+        io.to(`game:${gameId}`).emit('game-state', gameState);
+        io.to(`game:${gameId}`).emit('action-performed', {
+          action: 'reset-canvas-market',
+          playerId,
+        });
+      } catch (error: any) {
+        console.error('Reset canvas market error:', error);
+        socket.emit('action-error', { message: error.message });
+      }
+    });
     
     // Selling phase - submit sell intent (legacy)
     socket.on('action:sell', async (data: { gameId: string; playerId: string; canvasIds: string[] }) => {

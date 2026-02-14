@@ -177,6 +177,149 @@ function confirmAction(message) {
   return confirm(message);
 }
 
+function createDefaultModalIcon(type) {
+  if (type === 'buy') {
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 6h14l-1.4 7.2a2 2 0 0 1-2 1.6H9.3L8.8 17H19v2H8a2 2 0 0 1-1.9-1.4L3.3 6.5H1V4h3.8l.7 2z"></path><circle cx="10" cy="21" r="1.5"></circle><circle cx="17" cy="21" r="1.5"></circle></svg>';
+  }
+
+  return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.3 5.7a1 1 0 0 0-1.4 0L12 10.6 7.1 5.7A1 1 0 0 0 5.7 7.1l4.9 4.9-4.9 4.9a1 1 0 1 0 1.4 1.4l4.9-4.9 4.9 4.9a1 1 0 0 0 1.4-1.4L13.4 12l4.9-4.9a1 1 0 0 0 0-1.4z"></path></svg>';
+}
+
+function createModalActionButton(action) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = `app-modal-action-btn ${action.variant === 'primary' ? 'primary' : 'secondary'}`;
+  button.disabled = !!action.disabled;
+  if (action.testId) {
+    button.setAttribute('data-testid', action.testId);
+  }
+  button.innerHTML = `
+    <span class="app-modal-action-icon">${action.icon || createDefaultModalIcon(action.iconType)}</span>
+    <span>${action.label}</span>
+  `;
+  button.addEventListener('click', () => {
+    if (typeof action.onClick === 'function') {
+      action.onClick();
+    }
+  });
+  return button;
+}
+
+function openAppModal(config) {
+  const overlay = document.createElement('div');
+  overlay.className = 'app-modal-overlay';
+  overlay.setAttribute('role', 'presentation');
+  if (config.testId) {
+    overlay.setAttribute('data-testid', config.testId);
+  }
+
+  const dialog = document.createElement('section');
+  dialog.className = 'app-modal-dialog';
+  dialog.setAttribute('role', 'dialog');
+  dialog.setAttribute('aria-modal', 'true');
+  if (config.title) {
+    dialog.setAttribute('aria-label', config.title);
+  }
+  if (config.maxWidth) {
+    dialog.style.setProperty('--app-modal-max-width', config.maxWidth);
+  }
+
+  const header = document.createElement('header');
+  header.className = 'app-modal-header';
+
+  const title = document.createElement('h2');
+  title.className = 'app-modal-title';
+  title.textContent = config.title || '';
+
+  const closeBtn = document.createElement('button');
+  closeBtn.type = 'button';
+  closeBtn.className = 'app-modal-close';
+  closeBtn.setAttribute('aria-label', 'Close modal');
+  closeBtn.innerHTML = '<img src="/assets/close.svg" alt="" />';
+
+  header.appendChild(title);
+  header.appendChild(closeBtn);
+
+  const body = document.createElement('div');
+  body.className = 'app-modal-body';
+
+  const footer = document.createElement('footer');
+  footer.className = 'app-modal-footer';
+
+  dialog.appendChild(header);
+  dialog.appendChild(body);
+  dialog.appendChild(footer);
+  overlay.appendChild(dialog);
+  document.body.appendChild(overlay);
+  document.body.classList.add('app-modal-open');
+
+  const modalApi = {
+    isOpen: true,
+    setTitle(nextTitle) {
+      title.textContent = nextTitle || '';
+      if (nextTitle) {
+        dialog.setAttribute('aria-label', nextTitle);
+      }
+    },
+    setBodyContent(content) {
+      body.innerHTML = '';
+      if (typeof content === 'string') {
+        body.innerHTML = content;
+      } else if (content instanceof Node) {
+        body.appendChild(content);
+      }
+    },
+    setActions(actions = []) {
+      footer.innerHTML = '';
+      actions.forEach(action => {
+        footer.appendChild(createModalActionButton(action));
+      });
+    },
+    close(reason = 'close') {
+      if (!modalApi.isOpen) return;
+      modalApi.isOpen = false;
+      document.removeEventListener('keydown', handleEscape);
+      overlay.removeEventListener('click', handleOverlayClick);
+      closeBtn.removeEventListener('click', handleCloseClick);
+      overlay.remove();
+      document.body.classList.remove('app-modal-open');
+      if (typeof config.onClose === 'function') {
+        config.onClose(reason);
+      }
+    },
+    getBodyElement() {
+      return body;
+    }
+  };
+
+  function handleEscape(event) {
+    if (event.key === 'Escape' && config.closeOnEscape !== false) {
+      modalApi.close('escape');
+    }
+  }
+
+  function handleOverlayClick(event) {
+    if (event.target === overlay && config.closeOnBackdrop !== false) {
+      modalApi.close('backdrop');
+    }
+  }
+
+  function handleCloseClick() {
+    modalApi.close('close');
+  }
+
+  document.addEventListener('keydown', handleEscape);
+  overlay.addEventListener('click', handleOverlayClick);
+  closeBtn.addEventListener('click', handleCloseClick);
+
+  modalApi.setBodyContent(config.bodyContent || '');
+  modalApi.setActions(config.actions || []);
+
+  return modalApi;
+}
+
+window.openAppModal = openAppModal;
+
 // Export for module usage if needed
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
@@ -189,6 +332,7 @@ if (typeof module !== 'undefined' && module.exports) {
     getPaintColor,
     pluralize,
     animate,
-    confirmAction
+    confirmAction,
+    openAppModal
   };
 }
