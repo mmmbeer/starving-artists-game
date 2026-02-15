@@ -98,8 +98,8 @@ export async function canPlayerAct(
   const game = await gameDb.getGame(gameId);
   if (!game || game.status !== 'playing') return false;
   
-  // Can only act during morning, day, or night phases
-  if (game.current_phase === 'selling') return false;
+  // Regular actions only in morning/day
+  if (game.current_phase !== 'morning' && game.current_phase !== 'day') return false;
   
   // Must be current player's turn
   if (game.current_player_id !== playerId) return false;
@@ -117,7 +117,7 @@ export async function canPlayerEndTurn(
   const game = await gameDb.getGame(gameId);
   if (!game || game.status !== 'playing') return false;
 
-  if (game.current_phase === 'selling') return false;
+  if (game.current_phase !== 'morning' && game.current_phase !== 'day') return false;
 
   return game.current_player_id === playerId;
 }

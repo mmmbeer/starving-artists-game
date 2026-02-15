@@ -2,7 +2,6 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import * as gameEngine from '../services/game/gameEngine';
 import * as actionHandler from '../services/game/actionHandler';
-import * as sellingPhase from '../services/game/sellingPhase';
 import * as playerManager from '../services/lobby/playerManager';
 
 export function registerGameSocketHandlers(io: SocketIOServer) {
@@ -154,6 +153,13 @@ export function registerGameSocketHandlers(io: SocketIOServer) {
           playerId,
           cubesCollected: result.cubesCollected.length,
         });
+        io.to(`game:${gameId}`).emit('turn-changed', {
+          currentPlayerId: result.gameState.game.current_player_id,
+          currentPhase: result.gameState.game.current_phase,
+        });
+        if (result.phaseResult) {
+          io.to(`game:${gameId}`).emit('phase-changed', result.phaseResult);
+        }
         
         if (result.sellingComplete) {
           io.to(`game:${gameId}`).emit('selling-complete', { gameId });
@@ -177,6 +183,13 @@ export function registerGameSocketHandlers(io: SocketIOServer) {
           action: 'skip-collection',
           playerId,
         });
+        io.to(`game:${gameId}`).emit('turn-changed', {
+          currentPlayerId: result.gameState.game.current_player_id,
+          currentPhase: result.gameState.game.current_phase,
+        });
+        if (result.phaseResult) {
+          io.to(`game:${gameId}`).emit('phase-changed', result.phaseResult);
+        }
         
         if (result.sellingComplete) {
           io.to(`game:${gameId}`).emit('selling-complete', { gameId });
@@ -234,21 +247,26 @@ export function registerGameSocketHandlers(io: SocketIOServer) {
       }
     });
     
-    // Selling phase - submit sell intent (legacy)
+    // Night phase - submit sell selection (or pass)
     socket.on('action:sell', async (data: { gameId: string; playerId: string; canvasIds: string[] }) => {
       try {
         const { gameId, playerId, canvasIds } = data;
-        
-        // Store sell intent (in a real implementation, we'd need a temporary store)
-        // For now, emit to all players that this player submitted
-        socket.to(`game:${gameId}`).emit('sell-intent-submitted', {
+
+        const result = await actionHandler.performSellAction(gameId, playerId, canvasIds || []);
+
+        io.to(`game:${gameId}`).emit('game-state', result.gameState);
+        io.to(`game:${gameId}`).emit('action-performed', {
+          action: 'sell',
           playerId,
-          canvasCount: canvasIds.length,
+          canvasCount: (canvasIds || []).length,
         });
-        
-        socket.emit('sell-intent-confirmed', {
-          canvasIds,
+        io.to(`game:${gameId}`).emit('turn-changed', {
+          currentPlayerId: result.gameState.game.current_player_id,
+          currentPhase: result.gameState.game.current_phase,
         });
+        if (result.phaseResult) {
+          io.to(`game:${gameId}`).emit('phase-changed', result.phaseResult);
+        }
       } catch (error: any) {
         console.error('Sell action error:', error);
         socket.emit('action-error', { message: error.message });

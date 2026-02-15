@@ -94,15 +94,14 @@ class GameActions {
       });
       
       if (response.success) {
-        showToast('Sell Intent Submitted', 'Waiting for other players...', 'info');
-        
-        // Emit socket event
-        if (window.socket) {
-          window.socket.emit('action:sell', {
-            gameId: this.gameId,
-            playerId: this.playerId,
-            canvasIds
-          });
+        const soldCount = Array.isArray(canvasIds) ? canvasIds.length : 0;
+        const message = soldCount > 0
+          ? `Submitted ${soldCount} painting(s) for sale`
+          : 'Passed selling for tonight';
+        showToast('Night Selection Submitted', message, 'info');
+
+        if (window.applyGameState && response.gameState) {
+          window.applyGameState(response.gameState);
         }
       }
     } catch (error) {

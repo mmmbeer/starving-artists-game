@@ -2,8 +2,6 @@
 import { Router, Request, Response } from 'express';
 import * as gameEngine from '../services/game/gameEngine';
 import * as actionHandler from '../services/game/actionHandler';
-import * as sellingPhase from '../services/game/sellingPhase';
-import { isValidUUID } from '../utils/validation';
 import { CUBES_PER_WORK_ACTION } from '../utils/constants';
 
 const router = Router();
@@ -198,7 +196,7 @@ router.post('/:gameId/action/end-turn', async (req: Request<{ gameId: string }>,
   }
 });
 
-// Submit selling intents
+// Submit night sell selection (or pass with empty selection)
 router.post('/:gameId/action/sell', async (req: Request<{ gameId: string }>, res: Response) => {
   try {
     const { gameId } = req.params;
@@ -212,10 +210,27 @@ router.post('/:gameId/action/sell', async (req: Request<{ gameId: string }>, res
     if (!Array.isArray(canvasIds)) {
       return res.status(400).json({ error: 'Invalid canvas IDs' });
     }
-    
-    // This endpoint just registers the intent
-    // The actual selling happens when all players have submitted
-    res.json({ success: true, message: 'Sell intent registered' });
+
+    const result = await actionHandler.performSellAction(gameId, playerId, canvasIds);
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`game:${gameId}`).emit('game-state', result.gameState);
+      io.to(`game:${gameId}`).emit('action-performed', {
+        action: 'sell',
+        playerId,
+        canvasCount: canvasIds.length,
+      });
+      io.to(`game:${gameId}`).emit('turn-changed', {
+        currentPlayerId: result.gameState.game.current_player_id,
+        currentPhase: result.gameState.game.current_phase,
+      });
+      if (result.phaseResult) {
+        io.to(`game:${gameId}`).emit('phase-changed', result.phaseResult);
+      }
+    }
+
+    res.json({ success: true, gameState: result.gameState, phaseResult: result.phaseResult });
   } catch (error: any) {
     console.error('Sell action error:', error);
     res.status(400).json({ error: error.message || 'Failed to register sell intent' });
@@ -248,11 +263,19 @@ router.post('/:gameId/action/collect-paint', async (req: Request<{ gameId: strin
         playerId,
         cubesCollected: result.cubesCollected.length,
       });
+
+      io.to(`game:${gameId}`).emit('turn-changed', {
+        currentPlayerId: result.gameState.game.current_player_id,
+        currentPhase: result.gameState.game.current_phase,
+      });
       
       if (result.sellingComplete) {
         io.to(`game:${gameId}`).emit('selling-complete', {
           gameId,
         });
+      }
+      if (result.phaseResult) {
+        io.to(`game:${gameId}`).emit('phase-changed', result.phaseResult);
       }
     }
     
@@ -288,11 +311,19 @@ router.post('/:gameId/action/skip-collection', async (req: Request<{ gameId: str
         action: 'skip-collection',
         playerId,
       });
+
+      io.to(`game:${gameId}`).emit('turn-changed', {
+        currentPlayerId: result.gameState.game.current_player_id,
+        currentPhase: result.gameState.game.current_phase,
+      });
       
       if (result.sellingComplete) {
         io.to(`game:${gameId}`).emit('selling-complete', {
           gameId,
         });
+      }
+      if (result.phaseResult) {
+        io.to(`game:${gameId}`).emit('phase-changed', result.phaseResult);
       }
     }
     

@@ -108,6 +108,10 @@ export interface GameState {
 }
 
 export interface SellingPhaseData {
+  stage?: 'night_selection' | 'paint_collection';
+  nightOrder?: string[];
+  nightCurrentIndex?: number;
+  sellSelections?: Record<string, string[]>;
   order: Array<{
     playerId: string;
     paintValue: number;

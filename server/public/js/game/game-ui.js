@@ -570,15 +570,15 @@ class GameUI {
     const actionsExhausted = actionsTaken >= 2;
     const freeAvailable = this.isFreeActionAvailable();
     
-    const regularDisabled = !isMyTurn || phase === 'selling' || actionsExhausted;
+    const regularDisabled = !isMyTurn || phase === 'selling' || phase === 'night' || actionsExhausted;
 
     if (workBtn) workBtn.disabled = regularDisabled;
     if (buyBtn) buyBtn.disabled = regularDisabled;
     if (paintBtn) paintBtn.disabled = regularDisabled;
-    if (passBtn) passBtn.disabled = !isMyTurn || phase === 'selling';
+    if (passBtn) passBtn.disabled = !isMyTurn || phase === 'selling' || phase === 'night';
     if (sellBtn) sellBtn.disabled = !isMyTurn || phase !== 'night';
 
-    const freeDisabled = !isMyTurn || phase === 'selling' || !freeAvailable;
+    const freeDisabled = !isMyTurn || phase === 'selling' || phase === 'night' || !freeAvailable;
     if (freeBtn) freeBtn.disabled = freeDisabled;
     if (tradeBtn) tradeBtn.disabled = freeDisabled;
     if (resetBtn) resetBtn.disabled = freeDisabled;

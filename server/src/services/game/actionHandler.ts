@@ -5,10 +5,10 @@ import * as canvasDb from '../../database/canvasDb';
 import { drawPaintCubes, validateTradeRatio } from '../paint/paintBag';
 import { refillMarketSlot, getCanvasCost, shiftMarketLeft, resetMarket } from '../canvas/canvasMarket';
 import { canPlayerAct, canPlayerEndTurn } from './turnManager';
-import { checkWinCondition, declareWinner } from '../score/scoreTracker';
 import { getFullGameState } from './gameEngine';
 import { checkAndProcessCompletion, validatePaintPlacement } from './canvasCompletion';
-import { collectPaintCubes, skipCollection, canCollectPaint, getCurrentCollector } from './sellingPhase';
+import { collectPaintCubes, skipCollection, getCurrentCollector, submitNightSellSelection } from './sellingPhase';
+import { handleEndTurn, advancePhase } from './dayNightCycle';
 import { FullGameState, PaintCube, PlayerCanvas } from '../../models/types';
 import { CUBES_PER_WORK_ACTION, MAX_ACTIONS_PER_TURN, MAX_PAINT_CUBES_PER_ACTION } from '../../utils/constants';
 
@@ -215,10 +215,6 @@ export async function performPaintAction(
         rewards: completionResult.rewardsAwarded,
       });
       
-      // Check if player won
-      if (completionResult.isWinner) {
-        await declareWinner(gameId, playerId);
-      }
     }
   }
   
@@ -406,6 +402,35 @@ export async function performEndTurnAction(
   };
 }
 
+export async function performSellAction(
+  gameId: string,
+  playerId: string,
+  canvasIds: string[]
+): Promise<{ gameState: FullGameState; phaseResult?: any }> {
+  const game = await gameDb.getGame(gameId);
+  if (!game || game.current_phase !== 'night') {
+    throw new Error('Sell selection is only available during night');
+  }
+
+  const result = await submitNightSellSelection(gameId, playerId, canvasIds);
+  let phaseResult: any;
+
+  if (result.phase === 'morning') {
+    await gameDb.updateGamePhase(gameId, 'selling');
+    phaseResult = await advancePhase(gameId);
+  } else if (result.phase === 'selling') {
+    phaseResult = {
+      newPhase: 'selling',
+      sellingPhaseStarted: true,
+    };
+  }
+
+  return {
+    gameState: await getFullGameState(gameId),
+    phaseResult,
+  };
+}
+
 /**
  * Collect paint cubes during selling phase
  */
@@ -413,7 +438,7 @@ export async function performCollectPaintAction(
   gameId: string,
   playerId: string,
   selectedCubeIds: string[]
-): Promise<{ gameState: FullGameState; cubesCollected: PaintCube[]; sellingComplete: boolean }> {
+): Promise<{ gameState: FullGameState; cubesCollected: PaintCube[]; sellingComplete: boolean; phaseResult?: any }> {
   const game = await gameDb.getGame(gameId);
   if (!game || game.current_phase !== 'selling') {
     throw new Error('Not in selling phase');
@@ -423,23 +448,17 @@ export async function performCollectPaintAction(
   
   // Check if selling phase is complete
   const sellingComplete = !result.sellingData.isActive;
+  let phaseResult: any;
   
   if (sellingComplete) {
-    // Advance to next day
-    const { handleEndTurn: advanceFromSelling } = await import('./dayNightCycle');
-    // We need to trigger phase advancement
-    const gameState = await gameDb.getGameState(gameId);
-    if (gameState) {
-      await gameDb.updateGameState(gameId, {
-        selling_phase_data: undefined,
-      });
-    }
+    phaseResult = await advancePhase(gameId);
   }
   
   return {
     gameState: await getFullGameState(gameId),
     cubesCollected: result.cubesCollected,
     sellingComplete,
+    phaseResult,
   };
 }
 
@@ -449,7 +468,7 @@ export async function performCollectPaintAction(
 export async function performSkipCollectionAction(
   gameId: string,
   playerId: string
-): Promise<{ gameState: FullGameState; sellingComplete: boolean }> {
+): Promise<{ gameState: FullGameState; sellingComplete: boolean; phaseResult?: any }> {
   const game = await gameDb.getGame(gameId);
   if (!game || game.current_phase !== 'selling') {
     throw new Error('Not in selling phase');
@@ -457,10 +476,16 @@ export async function performSkipCollectionAction(
   
   const sellingData = await skipCollection(gameId, playerId);
   const sellingComplete = !sellingData.isActive;
+  let phaseResult: any;
+
+  if (sellingComplete) {
+    phaseResult = await advancePhase(gameId);
+  }
   
   return {
     gameState: await getFullGameState(gameId),
     sellingComplete,
+    phaseResult,
   };
 }
 
@@ -497,6 +522,16 @@ export async function getAvailableActions(
       }
     }
     return { canAct: false, availableActions: [], reason: 'Not your turn to collect' };
+  }
+
+  if (game.current_phase === 'night') {
+    if (game.current_player_id !== playerId) {
+      return { canAct: false, availableActions: [], reason: 'Not your turn to submit sell selection' };
+    }
+    return {
+      canAct: true,
+      availableActions: ['sell'],
+    };
   }
   
   // Regular phases

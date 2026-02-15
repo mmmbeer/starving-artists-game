@@ -1089,7 +1089,8 @@
   display: grid;
   grid-template-columns: minmax(220px, 320px) 1fr;
   gap: var(--spacing-md);
-  align-items: start;
+  align-items: stretch;
+  min-height: min(68vh, 700px);
 }
 
 .buy-canvas-preview {
@@ -1097,29 +1098,50 @@
   border: 1px solid var(--game-edge);
   border-radius: var(--radius-md);
   padding: var(--spacing-sm);
+  display: flex;
 }
 
 .buy-canvas-preview .market-canvas-card {
   width: 100%;
   margin: 0;
   cursor: default;
+  height: 100%;
 }
 
 .buy-canvas-preview .market-canvas-card:hover {
   transform: none;
 }
 
+.buy-canvas-preview .market-canvas-media,
+.buy-canvas-preview .market-canvas-frame {
+  height: 100%;
+}
+
 .buy-canvas-selection {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .buy-canvas-meta {
   margin-bottom: var(--spacing-sm);
 }
 
+.buy-canvas-selection .purchase-cubes {
+  max-height: 42vh;
+  overflow-y: auto;
+}
+
+.free-action-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
 @media (max-width: 768px) {
   .buy-canvas-modal-layout {
     grid-template-columns: 1fr;
+    min-height: auto;
   }
 }
 

@@ -4,7 +4,6 @@
 import * as gameDb from '../../database/gameDb';
 import * as playerDb from '../../database/playerDb';
 import { drawPaintCubes } from '../paint/paintBag';
-import { initializeSellingPhase, isSellingPhaseComplete } from './sellingPhase';
 import { Game, Player, GameState } from '../../models/types';
 import { PAINT_MARKET_REFILL_SIZE, WIN_CONDITIONS } from '../../utils/constants';
 
@@ -87,8 +86,8 @@ export async function advancePhase(gameId: string): Promise<PhaseTransitionResul
       break;
 
     case 'night':
-      // Night -> Check for selling phase or new day
-      result = await handleNightEnd(gameId);
+      // Night progression is driven by explicit sell submissions.
+      throw new Error('Night phase requires sell submissions from players');
       break;
 
     case 'selling':
@@ -105,31 +104,6 @@ export async function advancePhase(gameId: string): Promise<PhaseTransitionResul
   await gameDb.resetActionCount(gameId);
 
   return result;
-}
-
-/**
- * Handle the end of night phase
- */
-async function handleNightEnd(gameId: string): Promise<PhaseTransitionResult> {
-  // Check if any players completed paintings this day
-  const sellingData = await initializeSellingPhase(gameId);
-  
-  if (sellingData && sellingData.order.length > 0) {
-    // Start selling phase
-    await gameDb.updateGamePhase(gameId, 'selling');
-    
-    // Set current player to first in selling order
-    const firstCollector = sellingData.order[0];
-    await gameDb.updateCurrentPlayer(gameId, firstCollector.playerId);
-    
-    return {
-      newPhase: 'selling',
-      sellingPhaseStarted: true,
-    };
-  }
-
-  // No completed paintings, go directly to new day
-  return await startNewDay(gameId);
 }
 
 /**

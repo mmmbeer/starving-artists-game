@@ -1,10 +1,8 @@
 // Canvas Completion Service
 // Handles detecting completed canvases and awarding rewards
 
-import * as playerDb from '../../database/playerDb';
 import * as canvasDb from '../../database/canvasDb';
 import { PlayerCanvas, Player, CanvasDefinition } from '../../models/types';
-import { WIN_CONDITIONS } from '../../utils/constants';
 
 export interface CompletionResult {
   isComplete: boolean;
@@ -36,7 +34,7 @@ export function isCanvasComplete(canvas: PlayerCanvas): boolean {
 export async function checkAndProcessCompletion(
   playerId: string,
   canvasId: string,
-  playerCount: number
+  _playerCount: number
 ): Promise<CompletionResult> {
   const canvas = await canvasDb.getPlayerCanvas(canvasId);
   if (!canvas || canvas.player_id !== playerId) {
@@ -56,43 +54,14 @@ export async function checkAndProcessCompletion(
   // Mark canvas as completed
   await canvasDb.markCanvasCompleted(canvasId);
 
-  // Get player to update stats
-  const player = await playerDb.getPlayer(playerId);
-  if (!player || !canvas.definition) {
-    return { isComplete: true };
-  }
-
-  const rewards = {
-    stars: canvas.definition.star_value,
-    food: canvas.definition.food_value,
-    paintValue: canvas.definition.paint_value,
-  };
-
-  // Award stars (points)
-  const newScore = player.score + rewards.stars;
-  await playerDb.updatePlayerScore(playerId, newScore);
-
-  // Award food (nutrition)
-  const newNutrition = player.nutrition + rewards.food;
-  await playerDb.updatePlayerNutrition(playerId, newNutrition);
-  await playerDb.addFoodEarned(playerId, rewards.food);
-
-  // Increment paintings completed
-  await playerDb.incrementPaintingsCompleted(playerId);
-
-  // Check win condition
-  const winCondition = WIN_CONDITIONS[playerCount as keyof typeof WIN_CONDITIONS] || WIN_CONDITIONS[4];
-  const updatedPlayer = await playerDb.getPlayer(playerId);
-  
-  const isWinner = updatedPlayer && (
-    updatedPlayer.score >= winCondition.points ||
-    updatedPlayer.paintings_completed >= winCondition.paintings
-  );
-
   return {
     isComplete: true,
-    rewardsAwarded: rewards,
-    isWinner: isWinner || false,
+    rewardsAwarded: canvas.definition ? {
+      stars: canvas.definition.star_value,
+      food: canvas.definition.food_value,
+      paintValue: canvas.definition.paint_value,
+    } : undefined,
+    isWinner: false,
   };
 }
 

@@ -15,8 +15,32 @@ type PlayerRow = {
   is_host: number | boolean;
   connected: number | boolean;
   last_seen: Date;
-  last_free_action_day: number;
+  last_free_action_day?: number;
 };
+
+let hasLastFreeActionDayColumn: boolean | null = null;
+
+async function supportsLastFreeActionDayColumn(): Promise<boolean> {
+  if (hasLastFreeActionDayColumn !== null) {
+    return hasLastFreeActionDayColumn;
+  }
+
+  try {
+    const rows = await query<{ Field: string }>(
+      "SHOW COLUMNS FROM players LIKE 'last_free_action_day'"
+    );
+    hasLastFreeActionDayColumn = rows.length > 0;
+  } catch {
+    hasLastFreeActionDayColumn = false;
+  }
+
+  return hasLastFreeActionDayColumn;
+}
+
+function playerSelectColumns(includeLastFreeActionDay: boolean): string {
+  const base = 'id, game_id, name, nutrition, score, paintings_completed, food_earned, turn_order, is_host, connected, last_seen';
+  return includeLastFreeActionDay ? `${base}, last_free_action_day` : base;
+}
 
 type PaintCubeRow = {
   id: string;
@@ -32,11 +56,19 @@ export async function createPlayer(
   playerId?: string
 ): Promise<Player> {
   const id = playerId ?? uuidv4();
-  await execute(
-    `INSERT INTO players (id, game_id, name, nutrition, score, paintings_completed, food_earned, turn_order, is_host, connected, last_seen, last_free_action_day)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)`,
-    [id, gameId, name, 5, 0, 0, 0, turnOrder, isHost, true, 0]
-  );
+  if (await supportsLastFreeActionDayColumn()) {
+    await execute(
+      `INSERT INTO players (id, game_id, name, nutrition, score, paintings_completed, food_earned, turn_order, is_host, connected, last_seen, last_free_action_day)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)`,
+      [id, gameId, name, 5, 0, 0, 0, turnOrder, isHost, true, 0]
+    );
+  } else {
+    await execute(
+      `INSERT INTO players (id, game_id, name, nutrition, score, paintings_completed, food_earned, turn_order, is_host, connected, last_seen)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+      [id, gameId, name, 5, 0, 0, 0, turnOrder, isHost, true]
+    );
+  }
   const player = await getPlayer(id);
   if (!player) {
     throw new Error('Failed to create player');
@@ -62,16 +94,18 @@ function mapPlayerRow(row: PlayerRow): Player {
 }
 
 export async function getPlayer(playerId: string): Promise<Player | null> {
+  const includeLastFreeActionDay = await supportsLastFreeActionDayColumn();
   const row = await queryOne<PlayerRow>(
-    'SELECT id, game_id, name, nutrition, score, paintings_completed, food_earned, turn_order, is_host, connected, last_seen, last_free_action_day FROM players WHERE id = ?',
+    `SELECT ${playerSelectColumns(includeLastFreeActionDay)} FROM players WHERE id = ?`,
     [playerId]
   );
   return row ? mapPlayerRow(row) : null;
 }
 
 export async function getGamePlayers(gameId: string): Promise<Player[]> {
+  const includeLastFreeActionDay = await supportsLastFreeActionDayColumn();
   const rows = await query<PlayerRow>(
-    'SELECT id, game_id, name, nutrition, score, paintings_completed, food_earned, turn_order, is_host, connected, last_seen, last_free_action_day FROM players WHERE game_id = ? ORDER BY turn_order ASC',
+    `SELECT ${playerSelectColumns(includeLastFreeActionDay)} FROM players WHERE game_id = ? ORDER BY turn_order ASC`,
     [gameId]
   );
   return rows.map(mapPlayerRow);
@@ -124,6 +158,9 @@ export async function updatePlayerFreeActionDay(
   playerId: string,
   dayNumber: number
 ): Promise<void> {
+  if (!(await supportsLastFreeActionDayColumn())) {
+    return;
+  }
   await execute('UPDATE players SET last_free_action_day = ? WHERE id = ?', [dayNumber, playerId]);
 }
 
