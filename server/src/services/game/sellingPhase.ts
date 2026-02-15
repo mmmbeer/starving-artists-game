@@ -5,7 +5,7 @@ import * as gameDb from '../../database/gameDb';
 import * as playerDb from '../../database/playerDb';
 import * as canvasDb from '../../database/canvasDb';
 import { drawPaintCubes } from '../paint/paintBag';
-import { SellingPhaseData, PaintCube, Player, PlayerCanvas } from '../../models/types';
+import { SellingPhaseData, PaintCube, Player } from '../../models/types';
 import { SELLING_PAINT_PAYOUT } from '../../utils/constants';
 
 const MAX_NUTRITION = 5;
@@ -260,6 +260,19 @@ export function getCurrentCollector(sellingData: SellingPhaseData): typeof selli
   return sellingData.order[sellingData.currentIndex];
 }
 
+function getNextCollectorIndex(sellingData: SellingPhaseData, startIndex: number): number {
+  if (sellingData.order.length === 0) return -1;
+
+  for (let offset = 0; offset < sellingData.order.length; offset++) {
+    const index = (startIndex + offset) % sellingData.order.length;
+    if (sellingData.order[index].remainingCubes > 0) {
+      return index;
+    }
+  }
+
+  return -1;
+}
+
 /**
  * Check if a player can collect paint cubes
  */
@@ -336,6 +349,9 @@ export async function collectPaintCubes(
   }
 
   // Validate not taking more than allowed
+  if (selectedCubes.length === 0) {
+    throw new Error('Must select at least one cube');
+  }
   if (selectedCubes.length > canCollect.maxCubes) {
     throw new Error(`Can only collect ${canCollect.maxCubes} cubes`);
   }
@@ -352,25 +368,16 @@ export async function collectPaintCubes(
   const currentIndex = sellingData.currentIndex;
   sellingData.order[currentIndex].remainingCubes -= selectedCubes.length;
 
-  // Check if current player is done collecting or market empty
-  const shouldAdvance = 
-    sellingData.order[currentIndex].remainingCubes <= 0 || 
-    newPaintMarket.length === 0;
-
-  if (shouldAdvance) {
-    sellingData.currentIndex++;
-    
-    // Skip players who can't collect anymore
-    while (
-      sellingData.currentIndex < sellingData.order.length &&
-      (sellingData.order[sellingData.currentIndex].remainingCubes <= 0 || newPaintMarket.length === 0)
-    ) {
-      sellingData.currentIndex++;
+  if (newPaintMarket.length === 0) {
+    sellingData.isActive = false;
+  } else {
+    const nextIndex = getNextCollectorIndex(sellingData, currentIndex + 1);
+    sellingData.isActive = nextIndex >= 0;
+    if (nextIndex >= 0) {
+      sellingData.currentIndex = nextIndex;
+      await gameDb.updateCurrentPlayer(gameId, sellingData.order[nextIndex].playerId);
     }
   }
-
-  // Check if selling phase is complete
-  sellingData.isActive = sellingData.currentIndex < sellingData.order.length && newPaintMarket.length > 0;
 
   // Update game state
   await gameDb.updateGameState(gameId, {
@@ -407,12 +414,16 @@ export async function skipCollection(
     throw new Error('Not your turn to collect');
   }
 
-  // Mark current player as done (set remaining to 0)
-  sellingData.order[sellingData.currentIndex].remainingCubes = 0;
-  sellingData.currentIndex++;
+  // Pass forfeits all remaining collection for this sold canvas.
+  const currentIndex = sellingData.currentIndex;
+  sellingData.order[currentIndex].remainingCubes = 0;
 
-  // Check if selling phase is complete
-  sellingData.isActive = sellingData.currentIndex < sellingData.order.length;
+  const nextIndex = getNextCollectorIndex(sellingData, currentIndex + 1);
+  sellingData.isActive = nextIndex >= 0;
+  if (nextIndex >= 0) {
+    sellingData.currentIndex = nextIndex;
+    await gameDb.updateCurrentPlayer(gameId, sellingData.order[nextIndex].playerId);
+  }
 
   await gameDb.updateGameState(gameId, {
     selling_phase_data: sellingData,
@@ -463,7 +474,7 @@ export function getSellingPhaseStatus(
       playerId: entry.playerId,
       playerName: player?.name || 'Unknown',
       rank: entry.rank,
-      done: index < sellingData.currentIndex || entry.remainingCubes <= 0,
+      done: entry.remainingCubes <= 0,
     };
   });
 

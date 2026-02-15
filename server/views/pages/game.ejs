@@ -472,6 +472,7 @@
     let selectedPurchaseCubeIds = [];
     let purchaseModal = null;
     let freeActionModal = null;
+    let sellingPhaseModal = null;
     let freeActionMode = null;
     let selectedTradeGiveIds = [];
     let selectedTradeTakeIds = [];
@@ -794,48 +795,7 @@
     }
 
     function setupSellingPhaseHandlers() {
-      // Collect paint button
-      document.getElementById('collectPaintBtn')?.addEventListener('click', async () => {
-        if (selectedSellingCubes.length === 0) return;
-        
-        try {
-          const response = await fetch(`/game/${gameId}/action/collect-paint`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cubeIds: selectedSellingCubes })
-          });
-          const data = await response.json();
-          
-          if (data.success) {
-            showToast('Success', `Collected ${data.cubesCollected.length} paint cubes!`, 'success');
-            selectedSellingCubes = [];
-            updateSellingCubesUI();
-          } else {
-            showToast('Error', data.error, 'danger');
-          }
-        } catch (error) {
-          showToast('Error', error.message, 'danger');
-        }
-      });
-
-      // Skip collection button
-      document.getElementById('skipCollectionBtn')?.addEventListener('click', async () => {
-        try {
-          const response = await fetch(`/game/${gameId}/action/skip-collection`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-          });
-          const data = await response.json();
-          
-          if (data.success) {
-            showToast('Skipped', 'You passed on collecting', 'info');
-          } else {
-            showToast('Error', data.error, 'danger');
-          }
-        } catch (error) {
-          showToast('Error', error.message, 'danger');
-        }
-      });
+      // Selling phase uses reusable popover modal and is rendered from game state.
     }
 
     function openCanvasPurchase(slotIndex) {
@@ -1599,36 +1559,82 @@
     }
 
     function showSellingPhase(state) {
-      const modal = document.getElementById('sellingPhaseModal');
-      if (!modal) return;
-      
-      modal.classList.remove('d-none');
-      
-      // Update selling order display
       const sellingData = state.gameState.selling_phase_data;
-      if (sellingData) {
-        updateSellingOrder(sellingData, state.players);
-        updateSellingMarket(state.gameState.paint_market, sellingData);
+      if (!sellingData) return;
+
+      if (typeof window.openAppModal !== 'function') {
+        showToast('Error', 'Modal system is unavailable', 'danger');
+        return;
       }
+
+      const currentCollector = sellingData.order?.[sellingData.currentIndex];
+      const isMyCollectorTurn = !!currentCollector && currentCollector.playerId === playerId;
+      const maxCubes = isMyCollectorTurn
+        ? Math.min(currentCollector.cubesPerAction, currentCollector.remainingCubes, state.gameState.paint_market.length)
+        : 0;
+      const marketCubeIds = new Set((state.gameState.paint_market || []).map(cube => cube.id));
+      selectedSellingCubes = selectedSellingCubes.filter(cubeId => marketCubeIds.has(cubeId)).slice(0, maxCubes);
+
+      const bodyContent = buildSellingPhaseBody(state, sellingData, maxCubes, isMyCollectorTurn);
+      const actions = [
+        {
+          label: 'Pass',
+          variant: 'secondary',
+          testId: 'skip-collection-btn',
+          disabled: !isMyCollectorTurn,
+          onClick: () => submitSkipCollection(),
+        },
+        {
+          label: `Collect ${selectedSellingCubes.length > 0 ? `(${selectedSellingCubes.length})` : ''}`.trim(),
+          variant: 'primary',
+          testId: 'collect-paint-btn',
+          disabled: !isMyCollectorTurn || selectedSellingCubes.length === 0,
+          onClick: () => submitCollectPaint(),
+        },
+      ];
+
+      if (!sellingPhaseModal) {
+        sellingPhaseModal = window.openAppModal({
+          title: 'Selling Phase',
+          bodyContent,
+          actions,
+          maxWidth: '760px',
+          closeOnBackdrop: false,
+          closeOnEscape: false,
+          testId: 'selling-modal',
+          onClose: () => {
+            sellingPhaseModal = null;
+            if (getCurrentState().game.current_phase === 'selling') {
+              setTimeout(() => showSellingPhase(getCurrentState()), 0);
+            }
+          },
+        });
+      } else {
+        sellingPhaseModal.setTitle('Selling Phase');
+        sellingPhaseModal.setBodyContent(bodyContent);
+        sellingPhaseModal.setActions(actions);
+      }
+
+      bindSellingCubeSelection(maxCubes, isMyCollectorTurn);
     }
 
     function hideSellingPhase() {
-      const modal = document.getElementById('sellingPhaseModal');
-      if (modal) modal.classList.add('d-none');
+      if (sellingPhaseModal) {
+        const modal = sellingPhaseModal;
+        sellingPhaseModal = null;
+        modal.close('phase-exit');
+      }
       selectedSellingCubes = [];
     }
 
-    function updateSellingOrder(sellingData, players) {
-      const container = document.getElementById('sellingOrder');
-      if (!container) return;
-      
-      let html = '<div class="selling-order-list">';
+    function buildSellingPhaseBody(state, sellingData, maxCubes, isMyCollectorTurn) {
+      let orderHtml = '<div class="selling-order-list">';
       sellingData.order.forEach((entry, index) => {
-        const player = players.find(p => p.id === entry.playerId);
+        const player = state.players.find(p => p.id === entry.playerId);
         const isActive = index === sellingData.currentIndex;
-        const isDone = index < sellingData.currentIndex || entry.remainingCubes <= 0;
+        const isDone = entry.remainingCubes <= 0;
         
-        html += `
+        orderHtml += `
           <div class="selling-order-item ${isActive ? 'active' : ''} ${isDone ? 'done' : ''}">
             <span class="rank-badge rank-${entry.rank}">${entry.rank === 'first' ? '1st' : entry.rank === 'second' ? '2nd' : '3rd'}</span>
             <span class="player-name">${player?.name || 'Unknown'} ${entry.playerId === playerId ? '(You)' : ''}</span>
@@ -1637,65 +1643,91 @@
           </div>
         `;
       });
-      html += '</div>';
-      container.innerHTML = html;
-    }
+      orderHtml += '</div>';
 
-    function updateSellingMarket(paintMarket, sellingData) {
-      const container = document.getElementById('sellingPaintCubes');
-      const maxCubesEl = document.getElementById('sellingMaxCubes');
-      const collectBtn = document.getElementById('collectPaintBtn');
-      const skipBtn = document.getElementById('skipCollectionBtn');
-      
-      if (!container) return;
-      
-      // Check if it's our turn to collect
-      const currentCollector = sellingData.order[sellingData.currentIndex];
-      const isMyTurn = currentCollector?.playerId === playerId;
-      const maxCubes = isMyTurn ? Math.min(currentCollector.cubesPerAction, currentCollector.remainingCubes, paintMarket.length) : 0;
-      
-      if (maxCubesEl) maxCubesEl.textContent = maxCubes;
-      if (collectBtn) collectBtn.disabled = !isMyTurn || selectedSellingCubes.length === 0;
-      if (skipBtn) skipBtn.disabled = !isMyTurn;
-      
-      // Render cubes
-      container.innerHTML = paintMarket.map(cube => `
-        <div 
-          class="paint-cube selectable ${selectedSellingCubes.includes(cube.id) ? 'selected' : ''} ${!isMyTurn ? 'disabled' : ''}"
+      const cubesHtml = state.gameState.paint_market.map(cube => `
+        <div
+          class="paint-cube selectable ${selectedSellingCubes.includes(cube.id) ? 'selected' : ''} ${!isMyCollectorTurn ? 'disabled' : ''}"
           data-cube-id="${cube.id}"
           data-color="${cube.color}"
           data-is-wild="${cube.is_wild}"
           title="${cube.color}${cube.is_wild ? ' (Wild)' : ''}"
-          onclick="toggleSellingCube('${cube.id}', ${maxCubes})"
         ></div>
       `).join('');
+
+      return `
+        <p class="selling-instructions">
+          Round-robin collection: first rank takes up to 4 each turn, second up to 2, others up to 1.
+          Continue in order until all sold paintings finish collecting or the market is empty.
+        </p>
+        <div id="sellingOrder" class="selling-order">
+          ${orderHtml}
+        </div>
+        <div class="selling-market">
+          <h5>Select Paint Cubes (${maxCubes} max)</h5>
+          <div id="sellingPaintCubes" class="paint-cubes-selectable">
+            ${cubesHtml}
+          </div>
+          <div class="selected-cubes-info mt-2">Selected: <span id="selectedCubeCount">${selectedSellingCubes.length}</span> cubes</div>
+        </div>
+      `;
     }
 
-    function toggleSellingCube(cubeId, maxCubes) {
-      const index = selectedSellingCubes.indexOf(cubeId);
-      if (index >= 0) {
-        selectedSellingCubes.splice(index, 1);
-      } else if (selectedSellingCubes.length < maxCubes) {
-        selectedSellingCubes.push(cubeId);
-      }
-      updateSellingCubesUI();
-    }
+    function bindSellingCubeSelection(maxCubes, isMyCollectorTurn) {
+      const body = sellingPhaseModal?.getBodyElement?.();
+      if (!body) return;
 
-    function updateSellingCubesUI() {
-      const countEl = document.getElementById('selectedCubeCount');
-      const collectBtn = document.getElementById('collectPaintBtn');
-      
-      if (countEl) countEl.textContent = selectedSellingCubes.length;
-      if (collectBtn) collectBtn.disabled = selectedSellingCubes.length === 0;
-      
-      // Update cube visual selection
-      document.querySelectorAll('#sellingPaintCubes .paint-cube').forEach(el => {
-        if (selectedSellingCubes.includes(el.dataset.cubeId)) {
-          el.classList.add('selected');
-        } else {
-          el.classList.remove('selected');
-        }
+      body.querySelectorAll('#sellingPaintCubes .paint-cube.selectable').forEach(el => {
+        el.addEventListener('click', () => {
+          if (!isMyCollectorTurn || maxCubes <= 0 || el.classList.contains('disabled')) return;
+          const cubeId = el.dataset.cubeId;
+          if (!cubeId) return;
+
+          const selectedIndex = selectedSellingCubes.indexOf(cubeId);
+          if (selectedIndex >= 0) {
+            selectedSellingCubes.splice(selectedIndex, 1);
+          } else if (selectedSellingCubes.length < maxCubes) {
+            selectedSellingCubes.push(cubeId);
+          }
+
+          showSellingPhase(getCurrentState());
+        });
       });
+    }
+
+    async function submitCollectPaint() {
+      if (selectedSellingCubes.length === 0) return;
+
+      try {
+        const response = await fetch(`/game/${gameId}/action/collect-paint`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cubeIds: selectedSellingCubes }),
+        });
+        const data = await response.json();
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to collect paint');
+        }
+        selectedSellingCubes = [];
+      } catch (error) {
+        showToast('Error', error.message, 'danger');
+      }
+    }
+
+    async function submitSkipCollection() {
+      try {
+        const response = await fetch(`/game/${gameId}/action/skip-collection`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const data = await response.json();
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to skip collection');
+        }
+        selectedSellingCubes = [];
+      } catch (error) {
+        showToast('Error', error.message, 'danger');
+      }
     }
 
     function getPlayerName(playerId) {
