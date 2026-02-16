@@ -29,7 +29,16 @@ async function supportsLastFreeActionDayColumn(): Promise<boolean> {
     const rows = await query<{ Field: string }>(
       "SHOW COLUMNS FROM players LIKE 'last_free_action_day'"
     );
-    hasLastFreeActionDayColumn = rows.length > 0;
+    if (rows.length > 0) {
+      hasLastFreeActionDayColumn = true;
+      return true;
+    }
+
+    // Backfill legacy schemas so free-action limits are always enforceable.
+    await execute(
+      'ALTER TABLE players ADD COLUMN last_free_action_day INT DEFAULT 0'
+    );
+    hasLastFreeActionDayColumn = true;
   } catch {
     hasLastFreeActionDayColumn = false;
   }

@@ -43,7 +43,7 @@ export async function checkAndProcessCompletion(
 
   // Already completed
   if (canvas.completed) {
-    return { isComplete: true };
+    return { isComplete: false };
   }
 
   // Check if all squares are painted

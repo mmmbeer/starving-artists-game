@@ -14,14 +14,11 @@
   <link rel="stylesheet" href="/css/components.css">
   <link rel="stylesheet" href="/css/game.css">
 </head>
-<body>
-  <!-- Header -->
-  <header class="app-header">
-    <div class="container-fluid header-structure">
-      <div class="header-phase-line">
-        <div class="header-phase-core">
-          <span class="header-day">(DAY <span id="dayNumber"><%= game.day_number %></span>)</span>
-          <span class="header-divider">:</span>
+<body class="sa-app pg-game-page">
+  <div class="pg-game sa-shell">
+  <header class="app-header pg-game__topbar">
+      <div class="header-phase-core pg-game__phase">
+          <span class="header-day">Day <span id="dayNumber"><%= game.day_number %></span></span>
           <div id="phaseIndicator" class="phase-indicator header-phase-indicator" data-phase="<%= game.current_phase %>">
             <div class="phase-icon">
               <svg class="phase-svg phase-morning" viewBox="0 0 64 64" role="img" aria-label="Morning">
@@ -52,11 +49,46 @@
             </div>
             <div id="phaseLabel" class="phase-label"><%= game.current_phase === 'morning' ? 'Morning' : game.current_phase === 'day' ? 'Afternoon' : game.current_phase === 'night' ? 'Evening' : 'Selling' %></div>
           </div>
-          <span class="header-current-player">(<span id="currentTurnName"><%= players.find(p => p.id === game.current_player_id)?.name || 'Player' %></span>)</span>
+          <div class="phase-progress" aria-hidden="true">
+            <span class="<%= game.current_phase === 'morning' ? 'is-active' : '' %>"></span>
+            <span class="<%= game.current_phase === 'day' ? 'is-active' : '' %>"></span>
+            <span class="<%= game.current_phase === 'night' || game.current_phase === 'selling' ? 'is-active' : '' %>"></span>
+          </div>
+      </div>
+      <div class="pg-game__turn">Turn: <strong id="currentTurnName"><%= players.find(p => p.id === game.current_player_id)?.name || 'Player' %></strong></div>
+      <div class="pg-game__you">
+        <span class="hud-chip">Stars <strong id="playerScore"><%= currentPlayer.score %></strong></span>
+        <span class="hud-chip">Nutrition <strong id="nutritionValue"><%= currentPlayer.nutrition %></strong></span>
+        <span class="hud-chip">Studio <strong><%= playerCanvases.length %></strong></span>
+      </div>
+  </header>
+
+  <section class="action-bar" data-testid="action-bar">
+    <div class="action-buttons">
+      <button id="actionPaintBtn" class="btn action-btn" data-action="paint" data-testid="paint-btn" <%= !isCurrentTurn || game.current_phase === 'selling' || game.current_phase === 'night' ? 'disabled' : '' %>>Paint</button>
+      <button id="actionWorkBtn" class="btn action-btn" data-action="work" data-testid="work-btn" <%= !isCurrentTurn || game.current_phase === 'selling' || game.current_phase === 'night' ? 'disabled' : '' %>>Work</button>
+      <button id="actionBuyBtn" class="btn action-btn" data-action="buy" data-testid="buy-btn" <%= !isCurrentTurn || game.current_phase === 'selling' || game.current_phase === 'night' ? 'disabled' : '' %>>Buy</button>
+      <button id="actionPassBtn" class="btn action-btn" data-action="pass" data-testid="pass-btn" <%= !isCurrentTurn || game.current_phase === 'selling' || game.current_phase === 'night' ? 'disabled' : '' %>>Pass</button>
+      <button id="actionSellBtn" class="btn action-btn" data-action="sell" data-testid="sell-btn" <%= !isCurrentTurn || game.current_phase !== 'night' ? 'disabled' : '' %>>Sell</button>
+      <div class="action-dropdown">
+        <button id="actionFreeBtn" class="btn action-btn" data-action="free" data-testid="free-btn">Free</button>
+        <div id="freeActionMenu" class="dropdown-menu">
+          <button class="dropdown-item" data-free-action="trade" disabled>Trade</button>
+          <button class="dropdown-item" data-free-action="reset-market" disabled>Reset Market</button>
         </div>
       </div>
     </div>
-  </header>
+    <div class="action-meta">
+      <span id="turnStatus" class="turn-status"><%= isCurrentTurn ? "Your turn" : "Waiting for " + (players.find(p => p.id === game.current_player_id)?.name || "player") %></span>
+      <span id="actionCount" class="action-count">Actions: <strong id="actionCountValue"><%= gameState.actions_taken %></strong>/2</span>
+      <span id="actionsLeft" class="action-left">Left: <strong id="actionsLeftValue"><%= Math.max(0, 2 - gameState.actions_taken) %></strong></span>
+      <span id="freeActionStatus" class="free-action-status">Free: <strong id="freeActionValue">Unknown</strong></span>
+      <div class="pending-paints">
+        <span>Pending: <strong id="pendingPaintsCount">0</strong></span>
+        <button id="commitPaintsBtn" class="btn btn-sm btn-accent" disabled data-testid="commit-paints-btn">Apply Paints</button>
+      </div>
+    </div>
+  </section>
 
   <!-- Waiting Overlay -->
   <div id="waitingOverlay" class="waiting-overlay <%= isCurrentTurn ? 'd-none' : '' %>" data-testid="waiting-overlay">
@@ -65,6 +97,13 @@
       <div class="waiting-text">
         Waiting for <span id="waitingPlayerName"><%= players.find(p => p.id === game.current_player_id)?.name || 'other player' %></span>...
       </div>
+    </div>
+  </div>
+
+  <div id="phaseTransitionOverlay" class="phase-transition-overlay d-none" aria-hidden="true">
+    <div class="phase-transition-card">
+      <div id="phaseTransitionIcon" class="phase-transition-icon"></div>
+      <div id="phaseTransitionText" class="phase-transition-text"></div>
     </div>
   </div>
 
@@ -105,7 +144,6 @@
   </div>
 
   <main class="game-container">
-  <div class="container-fluid">
     <div class="game-board">
       <section class="shared-space" data-testid="shared-space">
         <div class="shared-top">
@@ -159,7 +197,7 @@
                       </div>
                     <% } %>
                     <div class="canvas-hover-meta">
-                      Stars <%= canvas.star_value %> ? Paint <%= canvas.paint_value %> ? Food <%= canvas.food_value %>
+                      Stars <%= canvas.star_value %> | Paint <%= canvas.paint_value %> | Food <%= canvas.food_value %>
                     </div>
                   </div>
                 <% } else { %>
@@ -179,93 +217,35 @@
             <div class="deck-count"><span id="canvasDeckCount"><%= gameState.canvas_deck?.length || 0 %></span> cards</div>
           </div>
 
-          <div class="turn-info-block" data-testid="turn-info">
-            <div class="section-label">Turn Information</div>
-            <div id="turnInfoList" class="turn-info-list">
+          <div class="paint-market-block" data-testid="paint-market-section">
+            <div class="section-label">Paint Market</div>
+            <div id="paintMarket" class="paint-market-rail">
               <% 
-                const orderedPlayers = [...players].sort((a, b) => (a.turn_order || 0) - (b.turn_order || 0));
+                const colorOrder = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'black', 'wild'];
+                const marketGroups = {};
+                colorOrder.forEach(color => { marketGroups[color] = []; });
+                gameState.paint_market.forEach(cube => { marketGroups[cube.color].push(cube); });
               %>
-              <% orderedPlayers.forEach(player => { 
-                const isActive = player.id === game.current_player_id;
-                const isMe = player.id === currentPlayer.id;
-                const canvases = allPlayerCanvases[player.id] || [];
-                const hasCompleted = canvases.some(canvas => canvas.completed);
-                const showSelling = (game.current_phase === 'night' || game.current_phase === 'selling') && hasCompleted;
-              %>
-                <div class="turn-info-item <%= isActive ? 'active' : '' %> <%= isMe ? 'me' : '' %>" data-player-id="<%= player.id %>" data-selling="<%= showSelling ? 'true' : 'false' %>">
-                  <div class="turn-info-content">
-                    <span class="turn-field"><span class="turn-label">Name:</span> <span class="turn-name"><%= player.name %></span></span>
-                    <span class="turn-field"><span class="turn-label">Points:</span> <span class="turn-value"><%= player.score %></span></span>
-                    <span class="turn-field"><span class="turn-label">Nutrition:</span> <span class="turn-value"><%= player.nutrition %></span></span>
-                    <span class="turn-field turn-actions"><span class="turn-label">Actions:</span> <span class="turn-value"><%= isActive ? gameState.actions_taken + '/2' : '-' %></span></span>
+              <% colorOrder.forEach(color => { %>
+                <div class="paint-slot" data-color="<%= color %>" title="<%= color %>">
+                  <div class="paint-slot-pile" aria-hidden="true">
+                    <% marketGroups[color].forEach((cube, idx) => { %>
+                      <div
+                        class="paint-cube in-market"
+                        data-cube-id="<%= cube.id %>"
+                        data-color="<%= cube.color %>"
+                        data-is-wild="<%= cube.is_wild %>"
+                        style="<%= getCubePileStyle(cube.id, idx) %>"
+                        title="<%= cube.color %><%= cube.is_wild ? ' (Wild)' : '' %>"
+                      ></div>
+                    <% }); %>
                   </div>
-                  <% if (isMe || showSelling) { %>
-                    <div class="turn-badges">
-                      <% if (isMe) { %><span class="turn-you">You</span><% } %>
-                      <% if (showSelling) { %><span class="turn-selling">Selling</span><% } %>
-                    </div>
-                  <% } %>
+                  <div class="paint-slot-meta">
+                    <span class="slot-count"><%= marketGroups[color].length %></span>
+                  </div>
                 </div>
               <% }); %>
             </div>
-          </div>
-        </div>
-
-        <div class="paint-market-block" data-testid="paint-market-section">
-          <div class="section-label">Paint Market</div>
-          <div id="paintMarket" class="paint-market-rail">
-            <% 
-              const colorOrder = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'black', 'wild'];
-              const marketGroups = {};
-              colorOrder.forEach(color => { marketGroups[color] = []; });
-              gameState.paint_market.forEach(cube => { marketGroups[cube.color].push(cube); });
-            %>
-            <% colorOrder.forEach(color => { %>
-              <div class="paint-slot" data-color="<%= color %>">
-                <div class="paint-slot-header">
-                  <span class="color-label"><%= color.slice(0, 1).toUpperCase() %></span>
-                  <span class="slot-count"><%= marketGroups[color].length %></span>
-                </div>
-                <div class="paint-slot-cubes">
-                  <% marketGroups[color].forEach(cube => { %>
-                    <div 
-                      class="paint-cube in-market" 
-                      data-cube-id="<%= cube.id %>"
-                      data-color="<%= cube.color %>"
-                      data-is-wild="<%= cube.is_wild %>"
-                      title="<%= cube.color %><%= cube.is_wild ? ' (Wild)' : '' %>"
-                    ></div>
-                  <% }); %>
-                </div>
-              </div>
-            <% }); %>
-          </div>
-        </div>
-      </section>
-
-      <section class="action-bar" data-testid="action-bar">
-        <div class="action-buttons">
-          <button id="actionPaintBtn" class="btn action-btn" data-action="paint" data-testid="paint-btn" <%= !isCurrentTurn || game.current_phase === 'selling' || game.current_phase === 'night' ? 'disabled' : '' %>>Paint</button>
-          <button id="actionWorkBtn" class="btn action-btn" data-action="work" data-testid="work-btn" <%= !isCurrentTurn || game.current_phase === 'selling' || game.current_phase === 'night' ? 'disabled' : '' %>>Work</button>
-          <button id="actionBuyBtn" class="btn action-btn" data-action="buy" data-testid="buy-btn" <%= !isCurrentTurn || game.current_phase === 'selling' || game.current_phase === 'night' ? 'disabled' : '' %>>Buy</button>
-          <button id="actionPassBtn" class="btn action-btn" data-action="pass" data-testid="pass-btn" <%= !isCurrentTurn || game.current_phase === 'selling' || game.current_phase === 'night' ? 'disabled' : '' %>>Pass</button>
-          <button id="actionSellBtn" class="btn action-btn" data-action="sell" data-testid="sell-btn" <%= !isCurrentTurn || game.current_phase !== 'night' ? 'disabled' : '' %>>Sell</button>
-          <div class="action-dropdown">
-            <button id="actionFreeBtn" class="btn action-btn" data-action="free" data-testid="free-btn">Free</button>
-            <div id="freeActionMenu" class="dropdown-menu">
-              <button class="dropdown-item" data-free-action="trade" disabled>Trade</button>
-              <button class="dropdown-item" data-free-action="reset-market" disabled>Reset Market</button>
-            </div>
-          </div>
-        </div>
-        <div class="action-meta">
-          <span id="turnStatus" class="turn-status"><%= isCurrentTurn ? "Your turn" : "Waiting for " + (players.find(p => p.id === game.current_player_id)?.name || "player") %></span>
-          <span id="actionCount" class="action-count">Actions: <strong id="actionCountValue"><%= gameState.actions_taken %></strong>/2</span>
-          <span id="actionsLeft" class="action-left">Left: <strong id="actionsLeftValue"><%= Math.max(0, 2 - gameState.actions_taken) %></strong></span>
-          <span id="freeActionStatus" class="free-action-status">Free: <strong id="freeActionValue">Unknown</strong></span>
-          <div class="pending-paints">
-            <span>Pending: <strong id="pendingPaintsCount">0</strong></span>
-            <button id="commitPaintsBtn" class="btn btn-sm btn-accent" disabled data-testid="commit-paints-btn">Apply Paints</button>
           </div>
         </div>
       </section>
@@ -273,11 +253,43 @@
       <section class="player-space" data-testid="player-space">
         <div class="player-space-header">
           <div class="player-identity">
-            <div class="player-name"><%= currentPlayer.name %></div>
+            <div class="player-name">My Studio</div>
             <div class="player-stats">
-              <span>Score <strong id="playerScore"><%= currentPlayer.score %></strong></span>
-              <span>Nutrition <strong id="nutritionValue"><%= currentPlayer.nutrition %></strong></span>
+              <% const completedCanvases = playerCanvases.filter(canvas => canvas.completed).length; %>
+              <span>Completed <strong><%= completedCanvases %></strong></span>
+              <span>In Progress <strong><%= playerCanvases.length - completedCanvases %></strong></span>
             </div>
+          </div>
+        </div>
+
+        <div class="paint-tray-block">
+          <div class="section-label">Your Paint</div>
+          <div id="playerCubes" class="paint-tray">
+            <%
+              const playerGroups = {};
+              colorOrder.forEach(color => { playerGroups[color] = []; });
+              playerPaintCubes.forEach(cube => { playerGroups[cube.color].push(cube); });
+            %>
+            <% colorOrder.forEach(color => { %>
+              <div class="paint-slot" data-color="<%= color %>" title="<%= color %>">
+                <div class="paint-slot-pile">
+                  <% playerGroups[color].forEach((cube, idx) => { %>
+                    <div
+                      class="paint-cube in-tray"
+                      draggable="true"
+                      data-cube-id="<%= cube.id %>"
+                      data-color="<%= cube.color %>"
+                      data-is-wild="<%= cube.is_wild %>"
+                      style="<%= getCubePileStyle(cube.id, idx) %>"
+                      title="<%= cube.color %><%= cube.is_wild ? ' (Wild)' : '' %>"
+                    ></div>
+                  <% }); %>
+                </div>
+                <div class="paint-slot-meta">
+                  <span class="slot-count"><%= playerGroups[color].length %></span>
+                </div>
+              </div>
+            <% }); %>
           </div>
         </div>
 
@@ -292,17 +304,6 @@
           <div id="freeActionBody" class="free-action-body"></div>
           <div class="free-action-actions mt-3">
             <button id="confirmFreeActionBtn" class="btn btn-primary" type="button" disabled>Confirm</button>
-          </div>
-        </div>
-
-        <div id="sellSelectionPanel" class="sell-selection d-none" data-testid="sell-selection-panel">
-          <div class="sell-selection-header">
-            <div class="sell-title">Select completed canvases to sell</div>
-            <button id="cancelSellBtn" class="btn btn-sm btn-secondary" type="button">Cancel</button>
-          </div>
-          <div id="sellSelectionList" class="sell-selection-list"></div>
-          <div class="sell-selection-actions">
-            <button id="confirmSellBtn" class="btn btn-primary" type="button" disabled>Submit Sell</button>
           </div>
         </div>
 
@@ -377,39 +378,40 @@
           <button id="canvasNextBtn" class="carousel-nav" type="button" aria-label="Next canvas">&rsaquo;</button>
         </div>
 
-        <div class="paint-tray-block">
-          <div class="section-label">Your Paint</div>
-          <div id="playerCubes" class="paint-tray">
-            <% 
-              const playerGroups = {};
-              colorOrder.forEach(color => { playerGroups[color] = []; });
-              playerPaintCubes.forEach(cube => { playerGroups[cube.color].push(cube); });
-            %>
-            <% colorOrder.forEach(color => { %>
-              <div class="paint-slot" data-color="<%= color %>">
-                <div class="paint-slot-header">
-                  <span class="color-label"><%= color.slice(0, 1).toUpperCase() %></span>
-                  <span class="slot-count"><%= playerGroups[color].length %></span>
-                </div>
-                <div class="paint-slot-cubes">
-                  <% playerGroups[color].forEach(cube => { %>
-                    <div 
-                      class="paint-cube in-tray" 
-                      draggable="true"
-                      data-cube-id="<%= cube.id %>"
-                      data-color="<%= cube.color %>"
-                      data-is-wild="<%= cube.is_wild %>"
-                      title="<%= cube.color %><%= cube.is_wild ? ' (Wild)' : '' %>"
-                    ></div>
-                  <% }); %>
-                </div>
-              </div>
-            <% }); %>
-          </div>
-        </div>
       </section>
+
+      <aside class="turn-info-block" data-testid="turn-info">
+        <div class="section-label">Players</div>
+        <div id="turnInfoList" class="turn-info-list">
+          <%
+            const orderedPlayers = [...players].sort((a, b) => (a.turn_order || 0) - (b.turn_order || 0));
+          %>
+          <% orderedPlayers.forEach(player => {
+            const isActive = player.id === game.current_player_id;
+            const isMe = player.id === currentPlayer.id;
+            const canvases = allPlayerCanvases[player.id] || [];
+            const hasCompleted = canvases.some(canvas => canvas.completed);
+            const showSelling = (game.current_phase === 'night' || game.current_phase === 'selling') && hasCompleted;
+          %>
+            <div class="turn-info-item <%= isActive ? 'active' : '' %> <%= isMe ? 'me' : '' %>" data-player-id="<%= player.id %>" data-selling="<%= showSelling ? 'true' : 'false' %>">
+              <div class="turn-info-content">
+                <span class="turn-field"><span class="turn-label">Name:</span> <span class="turn-name"><%= player.name %></span></span>
+                <span class="turn-field"><span class="turn-label">Points:</span> <span class="turn-value"><%= player.score %></span></span>
+                <span class="turn-field"><span class="turn-label">Nutrition:</span> <span class="turn-value"><%= player.nutrition %></span></span>
+                <span class="turn-field turn-actions"><span class="turn-label">Actions:</span> <span class="turn-value"><%= isActive ? gameState.actions_taken + '/2' : '-' %></span></span>
+              </div>
+              <% if (isMe || showSelling) { %>
+                <div class="turn-badges">
+                  <% if (isMe) { %><span class="turn-you">You</span><% } %>
+                  <% if (showSelling) { %><span class="turn-selling">Selling</span><% } %>
+                </div>
+              <% } %>
+            </div>
+          <% }); %>
+        </div>
+      </aside>
     </div>
-  </div>
+  </main>
 
   <!-- Turn Complete Notice -->
   <div id="turnCompleteModal" class="turn-complete-modal d-none" role="dialog" aria-modal="false" data-testid="turn-complete-modal">
@@ -422,7 +424,7 @@
       </div>
     </div>
   </div>
-</main>
+  </div>
 
   <!-- Toast Container -->
   <div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer"></div>
@@ -472,7 +474,9 @@
     let selectedPurchaseCubeIds = [];
     let purchaseModal = null;
     let freeActionModal = null;
+    let sellSelectionModal = null;
     let sellingPhaseModal = null;
+    let phaseTransitionTimer = null;
     let freeActionMode = null;
     let selectedTradeGiveIds = [];
     let selectedTradeTakeIds = [];
@@ -541,6 +545,7 @@
     }
 
     function applyGameState(newState) {
+      const previousState = getCurrentState();
       isCurrentTurn = newState.game.current_player_id === playerId;
       
       if (gameUI) {
@@ -553,7 +558,9 @@
       updateWaitingOverlay();
       updateDayNumber(newState.game.day_number);
       updateActionMeta(newState);
+      updateActionButtons();
       updateTurnCompleteNotice(newState);
+      maybeShowPhaseTransition(previousState, newState);
 
       if (!isCurrentTurn || newState.game.current_phase === 'selling') {
         closeCanvasPurchase();
@@ -570,20 +577,20 @@
         }
       }
       
+      if (newState.game.current_phase === 'night') {
+        showNightSelectionModal(newState);
+      } else {
+        hideNightSelectionModal();
+      }
+
       if (newState.game.current_phase === 'selling') {
         showSellingPhase(newState);
       } else {
         hideSellingPhase();
       }
 
-      if (newState.game.current_phase !== 'night') {
-        closeSellSelection();
-      } else if (isCurrentTurn) {
-        openSellSelection();
-      }
-
       const freeAvailable = isFreeActionAvailable(newState);
-      if (!isCurrentTurn || newState.game.current_phase === 'selling' || !freeAvailable) {
+      if (!isCurrentTurn || newState.game.current_phase === 'selling' || newState.game.current_phase === 'night' || !freeAvailable) {
         closeFreeActionPanel();
       } else if (freeActionMode === 'trade') {
         renderTradePanel();
@@ -647,6 +654,9 @@
       socket.on('turn-changed', (data) => {
         console.log('Turn changed:', data);
         isCurrentTurn = data.currentPlayerId === playerId;
+        if (gameUI) {
+          gameUI.currentPlayerId = data.currentPlayerId;
+        }
         
         if (isCurrentTurn) {
           showToast('Your Turn!', "It's your turn to act", 'success');
@@ -752,14 +762,6 @@
 
       document.getElementById('commitPaintsBtn')?.addEventListener('click', () => {
         if (window.dragDropManager) window.dragDropManager.commitPaints();
-      });
-
-      document.getElementById('cancelSellBtn')?.addEventListener('click', () => {
-        closeSellSelection();
-      });
-
-      document.getElementById('confirmSellBtn')?.addEventListener('click', () => {
-        submitSellSelection();
       });
 
       document.querySelectorAll('[data-free-action="trade"]').forEach(btn => {
@@ -1347,86 +1349,229 @@
     }
 
     function toggleSellSelection() {
-      const panel = document.getElementById('sellSelectionPanel');
-      if (!panel) return;
-      if (panel.classList.contains('d-none')) {
-        openSellSelection();
-      } else {
-        closeSellSelection();
-      }
+      showNightSelectionModal(getCurrentState());
     }
 
-    function openSellSelection() {
-      const phase = gameUI?.gameState?.game?.current_phase || initialGameState.game.current_phase;
-      if (phase !== 'night') {
-        showToast('Not Available', 'Sell selections are only available at night', 'warning');
+    function showNightSelectionModal(state) {
+      if (typeof window.openAppModal !== 'function') {
+        showToast('Error', 'Modal system is unavailable', 'danger');
         return;
       }
 
-      const canvases = gameUI?.gameState?.playerCanvases?.[playerId] || [];
+      const phase = state?.game?.current_phase;
+      if (phase !== 'night') {
+        hideNightSelectionModal();
+        return;
+      }
+
+      const sellingData = state.gameState?.selling_phase_data || {};
+      const nightOrder = sellingData.nightOrder || [];
+      const nightCurrentIndex = sellingData.nightCurrentIndex || 0;
+      const currentSelectorId = nightOrder[nightCurrentIndex] || state.game.current_player_id;
+      const currentSelectorName = getPlayerName(currentSelectorId);
+      const isMySelectionTurn = currentSelectorId === playerId;
+
+      if (!sellSelectionModal) {
+        sellSelectionModal = window.openAppModal({
+          title: 'Night Sale Selection',
+          bodyContent: '',
+          maxWidth: '980px',
+          closeOnBackdrop: false,
+          closeOnEscape: false,
+          testId: 'sell-selection-modal',
+          onClose: () => {
+            sellSelectionModal = null;
+            selectedSellCanvasIds = [];
+            if (getCurrentState().game.current_phase === 'night') {
+              setTimeout(() => showNightSelectionModal(getCurrentState()), 0);
+            }
+          },
+        });
+      }
+
+      const canvases = state.playerCanvases?.[playerId] || [];
       const completed = canvases.filter(c => c.completed);
+      const mySubmitted = new Set(sellingData.sellSelections?.[playerId] || []);
+      if (mySubmitted.size > 0) {
+        selectedSellCanvasIds = selectedSellCanvasIds.filter(id => mySubmitted.has(id));
+      }
+      if (selectedSellCanvasIds.length === 0 && mySubmitted.size > 0) {
+        selectedSellCanvasIds = Array.from(mySubmitted);
+      }
 
-      selectedSellCanvasIds = [];
-      renderSellSelection(completed);
-
-      const panel = document.getElementById('sellSelectionPanel');
-      if (panel) panel.classList.remove('d-none');
+      sellSelectionModal.setTitle(`Night Sale Selection: ${currentSelectorName}`);
+      sellSelectionModal.setBodyContent(buildNightSelectionBody(state, completed, currentSelectorId, isMySelectionTurn));
+      sellSelectionModal.setActions(getNightSelectionActions(isMySelectionTurn));
+      bindNightSelectionEvents(completed, isMySelectionTurn);
     }
 
-    function closeSellSelection() {
+    function hideNightSelectionModal() {
       selectedSellCanvasIds = [];
-      const panel = document.getElementById('sellSelectionPanel');
-      if (panel) panel.classList.add('d-none');
-      updateSellConfirm();
+      if (sellSelectionModal) {
+        const modal = sellSelectionModal;
+        sellSelectionModal = null;
+        modal.close('phase-exit');
+      }
     }
 
-    function renderSellSelection(completedCanvases) {
-      const list = document.getElementById('sellSelectionList');
-      if (!list) return;
+    function getPaintMarketCountSummary(state) {
+      const colorOrder = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'black', 'wild'];
+      const counts = {};
+      colorOrder.forEach(color => { counts[color] = 0; });
+
+      const paintMarket = state.gameState.paint_market || [];
+      paintMarket.forEach(cube => {
+        counts[cube.color] = (counts[cube.color] || 0) + 1;
+      });
+
+      return colorOrder.map(color => `
+        <div class="sell-market-count" data-color="${color}">
+          <span class="paint-cube in-market sell-market-cube" data-color="${color}" data-is-wild="${color === 'wild'}"></span>
+          <span class="sell-market-label">${color.slice(0, 1).toUpperCase()}</span>
+          <span class="sell-market-value">${counts[color]}</span>
+        </div>
+      `).join('');
+    }
+
+    function getPlayerSellSelectionSummary(state, player) {
+      const sellingData = state.gameState?.selling_phase_data || {};
+      const selectedIds = sellingData.sellSelections?.[player.id] || [];
+      const selectedCanvases = (state.playerCanvases?.[player.id] || []).filter(canvas => selectedIds.includes(canvas.id));
+      const paintTotal = selectedCanvases.reduce((sum, canvas) => sum + (canvas.definition?.paint_value || 0), 0);
+      const canvasLabels = selectedCanvases.map(canvas => {
+        const name = canvas.definition?.name || 'Canvas';
+        const paintValue = canvas.definition?.paint_value || 0;
+        return `<span class="night-selected-chip">${name} (Paint ${paintValue})</span>`;
+      }).join('');
+
+      return `
+        <div class="night-player-sell-row ${selectedCanvases.length > 0 ? 'has-selection' : ''}">
+          <div class="night-player-sell-header">
+            <span class="night-player-name">${player.name}${player.id === playerId ? ' (You)' : ''}</span>
+            <span class="night-player-summary">${selectedCanvases.length} canvas${selectedCanvases.length === 1 ? '' : 'es'} | Paint total ${paintTotal}</span>
+          </div>
+          <div class="night-player-canvas-list">
+            ${canvasLabels || '<span class="night-selected-none">No canvases selected yet</span>'}
+          </div>
+        </div>
+      `;
+    }
+
+    function buildNightSelectionBody(state, completedCanvases, currentSelectorId, isMySelectionTurn) {
+      const marketCounts = getPaintMarketCountSummary(state);
+      const order = state.gameState?.selling_phase_data?.nightOrder || [];
+      const orderHtml = order.map((id, index) => {
+        const isActive = id === currentSelectorId;
+        const label = `${index + 1}. ${getPlayerName(id)}${id === playerId ? ' (You)' : ''}`;
+        return `<span class="night-order-item ${isActive ? 'active' : ''}">${label}</span>`;
+      }).join('');
+      const playerSelectionRows = state.players
+        .slice()
+        .sort((a, b) => (a.turn_order || 0) - (b.turn_order || 0))
+        .map(player => getPlayerSellSelectionSummary(state, player))
+        .join('');
 
       if (completedCanvases.length === 0) {
-        list.innerHTML = `
-          <div class="text-muted">No completed canvases available. Submit to pass.</div>
+        return `
+          <div class="sell-selection-modal-content">
+            <div class="night-selection-status ${isMySelectionTurn ? 'active' : ''}">
+              ${isMySelectionTurn ? 'Your turn to choose canvases to sell.' : `Waiting for ${getPlayerName(currentSelectorId)} to choose.`}
+            </div>
+            <div class="night-order-list">${orderHtml}</div>
+            <div class="sell-market-summary">
+              <div class="sell-market-title">Current Paint Market</div>
+              <div class="sell-market-grid">${marketCounts}</div>
+            </div>
+            <div class="night-player-selections">${playerSelectionRows}</div>
+            <div class="text-muted">No completed canvases available. Choose Pass.</div>
+          </div>
         `;
-        updateSellConfirm();
-        return;
       }
 
-      list.innerHTML = completedCanvases.map(canvas => `
-        <button class="sell-selection-item" type="button" data-canvas-id="${canvas.id}">
-          ${canvas.definition?.name || 'Canvas'}
-        </button>
-      `).join('');
+      const canvasesHtml = completedCanvases.map(canvas => {
+        const isSelected = selectedSellCanvasIds.includes(canvas.id);
+        const canvasName = canvas.definition?.name || 'Canvas';
+        const paintValue = canvas.definition?.paint_value ?? 0;
+        const starValue = canvas.definition?.star_value ?? 0;
+        const foodValue = canvas.definition?.food_value ?? 0;
+        const imageHtml = canvas.definition?.filename
+          ? `<img src="/assets/canvases/${canvas.definition.filename}" alt="${canvasName}" class="sell-canvas-thumb-img">`
+          : `<div class="sell-canvas-thumb-fallback">${canvasName}</div>`;
 
-      list.querySelectorAll('.sell-selection-item').forEach(item => {
+        return `
+          <button class="sell-selection-card ${isSelected ? 'selected' : ''}" type="button" data-canvas-id="${canvas.id}">
+            <div class="sell-canvas-thumb">${imageHtml}</div>
+            <div class="sell-canvas-meta">
+              <div class="sell-canvas-title">${canvasName}</div>
+              <div class="sell-canvas-values">Stars ${starValue} | Paint ${paintValue} | Food ${foodValue}</div>
+            </div>
+          </button>
+        `;
+      }).join('');
+
+      return `
+        <div class="sell-selection-modal-content">
+          <div class="night-selection-status ${isMySelectionTurn ? 'active' : ''}">
+            ${isMySelectionTurn ? 'Your turn to choose canvases to sell.' : `Waiting for ${getPlayerName(currentSelectorId)} to choose.`}
+          </div>
+          <div class="night-order-list">${orderHtml}</div>
+          <div class="sell-market-summary">
+            <div class="sell-market-title">Current Paint Market</div>
+            <div class="sell-market-grid">${marketCounts}</div>
+          </div>
+          <div class="night-player-selections">${playerSelectionRows}</div>
+          <div class="sell-selection-list sell-selection-list-modal">
+            ${canvasesHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    function bindNightSelectionEvents(completedCanvases, isMySelectionTurn) {
+      const body = sellSelectionModal?.getBodyElement?.();
+      if (!body) return;
+      if (!isMySelectionTurn) return;
+
+      body.querySelectorAll('.sell-selection-card').forEach(item => {
         item.addEventListener('click', () => {
           const canvasId = item.dataset.canvasId;
           if (!canvasId) return;
           if (selectedSellCanvasIds.includes(canvasId)) {
             selectedSellCanvasIds = selectedSellCanvasIds.filter(id => id !== canvasId);
-            item.classList.remove('selected');
           } else {
             selectedSellCanvasIds.push(canvasId);
-            item.classList.add('selected');
           }
-          updateSellConfirm();
+          showNightSelectionModal(getCurrentState());
         });
       });
-      updateSellConfirm();
     }
 
-    function updateSellConfirm() {
-      const confirmBtn = document.getElementById('confirmSellBtn');
-      if (!confirmBtn) return;
-      confirmBtn.disabled = false;
-      confirmBtn.textContent = selectedSellCanvasIds.length > 0 ? 'Submit Sell' : 'Pass';
+    function getNightSelectionActions(isMySelectionTurn) {
+      const submitLabel = selectedSellCanvasIds.length > 0
+        ? `Submit Sell (${selectedSellCanvasIds.length})`
+        : 'Pass';
+      return [
+        {
+          label: 'Waiting',
+          variant: 'secondary',
+          disabled: true,
+          onClick: () => null,
+        },
+        {
+          label: submitLabel,
+          variant: 'primary',
+          testId: 'confirm-sell-btn',
+          disabled: !isMySelectionTurn,
+          onClick: () => submitSellSelection(),
+        },
+      ];
     }
 
     async function submitSellSelection() {
       if (gameActions) {
         await gameActions.submitSellIntents(selectedSellCanvasIds);
       }
-      closeSellSelection();
+      selectedSellCanvasIds = [];
     }
 
     function updatePhaseIndicator(phase) {
@@ -1444,23 +1589,104 @@
       if (label) label.textContent = phaseText[phase] || phase;
     }
 
+    function maybeShowPhaseTransition(previousState, nextState) {
+      if (!previousState || !nextState) return;
+      const previousPhase = previousState.game?.current_phase;
+      const nextPhase = nextState.game?.current_phase;
+      const previousDay = previousState.game?.day_number;
+      const nextDay = nextState.game?.day_number;
+
+      if (previousPhase === nextPhase && previousDay === nextDay) {
+        return;
+      }
+
+      const phaseLabels = {
+        morning: 'Morning',
+        day: 'Afternoon',
+        night: 'Night',
+        selling: 'Selling'
+      };
+      const label = phaseLabels[nextPhase] || nextPhase;
+      const dayPrefix = nextDay !== previousDay ? `Day ${nextDay}: ` : '';
+      showPhaseTransitionOverlay(`${dayPrefix}Starting ${label}`, nextPhase);
+    }
+
+    function showPhaseTransitionOverlay(text, phase) {
+      const overlay = document.getElementById('phaseTransitionOverlay');
+      const icon = document.getElementById('phaseTransitionIcon');
+      const copy = document.getElementById('phaseTransitionText');
+      if (!overlay || !icon || !copy) return;
+
+      copy.textContent = text;
+      icon.innerHTML = getPhaseTransitionSvg(phase);
+
+      overlay.classList.remove('d-none', 'is-animate');
+      void overlay.offsetWidth;
+      overlay.classList.add('is-animate');
+
+      if (phaseTransitionTimer) {
+        clearTimeout(phaseTransitionTimer);
+      }
+      phaseTransitionTimer = setTimeout(() => {
+        overlay.classList.add('d-none');
+        overlay.classList.remove('is-animate');
+      }, 1600);
+    }
+
+    function getPhaseTransitionSvg(phase) {
+      const icons = {
+        morning: `
+          <svg viewBox="0 0 64 64" role="img" aria-label="Morning">
+            <circle cx="32" cy="32" r="12"></circle>
+            <line x1="32" y1="5" x2="32" y2="14"></line>
+            <line x1="32" y1="50" x2="32" y2="59"></line>
+            <line x1="5" y1="32" x2="14" y2="32"></line>
+            <line x1="50" y1="32" x2="59" y2="32"></line>
+          </svg>
+        `,
+        day: `
+          <svg viewBox="0 0 64 64" role="img" aria-label="Afternoon">
+            <circle cx="28" cy="28" r="12"></circle>
+            <path d="M42 46c0-8 7-14 15-14h2v14H42z"></path>
+          </svg>
+        `,
+        night: `
+          <svg viewBox="0 0 64 64" role="img" aria-label="Night">
+            <path d="M42 10a20 20 0 1 0 12 36A22 22 0 1 1 42 10z"></path>
+          </svg>
+        `,
+        selling: `
+          <svg viewBox="0 0 64 64" role="img" aria-label="Selling">
+            <rect x="12" y="26" width="40" height="22" rx="4"></rect>
+            <rect x="18" y="16" width="28" height="12" rx="4"></rect>
+            <circle cx="32" cy="37" r="5"></circle>
+          </svg>
+        `,
+      };
+      return icons[phase] || icons.day;
+    }
+
     function updateTurnIndicator(state) {
       const indicator = document.getElementById('turnStatus');
       const headerName = document.getElementById('currentTurnName');
       const actionCountValue = document.getElementById('actionCountValue');
       if (!indicator && !headerName) return;
 
+      const currentState = getCurrentState();
+      const currentPlayerId = state?.game?.current_player_id ?? currentState?.game?.current_player_id;
+      const actionsTaken = state?.gameState?.actions_taken ?? currentState?.gameState?.actions_taken ?? 0;
+
       if (isCurrentTurn) {
         if (indicator) indicator.textContent = 'Your turn';
-        if (headerName) headerName.textContent = getPlayerName(state.game.current_player_id);
+        if (headerName) headerName.textContent = getPlayerName(currentPlayerId);
       } else {
-        const currentName = getPlayerName(state.game.current_player_id);
+        const currentName = getPlayerName(currentPlayerId);
         if (indicator) indicator.textContent = `Waiting for ${currentName}`;
         if (headerName) headerName.textContent = currentName;
       }
 
       if (actionCountValue) {
-        actionCountValue.textContent = state.gameState.actions_taken;
+        actionCountValue.textContent = actionsTaken;
       }
     }
 
@@ -1497,7 +1723,7 @@
       const actionsTaken = state.gameState.actions_taken || 0;
       const freeAvailable = isFreeActionAvailable(state);
 
-      if (myTurn && phase !== 'selling' && actionsTaken >= 2 && !freeAvailable) {
+      if (myTurn && (phase === 'morning' || phase === 'day') && actionsTaken >= 2 && !freeAvailable) {
         modal.classList.remove('d-none');
       } else {
         modal.classList.add('d-none');
@@ -1766,6 +1992,15 @@
   </script>
   
   <%
+    function getCubePileStyle(cubeId, index) {
+      const seed = Array.from(String(cubeId)).reduce((acc, ch) => acc + ch.charCodeAt(0), 0) + (index * 31);
+      const x = (seed % 22) - 6;
+      const y = ((seed >> 2) % 16) - 6;
+      const rot = ((seed >> 4) % 28) - 14;
+      const z = 10 + index;
+      return '--pile-x:' + x + 'px; --pile-y:' + y + 'px; --pile-r:' + rot + 'deg; --pile-z:' + z + ';';
+    }
+
     function getColorStyle(color) {
       const colors = {
         red: '#EF4444, #DC2626',

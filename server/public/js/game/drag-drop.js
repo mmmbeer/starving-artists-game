@@ -15,9 +15,10 @@ class DragDropManager {
 
   setupDraggableCubes() {
     const cubes = document.querySelectorAll('.paint-cube:not(.in-market):not(.in-canvas)');
+    const canPaintNow = this.canPaintRightNow();
     
     cubes.forEach(cube => {
-      cube.setAttribute('draggable', 'true');
+      cube.setAttribute('draggable', canPaintNow ? 'true' : 'false');
       
       cube.addEventListener('dragstart', (e) => this.handleDragStart(e));
       cube.addEventListener('dragend', (e) => this.handleDragEnd(e));
@@ -38,6 +39,12 @@ class DragDropManager {
   }
 
   handleDragStart(e) {
+    if (!this.canPaintRightNow()) {
+      e.preventDefault();
+      showToast('Paint Unavailable', 'You can only paint on your turn while actions remain', 'warning');
+      return;
+    }
+
     this.draggedCube = e.target;
     this.draggedCubeData = {
       id: e.target.dataset.cubeId,
@@ -94,6 +101,11 @@ class DragDropManager {
   handleDrop(e) {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!this.canPaintRightNow()) {
+      showToast('Paint Unavailable', 'You cannot apply paint right now', 'warning');
+      return false;
+    }
     
     const square = e.target.closest('.canvas-square, .paint-drop-zone');
     if (!square || square.classList.contains('painted')) {
@@ -223,9 +235,8 @@ class DragDropManager {
       return;
     }
 
-    // Check if it's our turn
-    if (window.gameUI && !window.gameUI.isMyTurn()) {
-      showToast('Not Your Turn', 'Wait for your turn to paint', 'warning');
+    if (!this.canPaintRightNow()) {
+      showToast('Paint Unavailable', 'You can only paint on your turn while actions remain', 'warning');
       return;
     }
     
@@ -330,6 +341,21 @@ class DragDropManager {
     this.dropZones = [];
     this.setupDraggableCubes();
     this.setupDropZones();
+  }
+
+  canPaintRightNow() {
+    const state = window.gameUI?.gameState;
+    if (!state || !window.gameUI?.isMyTurn?.()) {
+      return false;
+    }
+
+    const phase = state.game?.current_phase;
+    if (phase !== 'morning' && phase !== 'day') {
+      return false;
+    }
+
+    const actionsTaken = state.gameState?.actions_taken || 0;
+    return actionsTaken < 2;
   }
 }
 

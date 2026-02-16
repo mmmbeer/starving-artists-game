@@ -276,16 +276,17 @@ class GameUI {
       marketGroups[cube.color].push(cube);
     });
 
-    const html = colorOrder.map(color => {
+      const html = colorOrder.map(color => {
       const cubes = marketGroups[color];
-      const cubesHtml = cubes.map(cube => this.renderPaintCube(cube, true)).join('');
+      const cubesHtml = cubes.map((cube, index) => this.renderPaintCube(cube, true, index)).join('');
       return `
-        <div class="paint-slot" data-color="${color}">
-          <div class="paint-slot-header">
-            <span class="color-label">${color.slice(0, 1).toUpperCase()}</span>
+        <div class="paint-slot" data-color="${color}" title="${color}">
+          <div class="paint-slot-pile" aria-hidden="true">
+            ${cubesHtml}
+          </div>
+          <div class="paint-slot-meta">
             <span class="slot-count">${cubes.length}</span>
           </div>
-          <div class="paint-slot-cubes">${cubesHtml}</div>
         </div>
       `;
     }).join('');
@@ -293,8 +294,9 @@ class GameUI {
     container.innerHTML = html;
   }
 
-  renderPaintCube(cube, inMarket = false) {
+  renderPaintCube(cube, inMarket = false, pileIndex = 0) {
     const tilt = getCubeTilt(cube.id) * (inMarket ? 0.7 : 1);
+    const pileStyle = getCubePileStyle(cube.id, pileIndex);
     return `
       <div 
         class="paint-cube ${inMarket ? 'in-market' : 'in-tray'}" 
@@ -302,7 +304,7 @@ class GameUI {
         data-cube-id="${cube.id}"
         data-color="${cube.color}"
         data-is-wild="${cube.is_wild}"
-        style="--cube-tilt: ${tilt}deg;"
+        style="--cube-tilt: ${tilt}deg; ${pileStyle}"
         title="${cube.color}${cube.is_wild ? ' (Wild)' : ''}"
       ></div>
     `;
@@ -339,14 +341,15 @@ class GameUI {
     } else {
       const html = colorOrder.map(color => {
         const colorCubes = playerGroups[color];
-        const cubesHtml = colorCubes.map(cube => this.renderPaintCube(cube, false)).join('');
+        const cubesHtml = colorCubes.map((cube, index) => this.renderPaintCube(cube, false, index)).join('');
         return `
-          <div class="paint-slot" data-color="${color}">
-            <div class="paint-slot-header">
-              <span class="color-label">${color.slice(0, 1).toUpperCase()}</span>
+          <div class="paint-slot" data-color="${color}" title="${color}">
+            <div class="paint-slot-pile">
+              ${cubesHtml}
+            </div>
+            <div class="paint-slot-meta">
               <span class="slot-count">${colorCubes.length}</span>
             </div>
-            <div class="paint-slot-cubes">${cubesHtml}</div>
           </div>
         `;
       }).join('');
@@ -617,4 +620,18 @@ function getCubeTilt(id) {
   }
   const tilt = (hash % 9) - 4;
   return tilt;
+}
+
+function getCubePileStyle(id, index) {
+  let hash = 0;
+  const seedText = `${id}:${index}`;
+  for (let i = 0; i < seedText.length; i += 1) {
+    hash = (hash * 33 + seedText.charCodeAt(i)) % 100000;
+  }
+
+  const x = (hash % 22) - 6;
+  const y = (Math.floor(hash / 7) % 16) - 6;
+  const r = (Math.floor(hash / 17) % 28) - 14;
+  const z = 10 + index;
+  return `--pile-x:${x}px; --pile-y:${y}px; --pile-r:${r}deg; --pile-z:${z};`;
 }

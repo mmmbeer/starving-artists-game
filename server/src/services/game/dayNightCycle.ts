@@ -4,6 +4,7 @@
 import * as gameDb from '../../database/gameDb';
 import * as playerDb from '../../database/playerDb';
 import { drawPaintCubes } from '../paint/paintBag';
+import { ensureNightSellingData } from './sellingPhase';
 import { Game, Player, GameState } from '../../models/types';
 import { PAINT_MARKET_REFILL_SIZE, WIN_CONDITIONS } from '../../utils/constants';
 
@@ -82,6 +83,7 @@ export async function advancePhase(gameId: string): Promise<PhaseTransitionResul
     case 'day':
       // Day -> Night
       await gameDb.updateGamePhase(gameId, 'night');
+      await ensureNightSellingData(gameId);
       result = { newPhase: 'night' };
       break;
 
@@ -165,18 +167,17 @@ async function startNewDay(gameId: string): Promise<PhaseTransitionResult> {
     await gameDb.setGameWinner(gameId, winner.id);
   }
 
-  // Refill paint market
+  // Add fresh paints to the market from the bag at day start.
   let refillDetails: { cubesAdded: number } | undefined;
   if (gameState && !winner) {
-    const cubesNeeded = PAINT_MARKET_REFILL_SIZE - gameState.paint_market.length;
-    if (cubesNeeded > 0 && gameState.paint_bag.length > 0) {
-      const { drawn, remaining } = drawPaintCubes(gameState.paint_bag, cubesNeeded);
-      
+    if (gameState.paint_bag.length > 0) {
+      const { drawn, remaining } = drawPaintCubes(gameState.paint_bag, PAINT_MARKET_REFILL_SIZE);
+
       await gameDb.updateGameState(gameId, {
         paint_market: [...gameState.paint_market, ...drawn],
         paint_bag: remaining,
       });
-      
+
       refillDetails = { cubesAdded: drawn.length };
     }
   }

@@ -137,9 +137,22 @@ export async function performPaintAction(
   playerId: string,
   paintings: Array<{ canvasId: string; squareId: string; cubeId: string }>
 ): Promise<{ gameState: FullGameState; completions: Array<{ canvasId: string; rewards: any }> }> {
-  // Verify player can act
-  const canAct = await canPlayerAct(gameId, playerId);
-  if (!canAct) throw new Error('Not your turn');
+  const game = await gameDb.getGame(gameId);
+  if (!game || game.status !== 'playing') {
+    throw new Error('Game not active');
+  }
+  if (game.current_phase !== 'morning' && game.current_phase !== 'day') {
+    throw new Error('Paint action is only available during action phases');
+  }
+  if (game.current_player_id !== playerId) {
+    throw new Error('Not your turn');
+  }
+
+  const gameStateBefore = await gameDb.getGameState(gameId);
+  if (!gameStateBefore) throw new Error('Game state not found');
+  if (gameStateBefore.actions_taken >= MAX_ACTIONS_PER_TURN) {
+    throw new Error('No actions left this turn');
+  }
   
   if (paintings.length === 0 || paintings.length > MAX_PAINT_CUBES_PER_ACTION) {
     throw new Error(`Can paint 1-${MAX_PAINT_CUBES_PER_ACTION} squares per action`);

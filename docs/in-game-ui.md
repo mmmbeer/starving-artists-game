@@ -1,159 +1,286 @@
-# In-Game UI Layout (Single Screen)
+## Starving Artists in-game UI design document (desktop-first, responsive)
 
-This document defines the authoritative, implementation-ready layout for the multiplayer in-game screen. The wireframe in `docs/wireframe_screenshot.png` only indicates relative placement and grouping. This spec replaces it with precise layout, behavior, and styling guidance while honoring the canonical game concepts and server authority rules.
+This document defines a full-screen, section-scrolling layout that supports the core loop: buy canvases from a 3-slot market, manage studio canvases, drag/drop paint cubes to paint, and resolve night selling with paint-market collection order.
 
-## Goals
+---
 
-- Single-screen layout, desktop-first, no page reloads.
-- Clear separation between shared space (authoritative game state) and player space (viewer studio).
-- Simple, uncluttered gallery aesthetic with strong readability.
-- All interactions funnel through the action bar; no hidden state changes.
-- No UI element implies client authority over rules.
+## 1) Design goals and UX principles
 
-## Layout Overview (Top to Bottom)
+**Primary goals**
 
-The screen is split into three vertical bands. Percentages are approximate and should be treated as relative constraints that can flex with viewport height.
+* Keep “what phase is it + whose turn + what can I do” always visible.
+* Make  **Canvas Market** ,  **Paint Market** ,  **My Studio (canvases)** , and **My Paint** usable without page scrolling.
+* Support fast, tactile play:  **drag paint cubes → drop onto canvas squares** .
+* Provide “peek” visibility into other players without leaving the main screen.
 
-1) Shared Space (top 35-45% height)
-2) Action Bar (center divider, 5-10% height)
-3) Player Studio (bottom 45-50% height)
+**Screen behavior**
 
-The overall layout uses a 12-column grid with 4-5% horizontal gutters. Shared space and player studio share the same left alignment to keep visual rhythm.
+* The app is **full-screen** with **internal scroll regions** (market list, studio carousel/strip, logs), not a single long page.
+* Desktop is the “complete cockpit.” Mobile collapses into stacked panels with a persistent bottom action tray.
 
-## Shared Space (Top Band)
+---
 
-This region is visible to all players and reflects authoritative game state.
+## 2) Information architecture
 
-### Canvas Market + Canvas Draw Deck
+### Always-visible HUD (top bar)
 
-- Placement: left and center of the shared space.
-- Layout: two adjacent blocks, market on the left, draw deck on the right.
-- Canvas market shows the full set of available canvases in a horizontal row with slight overlap, like a tidy gallery line.
-- Draw deck appears as a single stacked card block. It is visually distinct from the market but aligned to the same baseline.
-- Each market canvas displays its purchase cost near the lower-right of the card face (subtle text, not a badge).
-- No additional borders, frames, or padding are added to canvas cards. The card image is the visual container.
-- Hover behavior: each canvas reveals a compact, inline text overlay adjacent to the cursor (or directly below the card) that repeats the points, food, and paint rewards. This text is purely informational and must not imply selection or rule changes.
+A thin, sticky header that never scrolls away.
 
-### Upper-Right Status Cluster
+**Left: Day + Phase**
 
-The upper-right corner is reserved for phase and turn status. It is a shared UI element and must never overlap the shared canvas area.
+* “Day X” and a large phase chip:  **Morning / Afternoon / Night (Selling)** .
+* Phase progression indicator (three dots or segmented pill) with the current phase highlighted.
 
-1) Phase Indicator (dominant anchor)
-- Large SVG icon representing morning, afternoon, or evening.
-- Optional short label below or beside the icon (1-2 words).
-- Must be instantly legible at a glance and visually dominant within the cluster.
+**Center: Turn ownership**
 
-2) Player Order Tracker (compact strip)
-- A single-line or tight stacked strip directly adjacent to the phase icon.
-- Format: "Player Name [score] [nutrition]" repeated per player.
-- Active player is highlighted with a strong outline and a numbered index.
-- The viewing player is also marked distinctly (subtle underline or dot).
-- Nutrition is shown as a tiny horizontal gauge to the right of each player name.
-- For 26 players: collapse to a scrollable strip with snap points, or a compact stack that shows 8-10 names and a "+N" overflow indicator. The active player and viewer must always remain visible.
+* “It’s **[PlayerName]’s** turn” with a clear highlight ring that matches their player color.
+* Optional turn timer indicator (if enabled).
 
-## Paint Market (Shared, Below Canvases)
+**Right: You (quick stats)**
 
-- Placement: directly below the canvas market region, spanning most of the width.
-- Layout: a horizontal rail with slots in consistent color order:
-  red, orange, yellow, green, blue, purple, black, wild.
-- Each color slot includes a subtle label or icon so color ordering remains readable without color alone.
-- Each slot visually represents the current number of cubes in play (count badge or subtle number label) without cluttering the rail.
-- Market cubes should feel available to all; do not tie them to any player highlight.
-- The paint market sits between shared canvas area and the action bar, acting as the last shared resource before player actions.
+* Points (stars), Completed canvases count, Nutrition (1–5) as a compact meter.
+* If nutrition will drop at next day start, show a small warning icon (hover explains: “Nutrition decreases by 1 at day start”).
 
-## Action Bar (Center Divider)
+---
 
-This is the primary interaction entry point and a strong visual divider.
+## 3) Main layout (desktop)
 
-- Placement: full-width horizontal bar separating shared space from player studio.
-- Actions: Paint, Work, Buy, Pass, Sell, Free.
-- Free actions (trade, reset canvas market) are nested under a "Free" action button with a dropdown.
-- Sell is only enabled during the night phase and prompts selection of a completed canvas.
+A 3-column grid with a fixed-height canvas area, plus a bottom “action dock.”
 
-Button States
-- Disabled: low-contrast label, no hover, tooltip indicates why.
-- Enabled: clear call-to-action, hover glow or underline.
-- Active selection: persistent highlight with a small "active" marker.
-- Pending choice: action button shows a subtle progress ring until the user finishes the required selection.
+### Column A (left): Shared Markets (scroll within column)
 
-The action bar must never obscure the canvas market or the player studio content. It should feel like the control surface for the current turn.
+**A1. Canvas Market (top card, fixed height)**
 
-## Player Studio (Bottom Band)
+* Shows **3 full canvas cards** face-up in a vertical stack or horizontal row (depending on width).
+* Each slot shows:
+  * **Full card art** (the actual canvas card view, not text reconstruction).
+  * Slot cost badge: **1 / 2 / 3 cubes** by position.
+  * A “Buy” affordance that is enabled only when:
+    * It’s your turn (in action phases), and
+    * You have at least X cubes available to pay (any colors; payment is cubes into Paint Market).
+* On purchase:
+  * Animate paid cubes flowing from your paint tray into the Paint Market.
+  * Market shifts left and refills slot 3 (visible slide animation).
 
-This region is personalized to the viewing player but still reflects multiplayer state where relevant (turn ownership, locks).
+**A2. Paint Market (below Canvas Market)**
 
-### Player Canvases (Carousel)
+* A compact “bin” showing **counts by color** (8 colors including wild).
+* Two representations at once:
+  1. A small grid of cube icons (for tactile feel),
+  2. A color legend row with numeric counts (for clarity).
+* During trading/selling, this panel becomes interactive:
+  * Trading: highlights cubes eligible to take, shows exchange rate options (2→1, 5→2, 9→3).
+  * Selling collection: shows remaining cubes and an “order ribbon” indicating who is collecting now and how many per collection action (4/2/1).
 
-- Placement: upper portion of the player studio.
-- Layout: horizontal carousel with left/right navigation arrows and snap-to-card motion.
-- The active canvas is centered and slightly larger than neighbors.
-- Each canvas card shows:
-  - the canvas image
-  - the paint cube sockets (empty spaces)
-  - any painted spaces (filled)
-- Avoid overlays or heavy metadata on the canvas face. Use only minimal, unobtrusive indicators.
+**A3. Activity / Rules log (optional, collapsible)**
 
-Interaction
-- Selecting a canvas focuses it in the center position.
-- Navigation arrows appear on hover or when the carousel is not at the ends.
-- Active canvas is indicated by a thin outline glow or a small marker below the card.
+* A small scrolling feed: “Player bought…”, “Player painted…”, “Night sale started…”
+* Collapsed by default on smaller screens.
 
-### Player Paint Inventory (Bottom Tray)
+---
 
-- Placement: a full-width horizontal tray at the bottom of the player studio.
-- Cubes arranged in the same fixed color order as the paint market.
-- Slight randomized rotation (within 2-4 degrees) for tactile feel, but keep alignment clean.
+### Column B (center): My Studio (primary workspace)
 
-Interaction
-- Drag and drop or click-to-use, but the UI must prevent illegal moves.
-- Illegal placements visibly reject (shake or red outline) and revert to the tray.
-- The client never decides legality; it only reflects server acceptance or rejection.
+This is the “table” where you paint.
 
-## Multiplayer and State Cues
+**B1. Studio header row**
 
-- Active player: clear outline or halo around their name in the player order tracker.
-- Viewing player: subtle distinct marker (dot or underline).
-- Waiting state: small badge or muted label, no modal or blocking overlay.
-- Locked actions: show lock icon on the action button with a tooltip explaining the phase restriction.
+* “My Studio” label + counters:
+  * Completed (ready to sell) count
+  * In-progress count
+* A subtle nutrition track and score mini-display can duplicate the top bar here for glanceability.
 
-## Animation and Feedback
+**B2. Studio canvas strip (scroll within)**
 
-- Market updates: cubes shift smoothly to new positions with easing.
-- Cube movement: short lift-and-drop animation for paint actions.
-- Canvas purchase: selected canvas slides down into the player studio with a brief fade.
-- Score and nutrition changes: small numeric tick animations, no large popups.
+* Desktop default: a **horizontal carousel/filmstrip** of full canvas cards you own.
+* Each card has:
+  * The full art card with its required squares visible.
+  * Drop-sensitive squares already implemented by you (use them directly).
+  * A small status tag in the corner:
+    * “In progress”
+    * “Complete (unsold)”
+    * “Sold” (only if you keep sold history visible)
+* Selecting a card brings it into a larger “focus view” (below or as an overlay) so placing cubes is easy.
 
-## Accessibility and Clarity
+**B3. Focus canvas area (optional but strongly recommended)**
 
-- Color ordering must be understandable without color alone. Use labels or small icons.
-- Hover text for canvas rewards must be keyboard accessible via focus.
-- Scale down behavior: truncate player names, compress nutrition bars, reduce carousel card size, and increase snap points to avoid overlap.
+* When a canvas is selected, show it **larger** in a central focus panel.
+* The filmstrip remains visible, but the focus panel is the primary drop target.
+* Benefits: drag distance is shorter, and squares are easier to hit.
 
-## Styling and Theming
+**Painting interaction**
 
-Use CSS variables for all color, typography, spacing, and motion tokens. The UI must support multiple themes without markup changes.
+* Drag cubes from your paint tray (bottom dock) and drop onto squares.
+* On hover over a square, show:
+  * Required color or diamond flexibility hint.
+* Enforce “one wild per canvas” with immediate feedback (wild cube ghosted if already used).
+* Allow “paint up to 4 cubes” action limit per Paint action:
+  * UI shows a small “Placed 0/4” counter that increments as you drop.
 
-Required variable groups (not exhaustive)
-- Color: background, surface, text, muted text, accent, focus, outline, disabled, error, success.
-- Canvas and cube: canvas surface, cube highlight, cube shadow, cube outline.
-- Typography: primary font, accent font, sizes, line heights.
-- Spacing: base unit, card gaps, rail padding, action bar height.
-- Motion: fast, normal, slow durations; easing curve.
+---
 
-Aesthetic Direction
-- Modern art gallery feel: clean surfaces, subtle shadows, and generous negative space.
-- No heavy borders or frames around canvas images.
-- High contrast cube colors against neutral surfaces.
-- Motion is subtle and purposeful, not decorative.
+### Column C (right): Players + Peek
 
-## Shared vs Player Space Summary
+**C1. Player stack (always visible, no scroll until overflow)**
+Each player is a compact card with:
 
-- Shared space: canvas market, canvas draw deck, paint market, phase icon, player order tracker.
-- Player space: canvas carousel, paint inventory, player-specific selection highlights.
-- Action bar: shared control surface, but only the active player can execute actions.
+* Name + avatar/color
+* Points, completed count, nutrition meter (same three stats you track for yourself).
+* Turn indicator: a bright border when it’s their turn.
+* Phase readiness indicators (small icons): “Has complete canvas to sell” etc.
 
-## Implementation Notes
+**C2. “Peek studio” drawer**
 
-- All layout sizes should scale proportionally with viewport height and width using percentages and CSS clamp where needed.
-- No client-side randomization for game outcomes or market content.
-- All state displayed is derived from the server-authoritative game state.
+* Clicking a player opens a side drawer (or popover) that shows:
+  * Their studio summary: number of canvases, completed unsold, paint cube count (total only, not necessarily per-color if you want to keep some uncertainty).
+  * Thumbnail strip of their canvases (art visible, but  **no drag/drop** ).
+* This drawer should never navigate away; it’s a transient inspection layer.
+
+---
+
+### Bottom: Action Dock (sticky)
+
+A fixed dock that contains everything you need to act on your turn.
+
+**D1. Primary actions**
+Large buttons that are phase-aware:
+
+* Morning/Afternoon: buttons for available actions such as Work (draw 3 cubes), Paint (place up to 4), Buy Canvas, Trade.
+* Night: “Start Selling” / “Choose Canvases to Sell” appears when appropriate.
+* Buttons are enabled/disabled based on:
+  * Is it your turn?
+  * Is the action legal right now?
+  * Do you have required resources?
+
+**D2. My Paint Tray (drag source)**
+
+* A row of paint cubes you currently hold, grouped by color with counts.
+* Interaction patterns:
+  * Click a color stack to “fan out” individual cubes for dragging if you want that feel.
+  * Or drag from the stack and decrement count (simpler).
+* Include a compact “Bag draw” animation when Work action resolves.
+
+**D3. Quick pay selector**
+Buying from the Canvas Market requires paying cubes equal to slot cost.
+Provide a fast mechanism:
+
+* Click “Buy” on a market canvas → a tiny “pay strip” pops from the dock:
+  * Auto-selects any cubes (since color doesn’t matter for payment).
+  * Lets the user adjust if they care.
+  * Confirm → cubes animate into Paint Market.
+
+---
+
+## 4) Night phase (Selling) UI
+
+Night is different enough that the UI should “re-skin” the center panel while keeping the same layout.
+
+### Selling flow modal (guided, but not disruptive)
+
+Triggered by the Night phase action.
+
+**Step 1: Choose completed canvases to sell**
+
+* Modal shows your completed canvases (full cards).
+* Select one or more.
+* Confirm.
+
+**Step 2: Resolve sales (system-driven, clearly shown)**
+For each sold canvas:
+
+* Show rewards summary:
+  * Food value adds nutrition (overflow converts to cubes, if you implement that conversion).
+  * Star value adds points.
+  * Paint value sets collection priority.
+* Animate cubes returning from canvas back to the bag.
+
+**Step 3: Paint Market collection order**
+This is the tricky part; make it obvious:
+
+* Right column player cards re-order visually by **Paint Value** rank for this sale.
+* The Paint Market panel displays:
+  * “Collecting now: Player A (4 cubes)” then Player B (2) then others (1).
+* Collection interaction:
+  * If you want agency: each player picks cubes up to their limit when it’s their collection turn.
+  * Or fully automated “best for you” is risky. Better: prompt the active collector with a quick picker overlay.
+
+---
+
+## 5) Trading UI (popover modal)
+
+Trading can be invoked as an action (and optional player-to-player trade once per day if you include that rule).
+
+**Market trade popover**
+
+* Left: your cubes (select to give)
+* Right: paint market cubes (select to take)
+* Top shows rate tabs: 2→1, 5→2, 9→3.
+* Bottom confirm button with clear summary: “Give 5, Take 2.”
+
+**Optional player trade**
+
+* A broadcast offer modal:
+  * Offer: choose cubes you give / want
+  * Others see accept/decline in their peek panel
+  * First accept resolves.
+
+---
+
+## 6) Scrolling and sizing rules
+
+**No whole-page scrolling on desktop**
+
+* Header and bottom dock are fixed.
+* Columns A/B/C have their own scroll:
+  * Markets column scrolls if needed.
+  * Studio strip scrolls horizontally.
+  * Player list scrolls only if 4 players + expanded peek content.
+
+**Minimum viable sizes**
+
+* Canvas cards remain readable by:
+  * Using a “gallery frame” style with zoom-on-hover (desktop).
+  * A dedicated focus panel for the selected canvas.
+
+---
+
+## 7) Responsive behavior (desktop-first)
+
+### Tablet / small laptop
+
+* Keep 3 columns but reduce C column width.
+* Player peek becomes an overlay drawer instead of inline.
+
+### Mobile (portrait)
+
+Switch to a **three-panel stack** with a persistent bottom dock:
+
+1. **Studio** (default tab)
+2. **Markets**
+3. **Players**
+
+* Tabs are near the top (below HUD) or in the bottom dock.
+* Drag/drop remains in Studio view; markets and players are quick switches, not separate pages.
+
+### Mobile (landscape)
+
+* Two-column: Studio + Markets
+* Players accessible via a slide-in drawer.
+
+---
+
+## 8) States and visual emphasis
+
+**Active turn**
+
+* Entire UI subtly dims except:
+  * Active player card (right column)
+  * Enabled actions (bottom dock)
+
+**Phase shift**
+
+* At phase change, show a brief banner: “Afternoon Action Phase” with a soft transition.
+
+**Errors and constraints**
+
+* Illegal drops snap back with a short shake and a tooltip (“Needs Blue” / “Wild already used on this canvas” / “Paint action limit reached”).
