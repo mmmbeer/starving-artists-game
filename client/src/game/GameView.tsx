@@ -165,14 +165,16 @@ const GameView = ({
       </div>
 
       <PaintDragProvider onDrop={handlePaintDrop} canDrag={canDragCubes}>
-        <div className="game-view__board">
-          <aside className="game-view__studio-panel">
+        <div className="game-view__studio-workspace">
+          <div className="game-view__paint-toolbar">
             <div className="game-view__studio-header">
-              <h3>Studio</h3>
-              <p>{cubes.length} cubes</p>
+              <div>
+                <h3>Your studio</h3>
+                <p>Drag paint directly onto an open canvas space.</p>
+              </div>
+              <span>{cubes.length} cubes</span>
             </div>
             <PaintCubeLayer cubes={cubes} />
-
             <div className="game-view__studio-actions">
               <button type="button" onClick={onWork} disabled={!isPlayerTurn}>
                 Work (draw cubes)
@@ -181,30 +183,9 @@ const GameView = ({
                 End turn
               </button>
             </div>
+          </div>
 
-            <section className="game-view__market">
-              <h4>Canvas market</h4>
-              <ul>
-                {gameState.canvasMarket.slots.map((slot) => (
-                  <li key={slot.slotIndex}>
-                    <div>
-                      <p className="game-view__market-title">{slot.canvas.definition.title}</p>
-                      <p>Cost: {slot.cost}</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => onBuyCanvas(slot.slotIndex)}
-                      disabled={!isPlayerTurn}
-                    >
-                      Buy slot {slot.slotIndex + 1}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </aside>
-
-          <section className="game-view__canvas-gallery">
+          <section className="game-view__canvas-gallery" aria-label="Your canvases">
             {canvases.length === 0 ? (
               <div className="game-view__empty-canvas">Buy a canvas to begin painting.</div>
             ) : (
@@ -220,6 +201,27 @@ const GameView = ({
           </section>
         </div>
       </PaintDragProvider>
+
+      <section className="game-view__market">
+        <h4>Canvas market</h4>
+        <ul>
+          {gameState.canvasMarket.slots.map((slot) => (
+            <li key={slot.slotIndex}>
+              <div>
+                <p className="game-view__market-title">{slot.canvas.definition.title}</p>
+                <p>Cost: {slot.cost}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => onBuyCanvas(slot.slotIndex)}
+                disabled={!isPlayerTurn}
+              >
+                Buy slot {slot.slotIndex + 1}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <section className="game-view__history">
         <h3>Action log</h3>
