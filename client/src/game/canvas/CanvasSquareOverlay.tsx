@@ -1,4 +1,4 @@
-import type { CSSProperties, PointerEvent } from 'react';
+import type { CSSProperties } from 'react';
 import { useMemo } from 'react';
 import type { PaintColor } from '@shared/types/common';
 import type { PaintCube } from '@shared/types/paint';
@@ -19,7 +19,7 @@ const CanvasSquareOverlay = ({
   optimisticCube,
   wildUsed
 }: CanvasSquareOverlayProps) => {
-  const { dragCube, hoverTarget, enterSquare, leaveSquare, dropOnSquare } = usePaintDrag();
+  const { dragCube, hoverTarget, enterSquare, leaveSquare } = usePaintDrag();
   const isHoverTarget = hoverTarget?.canvasId === canvasId && hoverTarget.squareId === square.id;
   const isWildDrag = dragCube?.color === 'wild';
   const isDragActive = Boolean(dragCube);
@@ -45,11 +45,6 @@ const CanvasSquareOverlay = ({
     leaveSquare();
   };
 
-  const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
-    event.stopPropagation();
-    dropOnSquare({ canvasId, squareId: square.id });
-  };
-
   const classes = ['canvas-square'];
   if (isHoverTarget) {
     classes.push('canvas-square--hovered');
@@ -71,7 +66,6 @@ const CanvasSquareOverlay = ({
       data-square-id={square.id}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
-      onPointerUp={handlePointerUp}
       role="presentation"
       aria-label={`Canvas square ${square.id}`}
     >
