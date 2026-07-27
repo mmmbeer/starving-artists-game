@@ -66,6 +66,9 @@ const CanvasSquareOverlay = ({
     <div
       className={classes.join(' ')}
       style={squareStyle}
+      data-paint-drop-target="true"
+      data-canvas-id={canvasId}
+      data-square-id={square.id}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
       onPointerUp={handlePointerUp}
