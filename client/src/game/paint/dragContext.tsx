@@ -40,11 +40,19 @@ export const usePaintDrag = () => {
   return context;
 };
 
-/**
- * PaintDragProvider captures pointer motion, hover targets, and drop intent.
- * All styling is governed by shared tokens so this content stays logic-only.
- * Optimistic drops are reported via onDrop and resolved once the server responds.
- */
+const getDropTargetAtPoint = (clientX: number, clientY: number): DropTarget | null => {
+  const element = document.elementFromPoint(clientX, clientY);
+  const target = element?.closest<HTMLElement>('[data-paint-drop-target="true"]');
+  const canvasId = target?.dataset.canvasId;
+  const squareId = target?.dataset.squareId;
+
+  if (!canvasId || !squareId) {
+    return null;
+  }
+
+  return { canvasId, squareId };
+};
+
 export const PaintDragProvider = ({ children, canDrag, onDrop }: PaintDragProviderProps) => {
   const [dragState, setDragState] = useState<{
     isDragging: boolean;
@@ -70,6 +78,7 @@ export const PaintDragProvider = ({ children, canDrag, onDrop }: PaintDragProvid
 
   const updatePointer = useCallback((x: number, y: number) => {
     setDragState((previous) => (previous.isDragging ? { ...previous, pointer: { x, y } } : previous));
+    setHoverTarget(getDropTargetAtPoint(x, y));
   }, []);
 
   const finishDrag = useCallback(() => {
@@ -113,21 +122,37 @@ export const PaintDragProvider = ({ children, canDrag, onDrop }: PaintDragProvid
     }
 
     const handlePointerMove = (event: PointerEvent) => {
+      event.preventDefault();
       updatePointer(event.clientX, event.clientY);
     };
 
-    const handlePointerUp = () => {
+    const handlePointerUp = (event: PointerEvent) => {
+      const target = getDropTargetAtPoint(event.clientX, event.clientY);
+      if (target && dragState.cube) {
+        onDrop({
+          canvasId: target.canvasId,
+          squareId: target.squareId,
+          cubeId: dragState.cube.id,
+          cubeColor: dragState.cube.color
+        });
+      }
       finishDrag();
     };
 
-    window.addEventListener('pointermove', handlePointerMove);
+    const handlePointerCancel = () => {
+      finishDrag();
+    };
+
+    window.addEventListener('pointermove', handlePointerMove, { passive: false });
     window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerCancel);
 
     return () => {
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerCancel);
     };
-  }, [dragState.isDragging, updatePointer, finishDrag]);
+  }, [dragState.isDragging, dragState.cube, updatePointer, finishDrag, onDrop]);
 
   const value = useMemo(
     () => ({
