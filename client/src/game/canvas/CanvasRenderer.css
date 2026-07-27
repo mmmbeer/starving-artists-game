@@ -1,12 +1,12 @@
 .canvas-card {
   background: var(--surface-bright);
   border: 1px solid var(--border-muted);
-  border-radius: 1rem;
-  padding: 1rem;
+  padding: 0.65rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
   box-shadow: var(--shadow-soft);
+  min-width: 0;
 }
 
 .canvas-card__header {
@@ -14,6 +14,7 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 0.75rem;
+  padding: 0 0.15rem;
 }
 
 .canvas-card__title {
@@ -23,16 +24,15 @@
 }
 
 .canvas-card__meta {
-  margin: 0.25rem 0 0;
-  font-size: 0.8rem;
+  margin: 0.15rem 0 0;
+  font-size: 0.76rem;
   color: var(--text-secondary);
 }
 
 .canvas-card__wild-flag {
-  padding: 0.25rem 0.5rem;
-  border-radius: 999px;
+  padding: 0.2rem 0.4rem;
   border: 1px solid var(--border-muted);
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   color: var(--text-secondary);
   white-space: nowrap;
 }
@@ -41,9 +41,10 @@
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
-  border-radius: 0.85rem;
   overflow: hidden;
   background: var(--surface-muted);
+  min-height: 360px;
+  touch-action: none;
 }
 
 .canvas-card__image {
@@ -51,6 +52,8 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .canvas-card__placeholder {
@@ -69,51 +72,68 @@
   position: absolute;
   top: var(--square-top);
   left: var(--square-left);
-  width: clamp(12%, 10vw, 18%);
-  height: clamp(12%, 10vw, 18%);
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  background: rgba(255, 255, 255, 0.7);
+  width: clamp(2.1rem, 7.5%, 3.35rem);
+  aspect-ratio: 1;
+  border-radius: 0.18rem;
+  border: 2px solid rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.34);
   transform: translate(-50%, -50%) scale(1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease, background 0.14s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: auto;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.28);
 }
 
 .canvas-square--hovered {
-  transform: translate(-50%, -50%) scale(1.2);
-  border-color: rgba(0, 0, 0, 0.2);
+  transform: translate(-50%, -50%) scale(1.18);
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.66);
+  z-index: 2;
 }
 
 .canvas-square--hint-valid {
-  box-shadow: 0 0 0 3px rgba(67, 170, 111, 0.45);
+  box-shadow: 0 0 0 4px rgba(67, 170, 111, 0.62), 0 2px 8px rgba(0, 0, 0, 0.28);
 }
 
 .canvas-square--hint-invalid {
-  box-shadow: 0 0 0 3px rgba(209, 67, 67, 0.5);
+  box-shadow: 0 0 0 4px rgba(209, 67, 67, 0.62), 0 2px 8px rgba(0, 0, 0, 0.28);
 }
 
 .canvas-square__occupant {
-  width: 65%;
-  height: 65%;
-  border-radius: 50%;
-  border: 2px solid var(--surface-bright);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+  width: 76%;
+  height: 76%;
+  border-radius: 0.15rem;
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 2px 4px rgba(0, 0, 0, 0.24);
 }
 
 .canvas-square__hint {
   position: absolute;
-  inset: 0;
+  inset: -1px;
   border-radius: inherit;
   border: 1px dashed;
 }
 
 .canvas-square__hint--valid {
-  border-color: rgba(67, 170, 111, 0.4);
+  border-color: rgba(67, 170, 111, 0.72);
 }
 
 .canvas-square__hint--invalid {
-  border-color: rgba(209, 67, 67, 0.4);
+  border-color: rgba(209, 67, 67, 0.72);
+}
+
+@media (max-width: 700px) {
+  .canvas-card {
+    padding: 0.4rem;
+  }
+
+  .canvas-card__media {
+    min-height: 0;
+  }
+
+  .canvas-square {
+    width: clamp(2rem, 9%, 2.8rem);
+  }
 }
