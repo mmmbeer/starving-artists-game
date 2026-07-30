@@ -1,0 +1,7486 @@
+[
+  {
+    "file": "Albert Bierstadt - Bahamian View (1879).png",
+    "id": "albert-bierstadt-bahamian-view-1879",
+    "rotation": 0,
+    "orientationScore": 15.075,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "7"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 7
+    },
+    "labels": [
+      "1",
+      "1",
+      "0",
+      "1",
+      "3",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      1,
+      1,
+      0,
+      1,
+      3,
+      0,
+      0
+    ],
+    "maximums": [
+      1,
+      1,
+      0,
+      1,
+      3,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Albert Marquet - Bouquet of Flowers (1898).png",
+    "id": "albert-marquet-bouquet-of-flowers-1898",
+    "rotation": 0,
+    "orientationScore": 15.066,
+    "rawRewards": {
+      "starValue": "1",
+      "foodValue": "4",
+      "paintValue": "3"
+    },
+    "rewards": {
+      "starValue": 1,
+      "foodValue": 4,
+      "paintValue": 3
+    },
+    "labels": [
+      "1",
+      "0",
+      "1",
+      "1",
+      "0",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0
+    ],
+    "maximums": [
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 3,
+    "labelsComplete": true
+  },
+  {
+    "file": "Alfons Mucha - Four Seasons (1895).png",
+    "id": "alfons-mucha-four-seasons-1895",
+    "rotation": 270,
+    "orientationScore": 15.072,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "3",
+      "paintValue": "11"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 11
+    },
+    "labels": [
+      "0",
+      "1-2",
+      "0-2",
+      "0",
+      "0-3",
+      "2",
+      "1-3"
+    ],
+    "minimums": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      2,
+      1
+    ],
+    "maximums": [
+      0,
+      2,
+      2,
+      0,
+      3,
+      2,
+      3
+    ],
+    "flexiblePairs": [
+      [
+        "blue",
+        "yellow"
+      ],
+      [
+        "blue",
+        "black"
+      ],
+      [
+        "yellow",
+        "orange"
+      ],
+      [
+        "blue",
+        "black"
+      ]
+    ],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Alfons Mucha - Poster for Victorian Sardou_s Gismonda (1894).png",
+    "id": "alfons-mucha-poster-for-victorian-sardou-s-gismonda-1894",
+    "rotation": 0,
+    "orientationScore": 11.356,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "3",
+      "paintValue": "14"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 3,
+      "paintValue": 14
+    },
+    "labels": [
+      "0",
+      "2-6",
+      "3-5",
+      "3",
+      "0",
+      "0",
+      "0-2"
+    ],
+    "minimums": [
+      0,
+      2,
+      3,
+      3,
+      0,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      6,
+      5,
+      3,
+      0,
+      0,
+      2
+    ],
+    "flexiblePairs": [
+      [
+        "orange",
+        "yellow"
+      ],
+      [
+        "orange",
+        "black"
+      ],
+      [
+        "orange",
+        "yellow"
+      ],
+      [
+        "orange",
+        "black"
+      ]
+    ],
+    "targetCount": 12,
+    "labelsComplete": true
+  },
+  {
+    "file": "Alice Bailly - Cemetary (1913).png",
+    "id": "alice-bailly-cemetary-1913",
+    "rotation": 0,
+    "orientationScore": 3.578,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "3",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 3,
+      "paintValue": 8
+    },
+    "labels": [
+      "0",
+      "0-3",
+      "4-2",
+      "2",
+      "2-3",
+      "2",
+      "0-3"
+    ],
+    "minimums": [
+      0,
+      0,
+      2,
+      2,
+      2,
+      2,
+      0
+    ],
+    "maximums": [
+      0,
+      3,
+      4,
+      2,
+      3,
+      2,
+      3
+    ],
+    "flexiblePairs": [
+      [
+        "orange",
+        "black"
+      ],
+      [
+        "yellow",
+        "orange"
+      ],
+      [
+        "black",
+        "yellow"
+      ],
+      [
+        "orange",
+        "blue"
+      ]
+    ],
+    "targetCount": 12,
+    "labelsComplete": true
+  },
+  {
+    "file": "Andrea del Sarto - MAdonna of the Harpies (1517).png",
+    "id": "andrea-del-sarto-madonna-of-the-harpies-1517",
+    "rotation": 0,
+    "orientationScore": 16.069,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "6"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 6
+    },
+    "labels": [
+      "0",
+      "3",
+      "4-2",
+      "0",
+      "2-3",
+      "0",
+      "1"
+    ],
+    "minimums": [
+      0,
+      3,
+      2,
+      0,
+      2,
+      0,
+      1
+    ],
+    "maximums": [
+      0,
+      3,
+      4,
+      0,
+      3,
+      0,
+      1
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "blue"
+      ]
+    ],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "Aristarkh Lentulov - Saint Basil_s Cathedral (1913).png",
+    "id": "aristarkh-lentulov-saint-basil-s-cathedral-1913",
+    "rotation": 0,
+    "orientationScore": 16.078,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "0",
+      "1",
+      "0",
+      "2",
+      "2",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      0,
+      1,
+      0,
+      2,
+      2,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      1,
+      0,
+      2,
+      2,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 5,
+    "labelsComplete": true
+  },
+  {
+    "file": "Artemisia Gentileschi - Judith Beheading Holofernes (1620).png",
+    "id": "artemisia-gentileschi-judith-beheading-holofernes-1620",
+    "rotation": 0,
+    "orientationScore": 16.09,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 10
+    },
+    "labels": [
+      "2",
+      "2-3",
+      "0",
+      "0",
+      "1",
+      "0",
+      "2-3"
+    ],
+    "minimums": [
+      2,
+      2,
+      0,
+      0,
+      1,
+      0,
+      2
+    ],
+    "maximums": [
+      2,
+      3,
+      0,
+      0,
+      1,
+      0,
+      3
+    ],
+    "flexiblePairs": [
+      [
+        "orange",
+        "black"
+      ]
+    ],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "August Macke - Promenade (1913).png",
+    "id": "august-macke-promenade-1913",
+    "rotation": 270,
+    "orientationScore": 14.07,
+    "rawRewards": {
+      "starValue": "53",
+      "foodValue": "2",
+      "paintValue": "13"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 13
+    },
+    "labels": [
+      "0",
+      "0",
+      "1",
+      "3",
+      "2",
+      "2",
+      "2"
+    ],
+    "minimums": [
+      0,
+      0,
+      1,
+      3,
+      2,
+      2,
+      2
+    ],
+    "maximums": [
+      0,
+      0,
+      1,
+      3,
+      2,
+      2,
+      2
+    ],
+    "flexiblePairs": [],
+    "targetCount": 10,
+    "labelsComplete": true
+  },
+  {
+    "file": "Avon Periodicals - All True Detectives no.2 (1954).png",
+    "id": "avon-periodicals-all-true-detectives-no-2-1954",
+    "rotation": 0,
+    "orientationScore": 16.08,
+    "rawRewards": {
+      "starValue": "0",
+      "foodValue": "0",
+      "paintValue": "12"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 0,
+      "paintValue": 12
+    },
+    "labels": [
+      "1",
+      "3",
+      "1",
+      "0",
+      "2",
+      "0",
+      "2"
+    ],
+    "minimums": [
+      1,
+      3,
+      1,
+      0,
+      2,
+      0,
+      2
+    ],
+    "maximums": [
+      1,
+      3,
+      1,
+      0,
+      2,
+      0,
+      2
+    ],
+    "flexiblePairs": [],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "Benedetta Cappa - Speeding Motoboat (1923).png",
+    "id": "benedetta-cappa-speeding-motoboat-1923",
+    "rotation": 270,
+    "orientationScore": 12.08,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 10
+    },
+    "labels": [
+      "0",
+      "0-3",
+      "0-7",
+      "0",
+      "0-4",
+      "3",
+      "0"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      3,
+      0
+    ],
+    "maximums": [
+      0,
+      3,
+      7,
+      0,
+      4,
+      3,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "blue"
+      ],
+      [
+        "yellow",
+        "orange"
+      ],
+      [
+        "yellow",
+        "blue"
+      ],
+      [
+        "yellow",
+        "orange"
+      ],
+      [
+        "yellow",
+        "blue"
+      ],
+      [
+        "yellow",
+        "orange"
+      ],
+      [
+        "yellow",
+        "blue"
+      ]
+    ],
+    "targetCount": 10,
+    "labelsComplete": true
+  },
+  {
+    "file": "Berthe Morisot - Grain Field (1875).png",
+    "id": "berthe-morisot-grain-field-1875",
+    "rotation": 270,
+    "orientationScore": 15.067,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "7"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 7
+    },
+    "labels": [
+      "0",
+      "0",
+      "2-8",
+      "0-4",
+      "0-2",
+      "0-1",
+      "0"
+    ],
+    "minimums": [
+      0,
+      0,
+      2,
+      0,
+      0,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      0,
+      8,
+      4,
+      2,
+      1,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "green"
+      ],
+      [
+        "yellow",
+        "green"
+      ],
+      [
+        "yellow",
+        "green"
+      ],
+      [
+        "yellow",
+        "blue"
+      ],
+      [
+        "yellow",
+        "purple"
+      ],
+      [
+        "yellow",
+        "green"
+      ]
+    ],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Berthe Morisot - Rosbras, Brittany (1866).png",
+    "id": "berthe-morisot-rosbras-brittany-1866",
+    "rotation": 270,
+    "orientationScore": 15.095,
+    "rawRewards": {
+      "starValue": "",
+      "foodValue": "2",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 10
+    },
+    "labels": [
+      "0",
+      "2",
+      "1",
+      "1",
+      "2",
+      "0",
+      "2"
+    ],
+    "minimums": [
+      0,
+      2,
+      1,
+      1,
+      2,
+      0,
+      2
+    ],
+    "maximums": [
+      0,
+      2,
+      1,
+      1,
+      2,
+      0,
+      2
+    ],
+    "flexiblePairs": [],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "British India Press - See India No. 10.png",
+    "id": "british-india-press-see-india-no-10",
+    "rotation": 0,
+    "orientationScore": 14.079,
+    "rawRewards": {
+      "starValue": "0",
+      "foodValue": "2",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 10
+    },
+    "labels": [
+      "0-1",
+      "2-4",
+      "0-1",
+      "0",
+      "2",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      0,
+      2,
+      0,
+      0,
+      2,
+      0,
+      0
+    ],
+    "maximums": [
+      1,
+      4,
+      1,
+      0,
+      2,
+      0,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "orange",
+        "yellow"
+      ],
+      [
+        "red",
+        "orange"
+      ]
+    ],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Camille Pissarro - The Boulevard Montmartre at Night (1897).png",
+    "id": "camille-pissarro-the-boulevard-montmartre-at-night-1897",
+    "rotation": 270,
+    "orientationScore": 16.11,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "6"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 6
+    },
+    "labels": [
+      "0",
+      "0-4",
+      "0-4",
+      "0",
+      "2-4",
+      "0-2",
+      "0"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      0,
+      2,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      4,
+      4,
+      0,
+      4,
+      2,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "orange"
+      ],
+      [
+        "yellow",
+        "orange"
+      ],
+      [
+        "yellow",
+        "purple"
+      ],
+      [
+        "orange",
+        "blue"
+      ],
+      [
+        "yellow",
+        "purple"
+      ],
+      [
+        "orange",
+        "blue"
+      ]
+    ],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Cave Paintings of Lascaux - Hall of Bulls (c. 15,000 B.C.E.).png",
+    "id": "cave-paintings-of-lascaux-hall-of-bulls-c-15-000-b-c-e",
+    "rotation": 270,
+    "orientationScore": 16.116,
+    "rawRewards": {
+      "starValue": "0",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "0",
+      "3",
+      "0",
+      "0",
+      "0",
+      "0",
+      "3"
+    ],
+    "minimums": [
+      0,
+      3,
+      0,
+      0,
+      0,
+      0,
+      3
+    ],
+    "maximums": [
+      0,
+      3,
+      0,
+      0,
+      0,
+      0,
+      3
+    ],
+    "flexiblePairs": [],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Charles Conder - A Holiday at Mentone.png",
+    "id": "charles-conder-a-holiday-at-mentone",
+    "rotation": 270,
+    "orientationScore": 14.072,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 10
+    },
+    "labels": [
+      "0-1",
+      "0-1",
+      "2-4",
+      "0",
+      "4",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      0,
+      0,
+      2,
+      0,
+      4,
+      0,
+      0
+    ],
+    "maximums": [
+      1,
+      1,
+      4,
+      0,
+      4,
+      0,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "red"
+      ],
+      [
+        "yellow",
+        "orange"
+      ]
+    ],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Charles Nicholas and Vince Alascia - Robin Hood and His Merry Men no37 (1958).png",
+    "id": "charles-nicholas-and-vince-alascia-robin-hood-and-his-merry-men-no37-1958",
+    "rotation": 0,
+    "orientationScore": 15.354,
+    "rawRewards": {
+      "starValue": "0",
+      "foodValue": "3",
+      "paintValue": "11"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 11
+    },
+    "labels": [
+      "1",
+      "0",
+      "2-3",
+      "0-1",
+      "3",
+      "0",
+      "1"
+    ],
+    "minimums": [
+      1,
+      0,
+      2,
+      0,
+      3,
+      0,
+      1
+    ],
+    "maximums": [
+      1,
+      0,
+      3,
+      1,
+      3,
+      0,
+      1
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "green"
+      ]
+    ],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Charles R. Knight - Leaping Laelaps (1897).png",
+    "id": "charles-r-knight-leaping-laelaps-1897",
+    "rotation": 270,
+    "orientationScore": 15.088,
+    "rawRewards": {
+      "starValue": "1",
+      "foodValue": "",
+      "paintValue": "4"
+    },
+    "rewards": {
+      "starValue": 1,
+      "foodValue": 2,
+      "paintValue": 4
+    },
+    "labels": [
+      "0",
+      "1",
+      "1",
+      "1",
+      "0",
+      "1",
+      "0"
+    ],
+    "minimums": [
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0
+    ],
+    "maximums": [
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 4,
+    "labelsComplete": true
+  },
+  {
+    "file": "Charles Willson Peale - Exhumation of the Mastodon (1806).png",
+    "id": "charles-willson-peale-exhumation-of-the-mastodon-1806",
+    "rotation": 270,
+    "orientationScore": 16.087,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "1",
+      "2",
+      "0",
+      "3",
+      "0",
+      "1",
+      "1"
+    ],
+    "minimums": [
+      1,
+      2,
+      0,
+      3,
+      0,
+      1,
+      1
+    ],
+    "maximums": [
+      1,
+      2,
+      0,
+      3,
+      0,
+      1,
+      1
+    ],
+    "flexiblePairs": [],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Clara Peeters - Still Life with Pretzels (1611).png",
+    "id": "clara-peeters-still-life-with-pretzels-1611",
+    "rotation": 270,
+    "orientationScore": 16.122,
+    "rawRewards": {
+      "starValue": "53",
+      "foodValue": "2",
+      "paintValue": "12"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 12
+    },
+    "labels": [
+      "2",
+      "2-3",
+      "1",
+      "1",
+      "2-3",
+      "0",
+      "0-2"
+    ],
+    "minimums": [
+      2,
+      2,
+      1,
+      1,
+      2,
+      0,
+      0
+    ],
+    "maximums": [
+      2,
+      3,
+      1,
+      1,
+      3,
+      0,
+      2
+    ],
+    "flexiblePairs": [
+      [
+        "black",
+        "orange"
+      ],
+      [
+        "blue",
+        "black"
+      ]
+    ],
+    "targetCount": 10,
+    "labelsComplete": true
+  },
+  {
+    "file": "Claude - Seaport with embarkation of Saint Ursula (1641).png",
+    "id": "claude-seaport-with-embarkation-of-saint-ursula-1641",
+    "rotation": 270,
+    "orientationScore": 16.097,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "6"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 6
+    },
+    "labels": [
+      "1",
+      "2",
+      "0-5",
+      "0",
+      "3",
+      "1",
+      "0"
+    ],
+    "minimums": [
+      1,
+      2,
+      0,
+      0,
+      3,
+      1,
+      0
+    ],
+    "maximums": [
+      1,
+      2,
+      5,
+      0,
+      3,
+      1,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "Claude Monet - Lady with a Parasol (1875).png",
+    "id": "claude-monet-lady-with-a-parasol-1875",
+    "rotation": 0,
+    "orientationScore": 12.081,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "",
+      "paintValue": "14"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 14
+    },
+    "labels": [
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "7",
+      "0"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      7,
+      0
+    ],
+    "maximums": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      7,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "Claude Monet - Tulip Fields in Holland.png",
+    "id": "claude-monet-tulip-fields-in-holland",
+    "rotation": 270,
+    "orientationScore": 12.099,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "2",
+      "0-1",
+      "0-1",
+      "0",
+      "4-5",
+      "2-3",
+      "0"
+    ],
+    "minimums": [
+      2,
+      0,
+      0,
+      0,
+      4,
+      2,
+      0
+    ],
+    "maximums": [
+      2,
+      1,
+      1,
+      0,
+      5,
+      3,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "purple"
+      ],
+      [
+        "orange",
+        "blue"
+      ]
+    ],
+    "targetCount": 10,
+    "labelsComplete": true
+  },
+  {
+    "file": "Claude Monet - Water Lilies (1916).png",
+    "id": "claude-monet-water-lilies-1916",
+    "rotation": 270,
+    "orientationScore": 15.068,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 10
+    },
+    "labels": [
+      "1",
+      "0",
+      "0",
+      "2",
+      "2",
+      "3",
+      "0"
+    ],
+    "minimums": [
+      1,
+      0,
+      0,
+      2,
+      2,
+      3,
+      0
+    ],
+    "maximums": [
+      1,
+      0,
+      0,
+      2,
+      2,
+      3,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Courtesy NASA JPL-Caltech - Mars.png",
+    "id": "courtesy-nasa-jpl-caltech-mars",
+    "rotation": 0,
+    "orientationScore": 12.129,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 10
+    },
+    "labels": [
+      "3-4",
+      "0",
+      "0",
+      "0",
+      "1-2",
+      "2",
+      "1"
+    ],
+    "minimums": [
+      3,
+      0,
+      0,
+      0,
+      1,
+      2,
+      1
+    ],
+    "maximums": [
+      4,
+      0,
+      0,
+      0,
+      2,
+      2,
+      1
+    ],
+    "flexiblePairs": [
+      [
+        "red",
+        "blue"
+      ]
+    ],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Courtesy NASA JPL-Caltech - The Grand Tour (2016).png",
+    "id": "courtesy-nasa-jpl-caltech-the-grand-tour-2016",
+    "rotation": 0,
+    "orientationScore": 14.683,
+    "rawRewards": {
+      "starValue": "1",
+      "foodValue": "3",
+      "paintValue": "11"
+    },
+    "rewards": {
+      "starValue": 1,
+      "foodValue": 3,
+      "paintValue": 11
+    },
+    "labels": [
+      "2",
+      "1",
+      "0",
+      "2",
+      "2",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      2,
+      1,
+      0,
+      2,
+      2,
+      0,
+      0
+    ],
+    "maximums": [
+      2,
+      1,
+      0,
+      2,
+      2,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "Diego Rivera - The Alarm Clock (1914).png",
+    "id": "diego-rivera-the-alarm-clock-1914",
+    "rotation": 270,
+    "orientationScore": 15.082,
+    "rawRewards": {
+      "starValue": "53",
+      "foodValue": "3",
+      "paintValue": "12"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 12
+    },
+    "labels": [
+      "2",
+      "0",
+      "0",
+      "2",
+      "1",
+      "3",
+      "0"
+    ],
+    "minimums": [
+      2,
+      0,
+      0,
+      2,
+      1,
+      3,
+      0
+    ],
+    "maximums": [
+      2,
+      0,
+      0,
+      2,
+      1,
+      3,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Donald Thompson - Ships at Port.png",
+    "id": "donald-thompson-ships-at-port",
+    "rotation": 270,
+    "orientationScore": 14.076,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "0",
+      "2",
+      "4-2",
+      "1-2",
+      "2-3",
+      "0",
+      "0-1"
+    ],
+    "minimums": [
+      0,
+      2,
+      2,
+      1,
+      2,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      2,
+      4,
+      2,
+      3,
+      0,
+      1
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "green"
+      ],
+      [
+        "yellow",
+        "blue"
+      ]
+    ],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "Edgar Degas - Dancers in Blue (1895).png",
+    "id": "edgar-degas-dancers-in-blue-1895",
+    "rotation": 0,
+    "orientationScore": 15.064,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "3",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 10
+    },
+    "labels": [
+      "0",
+      "1-2",
+      "2-3",
+      "0",
+      "4",
+      "2",
+      "0"
+    ],
+    "minimums": [
+      0,
+      1,
+      2,
+      0,
+      4,
+      2,
+      0
+    ],
+    "maximums": [
+      0,
+      2,
+      3,
+      0,
+      4,
+      2,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "orange"
+      ]
+    ],
+    "targetCount": 10,
+    "labelsComplete": true
+  },
+  {
+    "file": "Edgar Degas - The Green Dancer (1879).png",
+    "id": "edgar-degas-the-green-dancer-1879",
+    "rotation": 0,
+    "orientationScore": 12.078,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 8
+    },
+    "labels": [
+      "0",
+      "3",
+      "0",
+      "3",
+      "0",
+      "0",
+      "1"
+    ],
+    "minimums": [
+      0,
+      3,
+      0,
+      3,
+      0,
+      0,
+      1
+    ],
+    "maximums": [
+      0,
+      3,
+      0,
+      3,
+      0,
+      0,
+      1
+    ],
+    "flexiblePairs": [],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "Edmund Blair Leighton - The Accolade (1901).png",
+    "id": "edmund-blair-leighton-the-accolade-1901",
+    "rotation": 0,
+    "orientationScore": 12.067,
+    "rawRewards": {
+      "starValue": "1",
+      "foodValue": "2",
+      "paintValue": "7"
+    },
+    "rewards": {
+      "starValue": 1,
+      "foodValue": 2,
+      "paintValue": 7
+    },
+    "labels": [
+      "2",
+      "1",
+      "0",
+      "0",
+      "0",
+      "0",
+      "2"
+    ],
+    "minimums": [
+      2,
+      1,
+      0,
+      0,
+      0,
+      0,
+      2
+    ],
+    "maximums": [
+      2,
+      1,
+      0,
+      0,
+      0,
+      0,
+      2
+    ],
+    "flexiblePairs": [],
+    "targetCount": 5,
+    "labelsComplete": true
+  },
+  {
+    "file": "Edvard Munch - The Scream (1893).png",
+    "id": "edvard-munch-the-scream-1893",
+    "rotation": 0,
+    "orientationScore": 14.073,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 8
+    },
+    "labels": [
+      "1-3",
+      "1-3",
+      "2-0",
+      "0",
+      "1",
+      "0",
+      "2"
+    ],
+    "minimums": [
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      2
+    ],
+    "maximums": [
+      3,
+      3,
+      2,
+      0,
+      1,
+      0,
+      2
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "red"
+      ],
+      [
+        "orange",
+        "yellow"
+      ],
+      [
+        "red",
+        "orange"
+      ]
+    ],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "El Greco - View of Toledo (1600).png",
+    "id": "el-greco-view-of-toledo-1600",
+    "rotation": 0,
+    "orientationScore": 14.072,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 8
+    },
+    "labels": [
+      "0",
+      "1",
+      "0",
+      "2",
+      "2",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      0,
+      1,
+      0,
+      2,
+      2,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      1,
+      0,
+      2,
+      2,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 5,
+    "labelsComplete": true
+  },
+  {
+    "file": "Elisabetti Sarini - Portia Wounding Her Thigh (1664).png",
+    "id": "elisabetti-sarini-portia-wounding-her-thigh-1664",
+    "rotation": 270,
+    "orientationScore": 14.666,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "13"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 13
+    },
+    "labels": [
+      "7",
+      "0",
+      "0-5",
+      "0",
+      "0",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      7,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "maximums": [
+      7,
+      0,
+      5,
+      0,
+      0,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "Elmer Wexler - Exciting Comics no9 (1941).png",
+    "id": "elmer-wexler-exciting-comics-no9-1941",
+    "rotation": 0,
+    "orientationScore": 13.436,
+    "rawRewards": {
+      "starValue": "0",
+      "foodValue": "3",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 10
+    },
+    "labels": [
+      "1-2",
+      "0",
+      "1",
+      "3",
+      "0-1",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      1,
+      0,
+      1,
+      3,
+      0,
+      0,
+      0
+    ],
+    "maximums": [
+      2,
+      0,
+      1,
+      3,
+      1,
+      0,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "red",
+        "blue"
+      ]
+    ],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Eva Gonzales - Nanny with a child (1877).png",
+    "id": "eva-gonzales-nanny-with-a-child-1877",
+    "rotation": 270,
+    "orientationScore": 15.077,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 8
+    },
+    "labels": [
+      "0",
+      "0",
+      "6-2",
+      "0-2",
+      "1",
+      "2",
+      "2"
+    ],
+    "minimums": [
+      0,
+      0,
+      2,
+      0,
+      1,
+      2,
+      2
+    ],
+    "maximums": [
+      0,
+      0,
+      6,
+      2,
+      1,
+      2,
+      2
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "green"
+      ],
+      [
+        "yellow",
+        "green"
+      ]
+    ],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "Evelyn De Morgan - Boreas and Oreithyia (1896).png",
+    "id": "evelyn-de-morgan-boreas-and-oreithyia-1896",
+    "rotation": 0,
+    "orientationScore": 15.103,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 8
+    },
+    "labels": [
+      "0",
+      "2",
+      "0",
+      "0",
+      "2",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      0,
+      2,
+      0,
+      0,
+      2,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      2,
+      0,
+      0,
+      2,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 4,
+    "labelsComplete": true
+  },
+  {
+    "file": "Francisco Goya - The Parasol (1777).png",
+    "id": "francisco-goya-the-parasol-1777",
+    "rotation": 270,
+    "orientationScore": 14.078,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "11"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 11
+    },
+    "labels": [
+      "1",
+      "2",
+      "0",
+      "3",
+      "0",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      1,
+      2,
+      0,
+      3,
+      0,
+      0,
+      0
+    ],
+    "maximums": [
+      1,
+      2,
+      0,
+      3,
+      0,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Francisco Oller - Hacienda Aurora (1899).png",
+    "id": "francisco-oller-hacienda-aurora-1899",
+    "rotation": 270,
+    "orientationScore": 15.07,
+    "rawRewards": {
+      "starValue": "1",
+      "foodValue": "2",
+      "paintValue": "6"
+    },
+    "rewards": {
+      "starValue": 1,
+      "foodValue": 2,
+      "paintValue": 6
+    },
+    "labels": [
+      "0",
+      "0",
+      "0",
+      "2",
+      "3",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      2,
+      3,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      0,
+      0,
+      2,
+      3,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 5,
+    "labelsComplete": true
+  },
+  {
+    "file": "Frantisek Kupka - Disks of Newton (1911).png",
+    "id": "frantisek-kupka-disks-of-newton-1911",
+    "rotation": 0,
+    "orientationScore": 9.102,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 10
+    },
+    "labels": [
+      "0-6",
+      "0-6",
+      "0-4",
+      "0-1",
+      "0-1",
+      "0-2",
+      "0"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "maximums": [
+      6,
+      6,
+      4,
+      1,
+      1,
+      2,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "red",
+        "orange"
+      ],
+      [
+        "red",
+        "orange"
+      ],
+      [
+        "yellow",
+        "red"
+      ],
+      [
+        "orange",
+        "yellow"
+      ],
+      [
+        "red",
+        "orange"
+      ],
+      [
+        "yellow",
+        "red"
+      ],
+      [
+        "purple",
+        "orange"
+      ],
+      [
+        "yellow",
+        "red"
+      ],
+      [
+        "purple",
+        "orange"
+      ],
+      [
+        "green",
+        "blue"
+      ]
+    ],
+    "targetCount": 10,
+    "labelsComplete": true
+  },
+  {
+    "file": "Franz Marc - Blue Horse I (1911).png",
+    "id": "franz-marc-blue-horse-i-1911",
+    "rotation": 0,
+    "orientationScore": 15.057,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 8
+    },
+    "labels": [
+      "0",
+      "0",
+      "1-2",
+      "2",
+      "4-5",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      0,
+      0,
+      1,
+      2,
+      4,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      0,
+      2,
+      2,
+      5,
+      0,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "blue"
+      ]
+    ],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Frederic Leighton - Flaming June (1895).png",
+    "id": "frederic-leighton-flaming-june-1895",
+    "rotation": 270,
+    "orientationScore": 15.076,
+    "rawRewards": {
+      "starValue": "53",
+      "foodValue": "2",
+      "paintValue": "13"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 13
+    },
+    "labels": [
+      "2",
+      "4",
+      "0",
+      "0",
+      "1",
+      "0",
+      "2"
+    ],
+    "minimums": [
+      2,
+      4,
+      0,
+      0,
+      1,
+      0,
+      2
+    ],
+    "maximums": [
+      2,
+      4,
+      0,
+      0,
+      1,
+      0,
+      2
+    ],
+    "flexiblePairs": [],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "Gabrielle Demers - The Witch Doctor.png",
+    "id": "gabrielle-demers-the-witch-doctor",
+    "rotation": 0,
+    "orientationScore": 14.065,
+    "rawRewards": {
+      "starValue": "1",
+      "foodValue": "3",
+      "paintValue": "11"
+    },
+    "rewards": {
+      "starValue": 1,
+      "foodValue": 3,
+      "paintValue": 11
+    },
+    "labels": [
+      "2",
+      "0",
+      "3",
+      "0",
+      "0",
+      "1",
+      "3"
+    ],
+    "minimums": [
+      2,
+      0,
+      3,
+      0,
+      0,
+      1,
+      3
+    ],
+    "maximums": [
+      2,
+      0,
+      3,
+      0,
+      0,
+      1,
+      3
+    ],
+    "flexiblePairs": [],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "Georges Seurat - A Sunday Afternoon on the Island of La Grande Jatte (c. 1884).png",
+    "id": "georges-seurat-a-sunday-afternoon-on-the-island-of-la-grande-jatte-c-1884",
+    "rotation": 270,
+    "orientationScore": 18.11,
+    "rawRewards": {
+      "starValue": "53",
+      "foodValue": "4",
+      "paintValue": "13"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 4,
+      "paintValue": 13
+    },
+    "labels": [
+      "0",
+      "1",
+      "0",
+      "3",
+      "2",
+      "3",
+      "1"
+    ],
+    "minimums": [
+      0,
+      1,
+      0,
+      3,
+      2,
+      3,
+      1
+    ],
+    "maximums": [
+      0,
+      1,
+      0,
+      3,
+      2,
+      3,
+      1
+    ],
+    "flexiblePairs": [],
+    "targetCount": 10,
+    "labelsComplete": true
+  },
+  {
+    "file": "Georges Seurat - Bathers at Asnieres.png",
+    "id": "georges-seurat-bathers-at-asnieres",
+    "rotation": 270,
+    "orientationScore": 14.078,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "3",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 9
+    },
+    "labels": [
+      "2",
+      "0",
+      "0-1",
+      "3-4",
+      "4",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      2,
+      0,
+      0,
+      3,
+      4,
+      0,
+      0
+    ],
+    "maximums": [
+      2,
+      0,
+      1,
+      4,
+      4,
+      0,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "green"
+      ]
+    ],
+    "targetCount": 10,
+    "labelsComplete": true
+  },
+  {
+    "file": "Georgia O_Keeffe - Series I No. 3 (1918).png",
+    "id": "georgia-o-keeffe-series-i-no-3-1918",
+    "rotation": 0,
+    "orientationScore": 14.07,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "1-2",
+      "2-3",
+      "2-3",
+      "0",
+      "1-2",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      1,
+      2,
+      2,
+      0,
+      1,
+      0,
+      0
+    ],
+    "maximums": [
+      2,
+      3,
+      3,
+      0,
+      2,
+      0,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "red"
+      ],
+      [
+        "orange",
+        "blue"
+      ]
+    ],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Giacomo Balla - Science against Obscurantism (1920).png",
+    "id": "giacomo-balla-science-against-obscurantism-1920",
+    "rotation": 270,
+    "orientationScore": 16.08,
+    "rawRewards": {
+      "starValue": "53",
+      "foodValue": "2",
+      "paintValue": "11"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 11
+    },
+    "labels": [
+      "0-3",
+      "0-1",
+      "0-3",
+      "0",
+      "2-5",
+      "0",
+      "3-5"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      0,
+      2,
+      0,
+      3
+    ],
+    "maximums": [
+      3,
+      1,
+      3,
+      0,
+      5,
+      0,
+      5
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "red"
+      ],
+      [
+        "blue",
+        "yellow"
+      ],
+      [
+        "red",
+        "blue"
+      ],
+      [
+        "black",
+        "yellow"
+      ],
+      [
+        "red",
+        "orange"
+      ],
+      [
+        "blue",
+        "black"
+      ]
+    ],
+    "targetCount": 11,
+    "labelsComplete": true
+  },
+  {
+    "file": "Goldstein Grigoriy - Mansion (c. 1920).png",
+    "id": "goldstein-grigoriy-mansion-c-1920",
+    "rotation": 0,
+    "orientationScore": 14.072,
+    "rawRewards": {
+      "starValue": "1",
+      "foodValue": "2",
+      "paintValue": "7"
+    },
+    "rewards": {
+      "starValue": 1,
+      "foodValue": 2,
+      "paintValue": 7
+    },
+    "labels": [
+      "1",
+      "1",
+      "0",
+      "2",
+      "1",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      1,
+      1,
+      0,
+      2,
+      1,
+      0,
+      0
+    ],
+    "maximums": [
+      1,
+      1,
+      0,
+      2,
+      1,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 5,
+    "labelsComplete": true
+  },
+  {
+    "file": "Gustav Klimt - The Kiss (c. 1907).png",
+    "id": "gustav-klimt-the-kiss-c-1907",
+    "rotation": 0,
+    "orientationScore": 14.076,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "0",
+      "1-3",
+      "2-4",
+      "1",
+      "0",
+      "1",
+      "0-4"
+    ],
+    "minimums": [
+      0,
+      1,
+      2,
+      1,
+      0,
+      1,
+      0
+    ],
+    "maximums": [
+      0,
+      3,
+      4,
+      1,
+      0,
+      1,
+      4
+    ],
+    "flexiblePairs": [
+      [
+        "black",
+        "yellow"
+      ],
+      [
+        "black",
+        "orange"
+      ],
+      [
+        "black",
+        "yellow"
+      ],
+      [
+        "orange",
+        "black"
+      ]
+    ],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "H.J. Detouche - Galileo displaying his telescope (1754).png",
+    "id": "h-j-detouche-galileo-displaying-his-telescope-1754",
+    "rotation": 270,
+    "orientationScore": 13.421,
+    "rawRewards": {
+      "starValue": "0",
+      "foodValue": "2",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 10
+    },
+    "labels": [
+      "2",
+      "0",
+      "0",
+      "2",
+      "3",
+      "0",
+      "1"
+    ],
+    "minimums": [
+      2,
+      0,
+      0,
+      2,
+      3,
+      0,
+      1
+    ],
+    "maximums": [
+      2,
+      0,
+      0,
+      2,
+      3,
+      0,
+      1
+    ],
+    "flexiblePairs": [],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Hanna Hirsch Pauli - Breakfast Time (1877).png",
+    "id": "hanna-hirsch-pauli-breakfast-time-1877",
+    "rotation": 270,
+    "orientationScore": 16.083,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "3",
+      "paintValue": "14"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 14
+    },
+    "labels": [
+      "0",
+      "4",
+      "3",
+      "0",
+      "1",
+      "1",
+      "0"
+    ],
+    "minimums": [
+      0,
+      4,
+      3,
+      0,
+      1,
+      1,
+      0
+    ],
+    "maximums": [
+      0,
+      4,
+      3,
+      0,
+      1,
+      1,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "Hashiguchi Goyo - Rain at Yabakai Border (1918).png",
+    "id": "hashiguchi-goyo-rain-at-yabakai-border-1918",
+    "rotation": 270,
+    "orientationScore": 16.103,
+    "rawRewards": {
+      "starValue": "1",
+      "foodValue": "2",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 1,
+      "foodValue": 2,
+      "paintValue": 8
+    },
+    "labels": [
+      "2",
+      "1",
+      "0",
+      "2",
+      "1",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      2,
+      1,
+      0,
+      2,
+      1,
+      0,
+      0
+    ],
+    "maximums": [
+      2,
+      1,
+      0,
+      2,
+      1,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Henri Fuseli - The Nightmare.png",
+    "id": "henri-fuseli-the-nightmare",
+    "rotation": 270,
+    "orientationScore": 13.072,
+    "rawRewards": {
+      "starValue": "53",
+      "foodValue": "2",
+      "paintValue": "11"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 11
+    },
+    "labels": [
+      "3",
+      "0",
+      "3",
+      "0",
+      "1",
+      "0",
+      "3"
+    ],
+    "minimums": [
+      3,
+      0,
+      3,
+      0,
+      1,
+      0,
+      3
+    ],
+    "maximums": [
+      3,
+      0,
+      3,
+      0,
+      1,
+      0,
+      3
+    ],
+    "flexiblePairs": [],
+    "targetCount": 10,
+    "labelsComplete": true
+  },
+  {
+    "file": "Henri Matisse - Goldfish (1911).png",
+    "id": "henri-matisse-goldfish-1911",
+    "rotation": 0,
+    "orientationScore": 14.076,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "11"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 11
+    },
+    "labels": [
+      "0",
+      "1-3",
+      "0-2",
+      "1-3",
+      "0",
+      "0",
+      "2"
+    ],
+    "minimums": [
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      2
+    ],
+    "maximums": [
+      0,
+      3,
+      2,
+      3,
+      0,
+      0,
+      2
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "orange"
+      ],
+      [
+        "green",
+        "yellow"
+      ],
+      [
+        "orange",
+        "green"
+      ]
+    ],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "Henri Rousseau - The Mill (c. 1896).png",
+    "id": "henri-rousseau-the-mill-c-1896",
+    "rotation": 270,
+    "orientationScore": 14.074,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "0",
+      "2",
+      "0",
+      "2",
+      "3",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      0,
+      2,
+      0,
+      2,
+      3,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      2,
+      0,
+      2,
+      3,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "Henrietta Rae - Hylas and the Water Nymphs (1909).png",
+    "id": "henrietta-rae-hylas-and-the-water-nymphs-1909",
+    "rotation": 270,
+    "orientationScore": 16.101,
+    "rawRewards": {
+      "starValue": "1",
+      "foodValue": "2",
+      "paintValue": "7"
+    },
+    "rewards": {
+      "starValue": 1,
+      "foodValue": 2,
+      "paintValue": 7
+    },
+    "labels": [
+      "0",
+      "0",
+      "0",
+      "2",
+      "3",
+      "2",
+      "0"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      2,
+      3,
+      2,
+      0
+    ],
+    "maximums": [
+      0,
+      0,
+      0,
+      2,
+      3,
+      2,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "Hieronymus Bosch - The Garden of Earthly Delights.png",
+    "id": "hieronymus-bosch-the-garden-of-earthly-delights",
+    "rotation": 0,
+    "orientationScore": 15.117,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "3",
+      "paintValue": "14"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 3,
+      "paintValue": 14
+    },
+    "labels": [
+      "3",
+      "2",
+      "1",
+      "1",
+      "3",
+      "2",
+      "0"
+    ],
+    "minimums": [
+      3,
+      2,
+      1,
+      1,
+      3,
+      2,
+      0
+    ],
+    "maximums": [
+      3,
+      2,
+      1,
+      1,
+      3,
+      2,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 12,
+    "labelsComplete": true
+  },
+  {
+    "file": "Ivan Aivazovsky - On the Island of Crete (1867).png",
+    "id": "ivan-aivazovsky-on-the-island-of-crete-1867",
+    "rotation": 270,
+    "orientationScore": 12.079,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "14"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 14
+    },
+    "labels": [
+      "0",
+      "1",
+      "1",
+      "1",
+      "0",
+      "3",
+      "3"
+    ],
+    "minimums": [
+      0,
+      1,
+      1,
+      1,
+      0,
+      3,
+      3
+    ],
+    "maximums": [
+      0,
+      1,
+      1,
+      1,
+      0,
+      3,
+      3
+    ],
+    "flexiblePairs": [],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "J. Howard Miller - We Can Do It! (Rosie the Riveter) (c. 1942).png",
+    "id": "j-howard-miller-we-can-do-it-rosie-the-riveter-c-1942",
+    "rotation": 0,
+    "orientationScore": 10.751,
+    "rawRewards": {
+      "starValue": "0",
+      "foodValue": "3",
+      "paintValue": "11"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 11
+    },
+    "labels": [
+      "1",
+      "0",
+      "3",
+      "0",
+      "4",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      1,
+      0,
+      3,
+      0,
+      4,
+      0,
+      0
+    ],
+    "maximums": [
+      1,
+      0,
+      3,
+      0,
+      4,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Jack Kirby - Race for the Moon #2 (1958).png",
+    "id": "jack-kirby-race-for-the-moon-2-1958",
+    "rotation": 0,
+    "orientationScore": 13.412,
+    "rawRewards": {
+      "starValue": "0",
+      "foodValue": "4",
+      "paintValue": "12"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 4,
+      "paintValue": 12
+    },
+    "labels": [
+      "2",
+      "3",
+      "3",
+      "0",
+      "0",
+      "0",
+      "2"
+    ],
+    "minimums": [
+      2,
+      3,
+      3,
+      0,
+      0,
+      0,
+      2
+    ],
+    "maximums": [
+      2,
+      3,
+      3,
+      0,
+      0,
+      0,
+      2
+    ],
+    "flexiblePairs": [],
+    "targetCount": 10,
+    "labelsComplete": true
+  },
+  {
+    "file": "Jan Matejko - Copernicus In The Tower At Frombork (1872).png",
+    "id": "jan-matejko-copernicus-in-the-tower-at-frombork-1872",
+    "rotation": 270,
+    "orientationScore": 16.11,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 10
+    },
+    "labels": [
+      "0",
+      "0",
+      "0",
+      "0",
+      "0-2",
+      "2-4",
+      "2"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      2
+    ],
+    "maximums": [
+      0,
+      0,
+      0,
+      0,
+      2,
+      4,
+      2
+    ],
+    "flexiblePairs": [
+      [
+        "purple",
+        "blue"
+      ],
+      [
+        "purple",
+        "blue"
+      ]
+    ],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Jan Steen - Argument over a Card Game (c. 1630).png",
+    "id": "jan-steen-argument-over-a-card-game-c-1630",
+    "rotation": 270,
+    "orientationScore": 17.089,
+    "rawRewards": {
+      "starValue": "1",
+      "foodValue": "2",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 1,
+      "foodValue": 2,
+      "paintValue": 8
+    },
+    "labels": [
+      "1",
+      "0",
+      "0",
+      "0",
+      "2",
+      "1",
+      "0"
+    ],
+    "minimums": [
+      1,
+      0,
+      0,
+      0,
+      2,
+      1,
+      0
+    ],
+    "maximums": [
+      1,
+      0,
+      0,
+      0,
+      2,
+      1,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 4,
+    "labelsComplete": true
+  },
+  {
+    "file": "Janos Mattis-Teutsch - Composition (1919).png",
+    "id": "janos-mattis-teutsch-composition-1919",
+    "rotation": 270,
+    "orientationScore": 15.082,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "3",
+      "paintValue": "11"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 3,
+      "paintValue": 11
+    },
+    "labels": [
+      "1-2",
+      "0-1",
+      "0-1",
+      "0-1",
+      "1-2",
+      "2-3",
+      "2"
+    ],
+    "minimums": [
+      1,
+      0,
+      0,
+      0,
+      1,
+      2,
+      2
+    ],
+    "maximums": [
+      2,
+      1,
+      1,
+      1,
+      2,
+      3,
+      2
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "red"
+      ],
+      [
+        "purple",
+        "orange"
+      ],
+      [
+        "green",
+        "blue"
+      ]
+    ],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "Jean-Leon Gerome - Carpet Merchant of Cairo (1887).png",
+    "id": "jean-leon-gerome-carpet-merchant-of-cairo-1887",
+    "rotation": 0,
+    "orientationScore": 17.092,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 10
+    },
+    "labels": [
+      "0",
+      "2",
+      "1",
+      "2",
+      "3",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      0,
+      2,
+      1,
+      2,
+      3,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      2,
+      1,
+      2,
+      3,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Joan Miro - Prades, the Village (1917).png",
+    "id": "joan-miro-prades-the-village-1917",
+    "rotation": 270,
+    "orientationScore": 15.068,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "3",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 10
+    },
+    "labels": [
+      "0",
+      "0-2",
+      "6-4",
+      "0-2",
+      "1-5",
+      "0-4",
+      "0"
+    ],
+    "minimums": [
+      0,
+      0,
+      4,
+      0,
+      1,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      2,
+      6,
+      2,
+      5,
+      4,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "purple",
+        "blue"
+      ],
+      [
+        "purple",
+        "blue"
+      ],
+      [
+        "yellow",
+        "purple"
+      ],
+      [
+        "orange",
+        "green"
+      ],
+      [
+        "blue",
+        "yellow"
+      ],
+      [
+        "purple",
+        "orange"
+      ],
+      [
+        "green",
+        "blue"
+      ]
+    ],
+    "targetCount": 12,
+    "labelsComplete": true
+  },
+  {
+    "file": "Johannes Itten - The Meeting (1916).png",
+    "id": "johannes-itten-the-meeting-1916",
+    "rotation": 0,
+    "orientationScore": 14.065,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "3",
+      "paintValue": "12"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 12
+    },
+    "labels": [
+      "1-3",
+      "0-3",
+      "1-4",
+      "1-2",
+      "0-1",
+      "0-2",
+      "0"
+    ],
+    "minimums": [
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0
+    ],
+    "maximums": [
+      3,
+      3,
+      4,
+      2,
+      1,
+      2,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "orange"
+      ],
+      [
+        "yellow",
+        "red"
+      ],
+      [
+        "purple",
+        "orange"
+      ],
+      [
+        "yellow",
+        "red"
+      ],
+      [
+        "purple",
+        "orange"
+      ],
+      [
+        "green",
+        "blue"
+      ]
+    ],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "Johannes Vermeer - The Girl with the Pearl Earring (c. 1665).png",
+    "id": "johannes-vermeer-the-girl-with-the-pearl-earring-c-1665",
+    "rotation": 0,
+    "orientationScore": 13.427,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "6"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 6
+    },
+    "labels": [
+      "0",
+      "2",
+      "0",
+      "0",
+      "3",
+      "0",
+      "2"
+    ],
+    "minimums": [
+      0,
+      2,
+      0,
+      0,
+      3,
+      0,
+      2
+    ],
+    "maximums": [
+      0,
+      2,
+      0,
+      0,
+      3,
+      0,
+      2
+    ],
+    "flexiblePairs": [],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "John Collier - Lady Godiva (1897).png",
+    "id": "john-collier-lady-godiva-1897",
+    "rotation": 270,
+    "orientationScore": 15.064,
+    "rawRewards": {
+      "starValue": "62",
+      "foodValue": "2",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 8
+    },
+    "labels": [
+      "2",
+      "1-2",
+      "2-3",
+      "0",
+      "2",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      2,
+      1,
+      2,
+      0,
+      2,
+      0,
+      0
+    ],
+    "maximums": [
+      2,
+      2,
+      3,
+      0,
+      2,
+      0,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "orange"
+      ]
+    ],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "John Copley - Watson and the Shark (1778).png",
+    "id": "john-copley-watson-and-the-shark-1778",
+    "rotation": 270,
+    "orientationScore": 12.09,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "11"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 11
+    },
+    "labels": [
+      "0",
+      "0",
+      "0-4",
+      "2-4",
+      "0-2",
+      "0",
+      "3"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      2,
+      0,
+      0,
+      3
+    ],
+    "maximums": [
+      0,
+      0,
+      4,
+      4,
+      2,
+      0,
+      3
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "green"
+      ],
+      [
+        "yellow",
+        "blue"
+      ],
+      [
+        "yellow",
+        "green"
+      ],
+      [
+        "yellow",
+        "blue"
+      ]
+    ],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "John J Audubon - Carolina Parrot (1828).png",
+    "id": "john-j-audubon-carolina-parrot-1828",
+    "rotation": 0,
+    "orientationScore": 15.069,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "7"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 7
+    },
+    "labels": [
+      "0",
+      "0",
+      "3",
+      "3",
+      "0",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      0,
+      0,
+      3,
+      3,
+      0,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      0,
+      3,
+      3,
+      0,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "John Marin - Brooklyn Bridge (1912).png",
+    "id": "john-marin-brooklyn-bridge-1912",
+    "rotation": 270,
+    "orientationScore": 15.057,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "3",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 9
+    },
+    "labels": [
+      "2",
+      "0",
+      "1",
+      "0",
+      "0",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      2,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    "maximums": [
+      2,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 3,
+    "labelsComplete": true
+  },
+  {
+    "file": "Jozsef Rippl-Ronai - A Park at Night (c. 1892).png",
+    "id": "jozsef-rippl-ronai-a-park-at-night-c-1892",
+    "rotation": 270,
+    "orientationScore": 16.079,
+    "rawRewards": {
+      "starValue": "53",
+      "foodValue": "2",
+      "paintValue": "14"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 14
+    },
+    "labels": [
+      "0",
+      "0",
+      "1",
+      "2",
+      "0",
+      "0",
+      "5"
+    ],
+    "minimums": [
+      0,
+      0,
+      1,
+      2,
+      0,
+      0,
+      5
+    ],
+    "maximums": [
+      0,
+      0,
+      1,
+      2,
+      0,
+      0,
+      5
+    ],
+    "flexiblePairs": [],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Judith Leyster - Laughing Children with a Cat (1629).png",
+    "id": "judith-leyster-laughing-children-with-a-cat-1629",
+    "rotation": 0,
+    "orientationScore": 16.082,
+    "rawRewards": {
+      "starValue": "1",
+      "foodValue": "2",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 1,
+      "foodValue": 2,
+      "paintValue": 8
+    },
+    "labels": [
+      "2",
+      "2",
+      "0",
+      "0",
+      "0",
+      "0",
+      "1"
+    ],
+    "minimums": [
+      2,
+      2,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "maximums": [
+      2,
+      2,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "flexiblePairs": [],
+    "targetCount": 5,
+    "labelsComplete": true
+  },
+  {
+    "file": "Katsushika Hokusai - The Great Wave off Kanagawa (c. 1830).png",
+    "id": "katsushika-hokusai-the-great-wave-off-kanagawa-c-1830",
+    "rotation": 270,
+    "orientationScore": 17.1,
+    "rawRewards": {
+      "starValue": "1",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 1,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "0",
+      "2",
+      "0",
+      "0",
+      "3",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      0,
+      2,
+      0,
+      0,
+      3,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      2,
+      0,
+      0,
+      3,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 5,
+    "labelsComplete": true
+  },
+  {
+    "file": "Katsushika Oi - Display Room in Yoshiwara at Night (1840).png",
+    "id": "katsushika-oi-display-room-in-yoshiwara-at-night-1840",
+    "rotation": 270,
+    "orientationScore": 16.097,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 8
+    },
+    "labels": [
+      "0",
+      "1",
+      "0",
+      "1",
+      "1",
+      "0",
+      "3"
+    ],
+    "minimums": [
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      3
+    ],
+    "maximums": [
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      3
+    ],
+    "flexiblePairs": [],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Kazimir Malevich - Morning in the Village after Snowstorm (1913).png",
+    "id": "kazimir-malevich-morning-in-the-village-after-snowstorm-1913",
+    "rotation": 270,
+    "orientationScore": 17.096,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "2",
+      "2",
+      "1",
+      "0",
+      "1",
+      "0",
+      "2"
+    ],
+    "minimums": [
+      2,
+      2,
+      1,
+      0,
+      1,
+      0,
+      2
+    ],
+    "maximums": [
+      2,
+      2,
+      1,
+      0,
+      1,
+      0,
+      2
+    ],
+    "flexiblePairs": [],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Korea - Ten Symbols of Longevity (1800s).png",
+    "id": "korea-ten-symbols-of-longevity-1800s",
+    "rotation": 270,
+    "orientationScore": 12.115,
+    "rawRewards": {
+      "starValue": "7",
+      "foodValue": "2",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 8
+    },
+    "labels": [
+      "0",
+      "0",
+      "0-5",
+      "0-2",
+      "0-5",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      0,
+      5,
+      2,
+      5,
+      0,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "blue"
+      ],
+      [
+        "yellow",
+        "blue"
+      ],
+      [
+        "yellow",
+        "blue"
+      ],
+      [
+        "yellow",
+        "green"
+      ],
+      [
+        "blue",
+        "yellow"
+      ],
+      [
+        "green",
+        "blue"
+      ]
+    ],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Lan Ying - White Clouds and Red Trees.png",
+    "id": "lan-ying-white-clouds-and-red-trees",
+    "rotation": 0,
+    "orientationScore": 13.446,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 10
+    },
+    "labels": [
+      "0",
+      "3-4",
+      "0-1",
+      "3-4",
+      "2-3",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      0,
+      3,
+      0,
+      3,
+      2,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      4,
+      1,
+      4,
+      3,
+      0,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "orange"
+      ],
+      [
+        "green",
+        "blue"
+      ]
+    ],
+    "targetCount": 10,
+    "labelsComplete": true
+  },
+  {
+    "file": "Leonardo da Vinci - The Lady with an Ermine (1489).png",
+    "id": "leonardo-da-vinci-the-lady-with-an-ermine-1489",
+    "rotation": 0,
+    "orientationScore": 15.078,
+    "rawRewards": {
+      "starValue": "1",
+      "foodValue": "2",
+      "paintValue": "7"
+    },
+    "rewards": {
+      "starValue": 1,
+      "foodValue": 2,
+      "paintValue": 7
+    },
+    "labels": [
+      "1",
+      "0",
+      "0",
+      "0",
+      "2",
+      "0",
+      "3"
+    ],
+    "minimums": [
+      1,
+      0,
+      0,
+      0,
+      2,
+      0,
+      3
+    ],
+    "maximums": [
+      1,
+      0,
+      0,
+      0,
+      2,
+      0,
+      3
+    ],
+    "flexiblePairs": [],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Liberty Kifer - Crystallo_s Faerie.png",
+    "id": "liberty-kifer-crystallo-s-faerie",
+    "rotation": 0,
+    "orientationScore": 14.064,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "3",
+      "paintValue": "6"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 6
+    },
+    "labels": [
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "4",
+      "3"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      4,
+      3
+    ],
+    "maximums": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      4,
+      3
+    ],
+    "flexiblePairs": [],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "Liberty Kifer - Crystallo_s Fire Fox.png",
+    "id": "liberty-kifer-crystallo-s-fire-fox",
+    "rotation": 0,
+    "orientationScore": 15.074,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "12"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 12
+    },
+    "labels": [
+      "0",
+      "4-7",
+      "6-2",
+      "0",
+      "0",
+      "0",
+      "2-3"
+    ],
+    "minimums": [
+      0,
+      4,
+      2,
+      0,
+      0,
+      0,
+      2
+    ],
+    "maximums": [
+      0,
+      7,
+      6,
+      0,
+      0,
+      0,
+      3
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "orange"
+      ],
+      [
+        "yellow",
+        "orange"
+      ],
+      [
+        "yellow",
+        "orange"
+      ],
+      [
+        "yellow",
+        "black"
+      ]
+    ],
+    "targetCount": 12,
+    "labelsComplete": true
+  },
+  {
+    "file": "Liberty Kifer - Crystallo_s Ice Wolf.png",
+    "id": "liberty-kifer-crystallo-s-ice-wolf",
+    "rotation": 0,
+    "orientationScore": 15.072,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "3",
+      "paintValue": "5"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 3,
+      "paintValue": 5
+    },
+    "labels": [
+      "0",
+      "0",
+      "0",
+      "0",
+      "5",
+      "0",
+      "3"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      0,
+      5,
+      0,
+      3
+    ],
+    "maximums": [
+      0,
+      0,
+      0,
+      0,
+      5,
+      0,
+      3
+    ],
+    "flexiblePairs": [],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Liberty Kifer - Crystallo_s Phoenix.png",
+    "id": "liberty-kifer-crystallo-s-phoenix",
+    "rotation": 0,
+    "orientationScore": 14.061,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 8
+    },
+    "labels": [
+      "0",
+      "4",
+      "0",
+      "0",
+      "0",
+      "0",
+      "3"
+    ],
+    "minimums": [
+      0,
+      4,
+      0,
+      0,
+      0,
+      0,
+      3
+    ],
+    "maximums": [
+      0,
+      4,
+      0,
+      0,
+      0,
+      0,
+      3
+    ],
+    "flexiblePairs": [],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "Liberty Kifer - Crystallo_s Seahorse.png",
+    "id": "liberty-kifer-crystallo-s-seahorse",
+    "rotation": 0,
+    "orientationScore": 14.067,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "3",
+      "paintValue": "6"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 3,
+      "paintValue": 6
+    },
+    "labels": [
+      "0",
+      "0",
+      "0",
+      "0",
+      "3",
+      "2",
+      "3"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      0,
+      3,
+      2,
+      3
+    ],
+    "maximums": [
+      0,
+      0,
+      0,
+      0,
+      3,
+      2,
+      3
+    ],
+    "flexiblePairs": [],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Liberty Kifer - Crystallo_s Unicorn.png",
+    "id": "liberty-kifer-crystallo-s-unicorn",
+    "rotation": 0,
+    "orientationScore": 14.068,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "0",
+      "0",
+      "6",
+      "0",
+      "0",
+      "0",
+      "3"
+    ],
+    "minimums": [
+      0,
+      0,
+      6,
+      0,
+      0,
+      0,
+      3
+    ],
+    "maximums": [
+      0,
+      0,
+      6,
+      0,
+      0,
+      0,
+      3
+    ],
+    "flexiblePairs": [],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "M.C. Escher - The Sea at the Mouth of the Ebro (1922).png",
+    "id": "m-c-escher-the-sea-at-the-mouth-of-the-ebro-1922",
+    "rotation": 270,
+    "orientationScore": 15.084,
+    "rawRewards": {
+      "starValue": "1",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 1,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "0",
+      "0",
+      "0",
+      "0",
+      "1",
+      "3",
+      "0"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      0,
+      1,
+      3,
+      0
+    ],
+    "maximums": [
+      0,
+      0,
+      0,
+      0,
+      1,
+      3,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 4,
+    "labelsComplete": true
+  },
+  {
+    "file": "Marc Chagall - Over the Town (1918).png",
+    "id": "marc-chagall-over-the-town-1918",
+    "rotation": 270,
+    "orientationScore": 12.075,
+    "rawRewards": {
+      "starValue": "",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "1",
+      "0",
+      "0",
+      "1",
+      "1-2",
+      "0",
+      "2-3"
+    ],
+    "minimums": [
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      2
+    ],
+    "maximums": [
+      1,
+      0,
+      0,
+      1,
+      2,
+      0,
+      3
+    ],
+    "flexiblePairs": [
+      [
+        "blue",
+        "black"
+      ]
+    ],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Marianne North - The South African Doornboom And Fingo Huts (1882).png",
+    "id": "marianne-north-the-south-african-doornboom-and-fingo-huts-1882",
+    "rotation": 270,
+    "orientationScore": 18.102,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 8
+    },
+    "labels": [
+      "1",
+      "0",
+      "0",
+      "2",
+      "0",
+      "2",
+      "0"
+    ],
+    "minimums": [
+      1,
+      0,
+      0,
+      2,
+      0,
+      2,
+      0
+    ],
+    "maximums": [
+      1,
+      0,
+      0,
+      2,
+      0,
+      2,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 5,
+    "labelsComplete": true
+  },
+  {
+    "file": "Marianne North - View of Kuching and River, Sarawak, Borneo (1876).png",
+    "id": "marianne-north-view-of-kuching-and-river-sarawak-borneo-1876",
+    "rotation": 270,
+    "orientationScore": 18.117,
+    "rawRewards": {
+      "starValue": "7",
+      "foodValue": "",
+      "paintValue": "4"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 4
+    },
+    "labels": [
+      "0",
+      "0",
+      "1",
+      "1",
+      "1",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 3,
+    "labelsComplete": true
+  },
+  {
+    "file": "Martin Johnson Heade - Cattleya Orchid And Three Hummingbirds (1871).png",
+    "id": "martin-johnson-heade-cattleya-orchid-and-three-hummingbirds-1871",
+    "rotation": 270,
+    "orientationScore": 18.108,
+    "rawRewards": {
+      "starValue": "1",
+      "foodValue": "3",
+      "paintValue": "13"
+    },
+    "rewards": {
+      "starValue": 1,
+      "foodValue": 3,
+      "paintValue": 13
+    },
+    "labels": [
+      "2",
+      "1",
+      "0-5",
+      "2",
+      "0",
+      "3",
+      "2"
+    ],
+    "minimums": [
+      2,
+      1,
+      0,
+      2,
+      0,
+      3,
+      2
+    ],
+    "maximums": [
+      2,
+      1,
+      5,
+      2,
+      0,
+      3,
+      2
+    ],
+    "flexiblePairs": [],
+    "targetCount": 10,
+    "labelsComplete": true
+  },
+  {
+    "file": "Martiros Saryan - Mules Laden with Hay (1910).png",
+    "id": "martiros-saryan-mules-laden-with-hay-1910",
+    "rotation": 270,
+    "orientationScore": 16.072,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "3",
+      "paintValue": "11"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 11
+    },
+    "labels": [
+      "0",
+      "0-1",
+      "2-5",
+      "0-2",
+      "2",
+      "1",
+      "1"
+    ],
+    "minimums": [
+      0,
+      0,
+      2,
+      0,
+      2,
+      1,
+      1
+    ],
+    "maximums": [
+      0,
+      1,
+      5,
+      2,
+      2,
+      1,
+      1
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "green"
+      ],
+      [
+        "yellow",
+        "orange"
+      ],
+      [
+        "yellow",
+        "green"
+      ]
+    ],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "Mary Cassatt - Children Playing at the Beach (1884).png",
+    "id": "mary-cassatt-children-playing-at-the-beach-1884",
+    "rotation": 0,
+    "orientationScore": 13.412,
+    "rawRewards": {
+      "starValue": "0",
+      "foodValue": "2",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 8
+    },
+    "labels": [
+      "1",
+      "0",
+      "3",
+      "0",
+      "2",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      1,
+      0,
+      3,
+      0,
+      2,
+      0,
+      0
+    ],
+    "maximums": [
+      1,
+      0,
+      3,
+      0,
+      2,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Mary Cassatt - Poppies in a Field (1874 - 1878).png",
+    "id": "mary-cassatt-poppies-in-a-field-1874-1878",
+    "rotation": 270,
+    "orientationScore": 13.454,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 10
+    },
+    "labels": [
+      "2",
+      "0",
+      "0",
+      "1",
+      "1",
+      "2",
+      "1"
+    ],
+    "minimums": [
+      2,
+      0,
+      0,
+      1,
+      1,
+      2,
+      1
+    ],
+    "maximums": [
+      2,
+      0,
+      0,
+      1,
+      1,
+      2,
+      1
+    ],
+    "flexiblePairs": [],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "Mary Cassatt - Woman with a Pearl Necklace (1879).png",
+    "id": "mary-cassatt-woman-with-a-pearl-necklace-1879",
+    "rotation": 0,
+    "orientationScore": 13.43,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 10
+    },
+    "labels": [
+      "2-4",
+      "2-4",
+      "0",
+      "0",
+      "0",
+      "2",
+      "0"
+    ],
+    "minimums": [
+      2,
+      2,
+      0,
+      0,
+      0,
+      2,
+      0
+    ],
+    "maximums": [
+      4,
+      4,
+      0,
+      0,
+      0,
+      2,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "red",
+        "orange"
+      ],
+      [
+        "red",
+        "orange"
+      ]
+    ],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Max Ernst - The Hat Makes the Man (1920).png",
+    "id": "max-ernst-the-hat-makes-the-man-1920",
+    "rotation": 270,
+    "orientationScore": 16.097,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "2",
+      "1",
+      "0",
+      "2",
+      "2",
+      "0",
+      "3"
+    ],
+    "minimums": [
+      2,
+      1,
+      0,
+      2,
+      2,
+      0,
+      3
+    ],
+    "maximums": [
+      2,
+      1,
+      0,
+      2,
+      2,
+      0,
+      3
+    ],
+    "flexiblePairs": [],
+    "targetCount": 10,
+    "labelsComplete": true
+  },
+  {
+    "file": "Michelangelo - The Creation of Adam (1512).png",
+    "id": "michelangelo-the-creation-of-adam-1512",
+    "rotation": 270,
+    "orientationScore": 10.604,
+    "rawRewards": {
+      "starValue": "0",
+      "foodValue": "2",
+      "paintValue": "7"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 7
+    },
+    "labels": [
+      "2",
+      "1",
+      "0",
+      "2",
+      "0",
+      "2",
+      "0"
+    ],
+    "minimums": [
+      2,
+      1,
+      0,
+      2,
+      0,
+      2,
+      0
+    ],
+    "maximums": [
+      2,
+      1,
+      0,
+      2,
+      0,
+      2,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "Michelangelo Caravaggio - Cardsharps (1594).png",
+    "id": "michelangelo-caravaggio-cardsharps-1594",
+    "rotation": 270,
+    "orientationScore": 14.083,
+    "rawRewards": {
+      "starValue": "1",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 1,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "0",
+      "1",
+      "0",
+      "0",
+      "2",
+      "0",
+      "2"
+    ],
+    "minimums": [
+      0,
+      1,
+      0,
+      0,
+      2,
+      0,
+      2
+    ],
+    "maximums": [
+      0,
+      1,
+      0,
+      0,
+      2,
+      0,
+      2
+    ],
+    "flexiblePairs": [],
+    "targetCount": 5,
+    "labelsComplete": true
+  },
+  {
+    "file": "Michelle Richeson - North Bay Carousel.png",
+    "id": "michelle-richeson-north-bay-carousel",
+    "rotation": 0,
+    "orientationScore": 15.099,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "0",
+      "paintValue": "12"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 0,
+      "paintValue": 12
+    },
+    "labels": [
+      "1-3",
+      "1-4",
+      "2-3",
+      "0",
+      "2",
+      "0",
+      "2-3"
+    ],
+    "minimums": [
+      1,
+      1,
+      2,
+      0,
+      2,
+      0,
+      2
+    ],
+    "maximums": [
+      3,
+      4,
+      3,
+      0,
+      2,
+      0,
+      3
+    ],
+    "flexiblePairs": [
+      [
+        "orange",
+        "red"
+      ],
+      [
+        "orange",
+        "yellow"
+      ],
+      [
+        "red",
+        "orange"
+      ]
+    ],
+    "targetCount": 11,
+    "labelsComplete": true
+  },
+  {
+    "file": "Morton Shamberg - Telephone (1916).png",
+    "id": "morton-shamberg-telephone-1916",
+    "rotation": 0,
+    "orientationScore": 7.073,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 10
+    },
+    "labels": [
+      "0",
+      "0",
+      "0",
+      "0",
+      "2",
+      "0",
+      "4"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      0,
+      2,
+      0,
+      4
+    ],
+    "maximums": [
+      0,
+      0,
+      0,
+      0,
+      2,
+      0,
+      4
+    ],
+    "flexiblePairs": [],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Norman Rockwell - And the Symbol of Welcome is Light (1920).png",
+    "id": "norman-rockwell-and-the-symbol-of-welcome-is-light-1920",
+    "rotation": 0,
+    "orientationScore": 16.108,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "0",
+      "paintValue": "12"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 0,
+      "paintValue": 12
+    },
+    "labels": [
+      "0",
+      "3",
+      "1",
+      "1",
+      "2",
+      "0",
+      "3"
+    ],
+    "minimums": [
+      0,
+      3,
+      1,
+      1,
+      2,
+      0,
+      3
+    ],
+    "maximums": [
+      0,
+      3,
+      1,
+      1,
+      2,
+      0,
+      3
+    ],
+    "flexiblePairs": [],
+    "targetCount": 10,
+    "labelsComplete": true
+  },
+  {
+    "file": "Olga Rozanova - Flight of an Aeroplane (1916).png",
+    "id": "olga-rozanova-flight-of-an-aeroplane-1916",
+    "rotation": 0,
+    "orientationScore": 9.061,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "0",
+      "1",
+      "0",
+      "1",
+      "4",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      0,
+      1,
+      0,
+      1,
+      4,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      1,
+      0,
+      1,
+      4,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Osman Hamdi - The Tortoise Trainer (1906).png",
+    "id": "osman-hamdi-the-tortoise-trainer-1906",
+    "rotation": 0,
+    "orientationScore": 15.068,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "6"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 6
+    },
+    "labels": [
+      "2",
+      "0",
+      "0",
+      "1",
+      "3",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      2,
+      0,
+      0,
+      1,
+      3,
+      0,
+      0
+    ],
+    "maximums": [
+      2,
+      0,
+      0,
+      1,
+      3,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Osman Hamdi Bey - The Chess Game (1896).png",
+    "id": "osman-hamdi-bey-the-chess-game-1896",
+    "rotation": 0,
+    "orientationScore": 13.464,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "11"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 11
+    },
+    "labels": [
+      "0-2",
+      "1-3",
+      "0",
+      "0",
+      "4",
+      "0",
+      "2"
+    ],
+    "minimums": [
+      0,
+      1,
+      0,
+      0,
+      4,
+      0,
+      2
+    ],
+    "maximums": [
+      2,
+      3,
+      0,
+      0,
+      4,
+      0,
+      2
+    ],
+    "flexiblePairs": [
+      [
+        "red",
+        "orange"
+      ],
+      [
+        "red",
+        "orange"
+      ]
+    ],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "Pablo Picasso - Bathers (1918).png",
+    "id": "pablo-picasso-bathers-1918",
+    "rotation": 0,
+    "orientationScore": 14.089,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "3",
+      "paintValue": "14"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 3,
+      "paintValue": 14
+    },
+    "labels": [
+      "2",
+      "0",
+      "0",
+      "2",
+      "3",
+      "3",
+      "2"
+    ],
+    "minimums": [
+      2,
+      0,
+      0,
+      2,
+      3,
+      3,
+      2
+    ],
+    "maximums": [
+      2,
+      0,
+      0,
+      2,
+      3,
+      3,
+      2
+    ],
+    "flexiblePairs": [],
+    "targetCount": 12,
+    "labelsComplete": true
+  },
+  {
+    "file": "Paolo Uccello - San Giorgio e il Drago (c. 1470).png",
+    "id": "paolo-uccello-san-giorgio-e-il-drago-c-1470",
+    "rotation": 270,
+    "orientationScore": 16.103,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "3",
+      "paintValue": "13"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 3,
+      "paintValue": 13
+    },
+    "labels": [
+      "3",
+      "0",
+      "0",
+      "2",
+      "2",
+      "0",
+      "3"
+    ],
+    "minimums": [
+      3,
+      0,
+      0,
+      2,
+      2,
+      0,
+      3
+    ],
+    "maximums": [
+      3,
+      0,
+      0,
+      2,
+      2,
+      0,
+      3
+    ],
+    "flexiblePairs": [],
+    "targetCount": 10,
+    "labelsComplete": true
+  },
+  {
+    "file": "Paolo Veronese - The Wedding Feast at Cana.png",
+    "id": "paolo-veronese-the-wedding-feast-at-cana",
+    "rotation": 270,
+    "orientationScore": 15.109,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "3",
+      "paintValue": "11"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 11
+    },
+    "labels": [
+      "2",
+      "3",
+      "3",
+      "2",
+      "0",
+      "1",
+      "0"
+    ],
+    "minimums": [
+      2,
+      3,
+      3,
+      2,
+      0,
+      1,
+      0
+    ],
+    "maximums": [
+      2,
+      3,
+      3,
+      2,
+      0,
+      1,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 11,
+    "labelsComplete": true
+  },
+  {
+    "file": "Paul Cezanne - Curtain, Jug and Fruit (1894).png",
+    "id": "paul-cezanne-curtain-jug-and-fruit-1894",
+    "rotation": 270,
+    "orientationScore": 16.087,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 8
+    },
+    "labels": [
+      "1-2",
+      "2-3",
+      "0",
+      "0",
+      "0",
+      "0",
+      "2"
+    ],
+    "minimums": [
+      1,
+      2,
+      0,
+      0,
+      0,
+      0,
+      2
+    ],
+    "maximums": [
+      2,
+      3,
+      0,
+      0,
+      0,
+      0,
+      2
+    ],
+    "flexiblePairs": [
+      [
+        "red",
+        "orange"
+      ]
+    ],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Paul Cezanne - The Gulf of Marseille Seen from L_Estaque (1885).png",
+    "id": "paul-cezanne-the-gulf-of-marseille-seen-from-l-estaque-1885",
+    "rotation": 270,
+    "orientationScore": 17.108,
+    "rawRewards": {
+      "starValue": "22",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "0",
+      "1",
+      "0",
+      "1",
+      "3",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      0,
+      1,
+      0,
+      1,
+      3,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      1,
+      0,
+      1,
+      3,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 5,
+    "labelsComplete": true
+  },
+  {
+    "file": "Paul Gauguin - The Siesta (c. 1894).png",
+    "id": "paul-gauguin-the-siesta-c-1894",
+    "rotation": 270,
+    "orientationScore": 14.074,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "3"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 3
+    },
+    "labels": [
+      "0",
+      "2",
+      "1",
+      "0",
+      "0",
+      "1",
+      "1"
+    ],
+    "minimums": [
+      0,
+      2,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "maximums": [
+      0,
+      2,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "flexiblePairs": [],
+    "targetCount": 5,
+    "labelsComplete": true
+  },
+  {
+    "file": "Paul Gauguin - Viaraumati Tei Oa (1892).png",
+    "id": "paul-gauguin-viaraumati-tei-oa-1892",
+    "rotation": 0,
+    "orientationScore": 12.077,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "7"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 7
+    },
+    "labels": [
+      "0",
+      "2",
+      "0",
+      "3",
+      "2",
+      "2",
+      "0"
+    ],
+    "minimums": [
+      0,
+      2,
+      0,
+      3,
+      2,
+      2,
+      0
+    ],
+    "maximums": [
+      0,
+      2,
+      0,
+      3,
+      2,
+      2,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "Paul Peel - Getting Ready for the Hunt (1886).png",
+    "id": "paul-peel-getting-ready-for-the-hunt-1886",
+    "rotation": 0,
+    "orientationScore": 17.072,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "7"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 7
+    },
+    "labels": [
+      "0",
+      "0",
+      "0",
+      "4",
+      "5",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      4,
+      5,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      0,
+      0,
+      4,
+      5,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "Paul Signac - Portrait of Felix Feneon (1890).png",
+    "id": "paul-signac-portrait-of-felix-feneon-1890",
+    "rotation": 270,
+    "orientationScore": 13.408,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "3",
+      "paintValue": "12"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 12
+    },
+    "labels": [
+      "0-2",
+      "1",
+      "0-2",
+      "0-2",
+      "0",
+      "1-3",
+      "2"
+    ],
+    "minimums": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      2
+    ],
+    "maximums": [
+      2,
+      1,
+      2,
+      2,
+      0,
+      3,
+      2
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "red"
+      ],
+      [
+        "purple",
+        "green"
+      ],
+      [
+        "yellow",
+        "red"
+      ],
+      [
+        "purple",
+        "green"
+      ]
+    ],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Peter Paul Rubens - The Massacre of the Innocents (1611).png",
+    "id": "peter-paul-rubens-the-massacre-of-the-innocents-1611",
+    "rotation": 270,
+    "orientationScore": 13.439,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "7"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 7
+    },
+    "labels": [
+      "2",
+      "0",
+      "0",
+      "1",
+      "2",
+      "0",
+      "2"
+    ],
+    "minimums": [
+      2,
+      0,
+      0,
+      1,
+      2,
+      0,
+      2
+    ],
+    "maximums": [
+      2,
+      0,
+      0,
+      1,
+      2,
+      0,
+      2
+    ],
+    "flexiblePairs": [],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "Pierre-Auguste Renoir - Dance at Le Moulin (1876).png",
+    "id": "pierre-auguste-renoir-dance-at-le-moulin-1876",
+    "rotation": 270,
+    "orientationScore": 13.437,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "11"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 11
+    },
+    "labels": [
+      "0",
+      "2",
+      "1",
+      "0",
+      "2",
+      "0",
+      "2"
+    ],
+    "minimums": [
+      0,
+      2,
+      1,
+      0,
+      2,
+      0,
+      2
+    ],
+    "maximums": [
+      0,
+      2,
+      1,
+      0,
+      2,
+      0,
+      2
+    ],
+    "flexiblePairs": [],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "Pierre-Auguste Renoir - Twin Sisters on the Terrace (1881).png",
+    "id": "pierre-auguste-renoir-twin-sisters-on-the-terrace-1881",
+    "rotation": 0,
+    "orientationScore": 14.687,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "5"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 5
+    },
+    "labels": [
+      "1",
+      "1",
+      "0",
+      "1",
+      "2",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      1,
+      1,
+      0,
+      1,
+      2,
+      0,
+      0
+    ],
+    "maximums": [
+      1,
+      1,
+      0,
+      1,
+      2,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 5,
+    "labelsComplete": true
+  },
+  {
+    "file": "Piet Mondrian - Composition with Red Plane, Yellow, Black, Gray and Blue (1913).png",
+    "id": "piet-mondrian-composition-with-red-plane-yellow-black-gray-and-blue-1913",
+    "rotation": 270,
+    "orientationScore": 20.111,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "12"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 12
+    },
+    "labels": [
+      "3",
+      "0",
+      "2",
+      "0",
+      "2",
+      "0",
+      "2"
+    ],
+    "minimums": [
+      3,
+      0,
+      2,
+      0,
+      2,
+      0,
+      2
+    ],
+    "maximums": [
+      3,
+      0,
+      2,
+      0,
+      2,
+      0,
+      2
+    ],
+    "flexiblePairs": [],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "Raja Ravi Varma - Princess Damayanthi talking with Royal Swan about Nala (1899).png",
+    "id": "raja-ravi-varma-princess-damayanthi-talking-with-royal-swan-about-nala-1899",
+    "rotation": 0,
+    "orientationScore": 17.277,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "4",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 4,
+      "paintValue": 9
+    },
+    "labels": [
+      "1",
+      "2",
+      "0",
+      "2",
+      "0",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      1,
+      2,
+      0,
+      2,
+      0,
+      0,
+      0
+    ],
+    "maximums": [
+      1,
+      2,
+      0,
+      2,
+      0,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 5,
+    "labelsComplete": true
+  },
+  {
+    "file": "Raphael - Sistine Madonna.png",
+    "id": "raphael-sistine-madonna",
+    "rotation": 0,
+    "orientationScore": 8.713,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "2",
+      "2",
+      "0",
+      "2",
+      "2",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      2,
+      2,
+      0,
+      2,
+      2,
+      0,
+      0
+    ],
+    "maximums": [
+      2,
+      2,
+      0,
+      2,
+      2,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Raphael - the school of athens (1509).png",
+    "id": "raphael-the-school-of-athens-1509",
+    "rotation": 270,
+    "orientationScore": 14.138,
+    "rawRewards": {
+      "starValue": "",
+      "foodValue": "2",
+      "paintValue": "6"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 6
+    },
+    "labels": [
+      "0",
+      "3",
+      "0",
+      "1",
+      "1",
+      "1",
+      "0"
+    ],
+    "minimums": [
+      0,
+      3,
+      0,
+      1,
+      1,
+      1,
+      0
+    ],
+    "maximums": [
+      0,
+      3,
+      0,
+      1,
+      1,
+      1,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Rembrandt van Rijn - The Storm on the Sea of Galilee (1633).png",
+    "id": "rembrandt-van-rijn-the-storm-on-the-sea-of-galilee-1633",
+    "rotation": 0,
+    "orientationScore": 12.218,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "0",
+      "0",
+      "1",
+      "0",
+      "3",
+      "0",
+      "3"
+    ],
+    "minimums": [
+      0,
+      0,
+      1,
+      0,
+      3,
+      0,
+      3
+    ],
+    "maximums": [
+      0,
+      0,
+      1,
+      0,
+      3,
+      0,
+      3
+    ],
+    "flexiblePairs": [],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "Renoir - Luncheon of the Boating Party (1880-1881).png",
+    "id": "renoir-luncheon-of-the-boating-party-1880-1881",
+    "rotation": 270,
+    "orientationScore": 16.124,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "7"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 7
+    },
+    "labels": [
+      "1-2",
+      "0",
+      "3",
+      "2",
+      "0",
+      "0-1",
+      "0"
+    ],
+    "minimums": [
+      1,
+      0,
+      3,
+      2,
+      0,
+      0,
+      0
+    ],
+    "maximums": [
+      2,
+      0,
+      3,
+      2,
+      0,
+      1,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "red",
+        "purple"
+      ]
+    ],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "Robert Henri - The Rum (1910).png",
+    "id": "robert-henri-the-rum-1910",
+    "rotation": 0,
+    "orientationScore": 14.051,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "4",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 4,
+      "paintValue": 8
+    },
+    "labels": [
+      "0",
+      "0",
+      "0",
+      "0",
+      "2-4",
+      "0",
+      "1-3"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      0,
+      2,
+      0,
+      1
+    ],
+    "maximums": [
+      0,
+      0,
+      0,
+      0,
+      4,
+      0,
+      3
+    ],
+    "flexiblePairs": [
+      [
+        "blue",
+        "black"
+      ],
+      [
+        "blue",
+        "black"
+      ]
+    ],
+    "targetCount": 5,
+    "labelsComplete": true
+  },
+  {
+    "file": "Salvador Dali - Port of Cadaques (Night) (1918).png",
+    "id": "salvador-dali-port-of-cadaques-night-1918",
+    "rotation": 270,
+    "orientationScore": 16.104,
+    "rawRewards": {
+      "starValue": "53",
+      "foodValue": "3",
+      "paintValue": "13"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 13
+    },
+    "labels": [
+      "2",
+      "0",
+      "0-1",
+      "1",
+      "3",
+      "1",
+      "2"
+    ],
+    "minimums": [
+      2,
+      0,
+      0,
+      1,
+      3,
+      1,
+      2
+    ],
+    "maximums": [
+      2,
+      0,
+      1,
+      1,
+      3,
+      1,
+      2
+    ],
+    "flexiblePairs": [],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "Salvator Rosa - The Temptation of St. Anthony (1645).png",
+    "id": "salvator-rosa-the-temptation-of-st-anthony-1645",
+    "rotation": 0,
+    "orientationScore": 12.094,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 10
+    },
+    "labels": [
+      "0",
+      "0-2",
+      "2",
+      "0",
+      "0",
+      "0",
+      "4-6"
+    ],
+    "minimums": [
+      0,
+      0,
+      2,
+      0,
+      0,
+      0,
+      4
+    ],
+    "maximums": [
+      0,
+      2,
+      2,
+      0,
+      0,
+      0,
+      6
+    ],
+    "flexiblePairs": [
+      [
+        "orange",
+        "black"
+      ],
+      [
+        "orange",
+        "black"
+      ]
+    ],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Sandro Botticelli - The Birth of Venus (c. 1480).png",
+    "id": "sandro-botticelli-the-birth-of-venus-c-1480",
+    "rotation": 270,
+    "orientationScore": 15.089,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "3",
+      "paintValue": "11"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 11
+    },
+    "labels": [
+      "2",
+      "3",
+      "0",
+      "2",
+      "2",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      2,
+      3,
+      0,
+      2,
+      2,
+      0,
+      0
+    ],
+    "maximums": [
+      2,
+      3,
+      0,
+      2,
+      2,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "Schomberg - Exciting Comics #53 (1947).png",
+    "id": "schomberg-exciting-comics-53-1947",
+    "rotation": 0,
+    "orientationScore": 10.648,
+    "rawRewards": {
+      "starValue": "0",
+      "foodValue": "2",
+      "paintValue": "11"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 11
+    },
+    "labels": [
+      "1",
+      "2",
+      "0",
+      "1",
+      "1",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      1,
+      2,
+      0,
+      1,
+      1,
+      0,
+      0
+    ],
+    "maximums": [
+      1,
+      2,
+      0,
+      1,
+      1,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 5,
+    "labelsComplete": true
+  },
+  {
+    "file": "Sonia Delaunay - Flamenco Dancer (1916).png",
+    "id": "sonia-delaunay-flamenco-dancer-1916",
+    "rotation": 0,
+    "orientationScore": 15.08,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "14"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 14
+    },
+    "labels": [
+      "0",
+      "2",
+      "1",
+      "0",
+      "2-4",
+      "2-4",
+      "0"
+    ],
+    "minimums": [
+      0,
+      2,
+      1,
+      0,
+      2,
+      2,
+      0
+    ],
+    "maximums": [
+      0,
+      2,
+      1,
+      0,
+      4,
+      4,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "purple",
+        "blue"
+      ],
+      [
+        "purple",
+        "blue"
+      ]
+    ],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "Steve Ditko - Mysterious Suspense #1 (1968).png",
+    "id": "steve-ditko-mysterious-suspense-1-1968",
+    "rotation": 0,
+    "orientationScore": 15.085,
+    "rawRewards": {
+      "starValue": "0",
+      "foodValue": "3",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 9
+    },
+    "labels": [
+      "0",
+      "2",
+      "3",
+      "0",
+      "1",
+      "0",
+      "1"
+    ],
+    "minimums": [
+      0,
+      2,
+      3,
+      0,
+      1,
+      0,
+      1
+    ],
+    "maximums": [
+      0,
+      2,
+      3,
+      0,
+      1,
+      0,
+      1
+    ],
+    "flexiblePairs": [],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "Theodore Robinson - La Dbcle(1892).png",
+    "id": "theodore-robinson-la-dbcle-1892",
+    "rotation": 270,
+    "orientationScore": 10.584,
+    "rawRewards": {
+      "starValue": "53",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "0",
+      "0",
+      "0",
+      "2",
+      "2",
+      "2",
+      "0"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      2,
+      2,
+      2,
+      0
+    ],
+    "maximums": [
+      0,
+      0,
+      0,
+      2,
+      2,
+      2,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Thomas Cole - The Mountain Ford (1846).png",
+    "id": "thomas-cole-the-mountain-ford-1846",
+    "rotation": 270,
+    "orientationScore": 15.072,
+    "rawRewards": {
+      "starValue": "1",
+      "foodValue": "",
+      "paintValue": "4"
+    },
+    "rewards": {
+      "starValue": 1,
+      "foodValue": 2,
+      "paintValue": 4
+    },
+    "labels": [
+      "0",
+      "0",
+      "0",
+      "0",
+      "2",
+      "1",
+      "1"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      0,
+      2,
+      1,
+      1
+    ],
+    "maximums": [
+      0,
+      0,
+      0,
+      0,
+      2,
+      1,
+      1
+    ],
+    "flexiblePairs": [],
+    "targetCount": 4,
+    "labelsComplete": true
+  },
+  {
+    "file": "Titian - BAcchus and Ariadne (1522).png",
+    "id": "titian-bacchus-and-ariadne-1522",
+    "rotation": 270,
+    "orientationScore": 14.074,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "3",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 10
+    },
+    "labels": [
+      "2",
+      "1",
+      "0",
+      "2",
+      "0",
+      "2",
+      "0"
+    ],
+    "minimums": [
+      2,
+      1,
+      0,
+      2,
+      0,
+      2,
+      0
+    ],
+    "maximums": [
+      2,
+      1,
+      0,
+      2,
+      0,
+      2,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "Uemura Shoen - Preparing for Dance (1914).png",
+    "id": "uemura-shoen-preparing-for-dance-1914",
+    "rotation": 270,
+    "orientationScore": 16.076,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 10
+    },
+    "labels": [
+      "0",
+      "2",
+      "0",
+      "0",
+      "0",
+      "3",
+      "2"
+    ],
+    "minimums": [
+      0,
+      2,
+      0,
+      0,
+      0,
+      3,
+      2
+    ],
+    "maximums": [
+      0,
+      2,
+      0,
+      0,
+      0,
+      3,
+      2
+    ],
+    "flexiblePairs": [],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "Unknown Artist - Painting of the Sun, Moon, and Peach Trees (c. 1800s).png",
+    "id": "unknown-artist-painting-of-the-sun-moon-and-peach-trees-c-1800s",
+    "rotation": 270,
+    "orientationScore": 18.134,
+    "rawRewards": {
+      "starValue": "03",
+      "foodValue": "2",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 10
+    },
+    "labels": [
+      "1-3",
+      "1-3",
+      "2-1",
+      "0-3",
+      "0-3",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    "maximums": [
+      3,
+      3,
+      2,
+      3,
+      3,
+      0,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "green",
+        "blue"
+      ],
+      [
+        "red",
+        "orange"
+      ],
+      [
+        "green",
+        "blue"
+      ],
+      [
+        "yellow",
+        "red"
+      ],
+      [
+        "orange",
+        "green"
+      ]
+    ],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Utagawa Hiroshige - First Cuckoo of the Year at Tsukudajima (c. 1831).png",
+    "id": "utagawa-hiroshige-first-cuckoo-of-the-year-at-tsukudajima-c-1831",
+    "rotation": 270,
+    "orientationScore": 14.698,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "",
+      "paintValue": "6"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 6
+    },
+    "labels": [
+      "1",
+      "1",
+      "0-5",
+      "1",
+      "2",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      1,
+      1,
+      0,
+      1,
+      2,
+      0,
+      0
+    ],
+    "maximums": [
+      1,
+      1,
+      5,
+      1,
+      2,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 5,
+    "labelsComplete": true
+  },
+  {
+    "file": "Utagawa Kuniyoshi - Matsui Tamijiro, Sword in Hand, Fighting a Giant Snake (1825).png",
+    "id": "utagawa-kuniyoshi-matsui-tamijiro-sword-in-hand-fighting-a-giant-snake-1825",
+    "rotation": 0,
+    "orientationScore": 18.186,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "0-2",
+      "0",
+      "0-2",
+      "0-2",
+      "2-4",
+      "0",
+      "1"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      0,
+      2,
+      0,
+      1
+    ],
+    "maximums": [
+      2,
+      0,
+      2,
+      2,
+      4,
+      0,
+      1
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "red"
+      ],
+      [
+        "green",
+        "blue"
+      ],
+      [
+        "yellow",
+        "red"
+      ],
+      [
+        "green",
+        "blue"
+      ]
+    ],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "Vanja Vujcic - Kleine Fee (2009).png",
+    "id": "vanja-vujcic-kleine-fee-2009",
+    "rotation": 0,
+    "orientationScore": 9.082,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 8
+    },
+    "labels": [
+      "0",
+      "0",
+      "1",
+      "2",
+      "0",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      0,
+      0,
+      1,
+      2,
+      0,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      0,
+      1,
+      2,
+      0,
+      0,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 3,
+    "labelsComplete": true
+  },
+  {
+    "file": "Vasily Vereshchagin - TO BE INSERTED WITH FUNNY CHARS (c. 1874).png",
+    "id": "vasily-vereshchagin-to-be-inserted-with-funny-chars-c-1874",
+    "rotation": 0,
+    "orientationScore": 8.064,
+    "rawRewards": {
+      "starValue": "1",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 1,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "0",
+      "0",
+      "0",
+      "1",
+      "2",
+      "2",
+      "0"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      1,
+      2,
+      2,
+      0
+    ],
+    "maximums": [
+      0,
+      0,
+      0,
+      1,
+      2,
+      2,
+      0
+    ],
+    "flexiblePairs": [],
+    "targetCount": 5,
+    "labelsComplete": true
+  },
+  {
+    "file": "Vaughn Reynolds - Pterois - Eye Tyrant (2011).png",
+    "id": "vaughn-reynolds-pterois-eye-tyrant-2011",
+    "rotation": 0,
+    "orientationScore": 16.098,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "10"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 10
+    },
+    "labels": [
+      "0",
+      "0",
+      "0",
+      "2",
+      "0",
+      "2",
+      "2"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      2,
+      0,
+      2,
+      2
+    ],
+    "maximums": [
+      0,
+      0,
+      0,
+      2,
+      0,
+      2,
+      2
+    ],
+    "flexiblePairs": [],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Vincent Van Gogh - Three Sunflowers (1888).png",
+    "id": "vincent-van-gogh-three-sunflowers-1888",
+    "rotation": 0,
+    "orientationScore": 16.07,
+    "rawRewards": {
+      "starValue": "4",
+      "foodValue": "3",
+      "paintValue": "14"
+    },
+    "rewards": {
+      "starValue": 4,
+      "foodValue": 3,
+      "paintValue": 14
+    },
+    "labels": [
+      "0",
+      "0-4",
+      "2-6",
+      "5",
+      "5",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      0,
+      0,
+      2,
+      5,
+      5,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      4,
+      6,
+      5,
+      5,
+      0,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "orange"
+      ],
+      [
+        "yellow",
+        "orange"
+      ],
+      [
+        "yellow",
+        "orange"
+      ],
+      [
+        "yellow",
+        "orange"
+      ]
+    ],
+    "targetCount": 16,
+    "labelsComplete": true
+  },
+  {
+    "file": "Vincent van Gogh - Caf Terrace at Night (1888).png",
+    "id": "vincent-van-gogh-caf-terrace-at-night-1888",
+    "rotation": 0,
+    "orientationScore": 9.8,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "2",
+      "paintValue": "6"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 2,
+      "paintValue": 6
+    },
+    "labels": [
+      "0",
+      "1",
+      "0",
+      "1",
+      "1",
+      "0",
+      "1"
+    ],
+    "minimums": [
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1
+    ],
+    "maximums": [
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1
+    ],
+    "flexiblePairs": [],
+    "targetCount": 4,
+    "labelsComplete": true
+  },
+  {
+    "file": "Vincent van Gogh - Starry Night (1889).png",
+    "id": "vincent-van-gogh-starry-night-1889",
+    "rotation": 270,
+    "orientationScore": 13.409,
+    "rawRewards": {
+      "starValue": "4",
+      "foodValue": "3",
+      "paintValue": "15"
+    },
+    "rewards": {
+      "starValue": 4,
+      "foodValue": 3,
+      "paintValue": 15
+    },
+    "labels": [
+      "0",
+      "1",
+      "2-4",
+      "0",
+      "4-6",
+      "0",
+      "2"
+    ],
+    "minimums": [
+      0,
+      1,
+      2,
+      0,
+      4,
+      0,
+      2
+    ],
+    "maximums": [
+      0,
+      1,
+      4,
+      0,
+      6,
+      0,
+      2
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "blue"
+      ],
+      [
+        "yellow",
+        "blue"
+      ]
+    ],
+    "targetCount": 11,
+    "labelsComplete": true
+  },
+  {
+    "file": "Wasilly Kandinsky - Munich-Schwabing With The Church Of St. Ursula (1908).png",
+    "id": "wasilly-kandinsky-munich-schwabing-with-the-church-of-st-ursula-1908",
+    "rotation": 0,
+    "orientationScore": 14.692,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "9"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 9
+    },
+    "labels": [
+      "0",
+      "2",
+      "1",
+      "2",
+      "1",
+      "0",
+      "1"
+    ],
+    "minimums": [
+      0,
+      2,
+      1,
+      2,
+      1,
+      0,
+      1
+    ],
+    "maximums": [
+      0,
+      2,
+      1,
+      2,
+      1,
+      0,
+      1
+    ],
+    "flexiblePairs": [],
+    "targetCount": 7,
+    "labelsComplete": true
+  },
+  {
+    "file": "William-Adolphe Bouguereau - Wave (1896).png",
+    "id": "william-adolphe-bouguereau-wave-1896",
+    "rotation": 270,
+    "orientationScore": 15.077,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "2",
+      "paintValue": "11"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 2,
+      "paintValue": 11
+    },
+    "labels": [
+      "0",
+      "0",
+      "0-1",
+      "2",
+      "5-6",
+      "0",
+      "0"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      2,
+      5,
+      0,
+      0
+    ],
+    "maximums": [
+      0,
+      0,
+      1,
+      2,
+      6,
+      0,
+      0
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "blue"
+      ]
+    ],
+    "targetCount": 8,
+    "labelsComplete": true
+  },
+  {
+    "file": "Windlow Homer - Eagle Head (1870).png",
+    "id": "windlow-homer-eagle-head-1870",
+    "rotation": 270,
+    "orientationScore": 12.114,
+    "rawRewards": {
+      "starValue": "2",
+      "foodValue": "3",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 8
+    },
+    "labels": [
+      "0",
+      "0",
+      "2-5",
+      "0",
+      "2-5",
+      "0",
+      "2"
+    ],
+    "minimums": [
+      0,
+      0,
+      2,
+      0,
+      2,
+      0,
+      2
+    ],
+    "maximums": [
+      0,
+      0,
+      5,
+      0,
+      5,
+      0,
+      2
+    ],
+    "flexiblePairs": [
+      [
+        "yellow",
+        "blue"
+      ],
+      [
+        "yellow",
+        "blue"
+      ],
+      [
+        "yellow",
+        "blue"
+      ]
+    ],
+    "targetCount": 9,
+    "labelsComplete": true
+  },
+  {
+    "file": "Winslow Homer - Summer Night (1890).png",
+    "id": "winslow-homer-summer-night-1890",
+    "rotation": 270,
+    "orientationScore": 15.065,
+    "rawRewards": {
+      "starValue": "1",
+      "foodValue": "3",
+      "paintValue": "7"
+    },
+    "rewards": {
+      "starValue": 1,
+      "foodValue": 3,
+      "paintValue": 7
+    },
+    "labels": [
+      "0",
+      "0",
+      "0",
+      "0",
+      "2",
+      "0",
+      "4"
+    ],
+    "minimums": [
+      0,
+      0,
+      0,
+      0,
+      2,
+      0,
+      4
+    ],
+    "maximums": [
+      0,
+      0,
+      0,
+      0,
+      2,
+      0,
+      4
+    ],
+    "flexiblePairs": [],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Xela - Wonder Comics no18 (1948).png",
+    "id": "xela-wonder-comics-no18-1948",
+    "rotation": 0,
+    "orientationScore": 12.084,
+    "rawRewards": {
+      "starValue": "0",
+      "foodValue": "3",
+      "paintValue": "11"
+    },
+    "rewards": {
+      "starValue": 2,
+      "foodValue": 3,
+      "paintValue": 11
+    },
+    "labels": [
+      "0",
+      "1",
+      "0",
+      "3",
+      "1",
+      "0",
+      "1"
+    ],
+    "minimums": [
+      0,
+      1,
+      0,
+      3,
+      1,
+      0,
+      1
+    ],
+    "maximums": [
+      0,
+      1,
+      0,
+      3,
+      1,
+      0,
+      1
+    ],
+    "flexiblePairs": [],
+    "targetCount": 6,
+    "labelsComplete": true
+  },
+  {
+    "file": "Zinaida - The Harvest (1915).png",
+    "id": "zinaida-the-harvest-1915",
+    "rotation": 270,
+    "orientationScore": 8.766,
+    "rawRewards": {
+      "starValue": "3",
+      "foodValue": "3",
+      "paintValue": "8"
+    },
+    "rewards": {
+      "starValue": 3,
+      "foodValue": 3,
+      "paintValue": 8
+    },
+    "labels": [
+      "2",
+      "4",
+      "0",
+      "0",
+      "2",
+      "0",
+      "2"
+    ],
+    "minimums": [
+      2,
+      4,
+      0,
+      0,
+      2,
+      0,
+      2
+    ],
+    "maximums": [
+      2,
+      4,
+      0,
+      0,
+      2,
+      0,
+      2
+    ],
+    "flexiblePairs": [],
+    "targetCount": 10,
+    "labelsComplete": true
+  }
+]
