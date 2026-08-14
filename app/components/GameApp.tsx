@@ -31,6 +31,8 @@ import {
   TUTORIAL_CANVAS_IDS,
 } from "../lib/tutorial-canvases";
 import { predictGameAction } from "../lib/optimistic-game";
+import CookieAcknowledgement from "./CookieAcknowledgement";
+import LegalLinks from "./LegalLinks";
 
 const CREDENTIAL_KEY = "starving-artists-players";
 const MAX_STORED_CREDENTIALS = 12;
@@ -2808,6 +2810,10 @@ function Landing({
           <MuseumWall />
         </div>
       </section>
+      <footer className="landing-legal-footer">
+        <LegalLinks />
+      </footer>
+      <CookieAcknowledgement />
     </main>
   );
 }

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { CanvasDefinition } from "../lib/types";
+import CookieAcknowledgement from "./CookieAcknowledgement";
+import LegalLinks from "./LegalLinks";
 
 export function EditorialHeader() {
   return (
@@ -26,17 +28,21 @@ export function EditorialHeader() {
 
 export function EditorialFooter() {
   return (
-    <footer className="editorial-footer">
-      <div>
-        <strong>Starving Artists</strong>
-        <span>An online strategy game about art, paint and staying fed.</span>
-      </div>
-      <nav aria-label="Footer navigation">
-        <Link href="/">Play</Link>
-        <Link href="/how-to-play">Rules</Link>
-        <Link href="/art-history">The art</Link>
-      </nav>
-    </footer>
+    <>
+      <footer className="editorial-footer">
+        <div>
+          <strong>Starving Artists</strong>
+          <span>An online strategy game about art, paint and staying fed.</span>
+        </div>
+        <nav aria-label="Footer navigation">
+          <Link href="/">Play</Link>
+          <Link href="/how-to-play">Rules</Link>
+          <Link href="/art-history">The art</Link>
+        </nav>
+        <LegalLinks />
+      </footer>
+      <CookieAcknowledgement />
+    </>
   );
 }
 

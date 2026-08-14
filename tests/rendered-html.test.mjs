@@ -279,6 +279,26 @@ test("art history pairs two landscape cards with one portrait card", () => {
   assert.match(styles, /\.art-history-landscape-stack\s*{[^}]*display:\s*grid;/s);
 });
 
+test("public pages expose legal policies and an essential-storage acknowledgement", () => {
+  const footer = readFileSync("app/components/LegalLinks.tsx", "utf8");
+  const cookies = readFileSync(
+    "app/components/CookieAcknowledgement.tsx",
+    "utf8",
+  );
+  const terms = readFileSync("app/terms/page.tsx", "utf8");
+  const privacy = readFileSync("app/privacy/page.tsx", "utf8");
+  const copyright = readFileSync("app/copyright/page.tsx", "utf8");
+
+  assert.match(footer, /Turnip Games, LLC/);
+  assert.match(footer, /legal@tourn\.app/);
+  assert.match(cookies, /essential cookies and browser storage/);
+  assert.match(cookies, /Acknowledge/);
+  assert.match(terms, /Terms of Service/);
+  assert.match(privacy, /fourteen days without activity/);
+  assert.match(copyright, /Copyright Takedown Notice/);
+  assert.match(copyright, /copyright\.gov\/512/);
+});
+
 test("game routes and host moderation controls are wired into the UI", () => {
   const component = readFileSync("app/components/GameApp.tsx", "utf8");
   const actionRoute = readFileSync(

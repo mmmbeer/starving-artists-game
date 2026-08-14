@@ -9,6 +9,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: baseUrl, lastModified, changeFrequency: "weekly", priority: 1 },
     { url: `${baseUrl}/how-to-play`, lastModified, changeFrequency: "monthly", priority: 0.9 },
     { url: `${baseUrl}/art-history`, lastModified, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${baseUrl}/terms`, lastModified, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${baseUrl}/privacy`, lastModified, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${baseUrl}/copyright`, lastModified, changeFrequency: "yearly", priority: 0.3 },
     ...ART_HISTORY.map((entry) => ({
       url: `${baseUrl}/art-history/${entry.slug}`,
       lastModified,
