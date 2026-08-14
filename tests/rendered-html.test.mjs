@@ -2,9 +2,12 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 
-test("declares development preview metadata in the root layout", () => {
+test("declares production search metadata in the root layout", () => {
   const layout = readFileSync("app/layout.tsx", "utf8");
-  assert.match(layout, /"codex-preview":\s*"development"/);
+  assert.match(layout, /metadataBase:\s*new URL\("https:\/\/www\.starvingartistsgame\.com"\)/);
+  assert.match(layout, /alternates:\s*\{ canonical:\s*"\/" \}/);
+  assert.match(layout, /googleBot:/);
+  assert.doesNotMatch(layout, /"codex-preview":\s*"development"/);
 });
 
 test("gameplay UI exposes touch painting and confirmation dialogs", () => {

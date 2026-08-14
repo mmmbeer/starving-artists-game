@@ -2176,7 +2176,7 @@ input::placeholder {
   grid-column: span 4;
   overflow: hidden;
   min-height: 440px;
-  grid-template-rows: minmax(235px, 1fr) auto;
+  grid-template-rows: auto 1fr;
   border: 2px solid #111;
   background: #fff;
   color: #111;
@@ -2187,9 +2187,7 @@ input::placeholder {
 
 .art-history-card:nth-child(8n + 1),
 .art-history-card:nth-child(8n + 6) {
-  grid-column: span 8;
-  grid-template-columns: minmax(0, 1.35fr) minmax(250px, 0.65fr);
-  grid-template-rows: 1fr;
+  grid-column: span 4;
 }
 
 .art-history-card:hover {
@@ -2214,14 +2212,15 @@ input::placeholder {
   width: var(--art-image-width);
   max-width: none;
   height: var(--art-image-height);
-  object-fit: fill;
+  object-fit: contain;
   transition: transform 700ms ease;
 }
 
 .art-history-card .in-game-art-crop {
   width: 100%;
-  height: 100%;
-  aspect-ratio: auto;
+  height: auto;
+  align-self: start;
+  aspect-ratio: var(--art-ratio);
 }
 
 .art-history-card:hover .in-game-art-crop img {
@@ -2239,8 +2238,8 @@ input::placeholder {
 
 .art-history-card:nth-child(8n + 1) .art-history-card-copy,
 .art-history-card:nth-child(8n + 6) .art-history-card-copy {
-  border-top: 0;
-  border-left: 2px solid #111;
+  border-top: 2px solid #111;
+  border-left: 0;
 }
 
 .art-history-card-copy small,
@@ -2492,7 +2491,13 @@ input::placeholder {
 }
 
 .game-vs-gallery figure {
+  width: min(100%, 560px);
   margin: 0;
+  justify-self: center;
+}
+
+.game-vs-gallery figure.portrait {
+  width: min(100%, 360px);
 }
 
 .art-detail-game-crop {
@@ -2532,7 +2537,7 @@ input::placeholder {
 .artist-panel > a {
   display: block;
   overflow: hidden;
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 5;
   border-bottom: 2px solid #111;
   background: #ddd;
 }
@@ -2546,7 +2551,9 @@ input::placeholder {
 .artist-panel .remote-image > img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center top;
+  background: #e2ded4;
   filter: grayscale(1) contrast(1.05);
 }
 
@@ -2831,7 +2838,7 @@ input::placeholder {
   .art-history-card:nth-child(8n + 6) {
     grid-column: span 6;
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(250px, 1fr) auto;
+    grid-template-rows: auto 1fr;
   }
 
   .art-history-card:nth-child(8n + 1) .art-history-card-copy,
@@ -2852,6 +2859,7 @@ input::placeholder {
   }
 
   .artist-panel > a {
+    aspect-ratio: 4 / 5;
     border-right: 2px solid #111;
     border-bottom: 0;
   }

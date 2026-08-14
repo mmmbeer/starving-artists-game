@@ -41,6 +41,8 @@ export default function RemoteImage({
         src={src}
         alt={alt}
         loading={loading}
+        decoding="async"
+        referrerPolicy="no-referrer"
         onError={() => setFailed(true)}
       />
     </span>

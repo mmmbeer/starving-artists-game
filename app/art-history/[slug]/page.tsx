@@ -131,7 +131,7 @@ export default async function ArtHistoryDetail({ params }: PageProps) {
               the artwork area used during play, without the card rails.
             </p>
           </div>
-          <figure>
+          <figure className={canvas.aspectRatio > 1 ? "landscape" : "portrait"}>
             <InGameArtCrop canvas={canvas} className="art-detail-game-crop" />
             <figcaption>{canvas.title} in Starving Artists</figcaption>
           </figure>
