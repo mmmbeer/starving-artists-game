@@ -2164,18 +2164,43 @@ input::placeholder {
 }
 
 .art-history-grid {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 22px;
   padding-bottom: 95px;
+}
+
+.art-history-cluster {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.art-history-cluster.portrait-left .art-history-landscape-stack {
+  order: 2;
+}
+
+.art-history-cluster.portrait-left > .art-history-portrait-card {
+  order: 1;
+}
+
+.art-history-landscape-stack {
+  display: grid;
+  gap: 22px;
+}
+
+.art-history-portrait-salon {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 22px;
 }
 
 .art-history-card {
   position: relative;
   display: grid;
-  grid-column: span 4;
   overflow: hidden;
-  min-height: 440px;
+  min-height: 0;
   grid-template-rows: auto 1fr;
   border: 2px solid #111;
   background: #fff;
@@ -2183,11 +2208,6 @@ input::placeholder {
   text-decoration: none;
   box-shadow: 8px 8px 0 #111;
   transition: transform 180ms ease, box-shadow 180ms ease;
-}
-
-.art-history-card:nth-child(8n + 1),
-.art-history-card:nth-child(8n + 6) {
-  grid-column: span 4;
 }
 
 .art-history-card:hover {
@@ -2236,17 +2256,31 @@ input::placeholder {
   padding: 21px;
 }
 
-.art-history-card:nth-child(8n + 1) .art-history-card-copy,
-.art-history-card:nth-child(8n + 6) .art-history-card-copy {
-  border-top: 2px solid #111;
-  border-left: 0;
-}
-
 .art-history-card-copy small,
 .art-history-card-copy span,
 .art-history-card-copy em {
   font-style: normal;
   font-weight: 850;
+}
+
+.art-history-portrait-salon .art-history-card-copy {
+  padding: 16px;
+}
+
+.art-history-portrait-salon .art-history-card-copy strong {
+  font-size: clamp(18px, 1.65vw, 27px);
+}
+
+.art-history-final-landscape {
+  width: min(100%, 680px);
+  grid-template-columns: minmax(0, 1.2fr) minmax(240px, 0.8fr);
+  grid-template-rows: 1fr;
+  align-self: center;
+}
+
+.art-history-final-landscape .art-history-card-copy {
+  border-top: 0;
+  border-left: 2px solid #111;
 }
 
 .art-history-card-copy small {
@@ -2833,18 +2867,17 @@ input::placeholder {
     width: min(430px, 100%);
   }
 
-  .art-history-card,
-  .art-history-card:nth-child(8n + 1),
-  .art-history-card:nth-child(8n + 6) {
-    grid-column: span 6;
+  .art-history-cluster {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
   }
 
-  .art-history-card:nth-child(8n + 1) .art-history-card-copy,
-  .art-history-card:nth-child(8n + 6) .art-history-card-copy {
-    border-top: 2px solid #111;
-    border-left: 0;
+  .art-history-cluster.portrait-left .art-history-landscape-stack,
+  .art-history-cluster.portrait-left > .art-history-portrait-card {
+    order: initial;
+  }
+
+  .art-history-portrait-salon {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .art-story-layout {
@@ -2931,8 +2964,22 @@ input::placeholder {
   .art-history-card,
   .art-history-card:nth-child(8n + 1),
   .art-history-card:nth-child(8n + 6) {
-    grid-column: 1 / -1;
-    min-height: 410px;
+    min-height: 0;
+  }
+
+  .art-history-portrait-salon {
+    grid-template-columns: 1fr;
+  }
+
+  .art-history-final-landscape {
+    width: 100%;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .art-history-final-landscape .art-history-card-copy {
+    border-top: 2px solid #111;
+    border-left: 0;
   }
 
   .editorial-callout,

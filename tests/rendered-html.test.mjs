@@ -267,6 +267,18 @@ test("landing page presents the complete canvas catalog as a rotating museum wal
   assert.match(styles, /@keyframes museum-glass-flash\s*{/);
 });
 
+test("art history pairs two landscape cards with one portrait card", () => {
+  const page = readFileSync("app/art-history/page.tsx", "utf8");
+  const styles = readFileSync("app/globals.css", "utf8");
+
+  assert.match(page, /Math\.floor\(landscapes\.length \/ 2\)/);
+  assert.match(page, /landscapes\.slice\(index \* 2, index \* 2 \+ 2\)/);
+  assert.match(page, /className="art-history-landscape-stack"/);
+  assert.match(page, /className="art-history-portrait-salon"/);
+  assert.match(styles, /\.art-history-cluster\s*{[^}]*grid-template-columns:/s);
+  assert.match(styles, /\.art-history-landscape-stack\s*{[^}]*display:\s*grid;/s);
+});
+
 test("game routes and host moderation controls are wired into the UI", () => {
   const component = readFileSync("app/components/GameApp.tsx", "utf8");
   const actionRoute = readFileSync(
