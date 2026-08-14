@@ -66,6 +66,73 @@ test("the server reducer rejects out-of-turn actions and advances valid work", (
   );
 });
 
+test("each artist gets one free market trade per day without spending an action", () => {
+  let state = engine.reduceGame(lobby(), "host", { type: "START_GAME" }, at);
+  const artistId = state.turnOrder[state.currentTurnIndex];
+
+  state = engine.reduceGame(state, artistId, { type: "WORK" }, at);
+  const otherArtistId = state.turnOrder[state.currentTurnIndex];
+  const tradingArtist = state.players.find((player) => player.id === artistId);
+  const marketCube = state.paintMarket[0];
+  const offeredCubeIds = tradingArtist.studioCubes
+    .slice(0, 2)
+    .map((cube) => cube.id);
+
+  const traded = engine.reduceGame(
+    state,
+    artistId,
+    {
+      type: "TRADE_MARKET",
+      giveCubeIds: offeredCubeIds,
+      takeCubeIds: [marketCube.id],
+    },
+    at,
+  );
+
+  assert.equal(traded.turnOrder[traded.currentTurnIndex], otherArtistId);
+  assert.equal(
+    traded.players.find((player) => player.id === artistId).lastMarketTradeDay,
+    traded.day,
+  );
+  assert.throws(
+    () =>
+      engine.reduceGame(
+        traded,
+        artistId,
+        {
+          type: "TRADE_MARKET",
+          giveCubeIds: traded.players
+            .find((player) => player.id === artistId)
+            .studioCubes.slice(0, 2)
+            .map((cube) => cube.id),
+          takeCubeIds: [traded.paintMarket[0].id],
+        },
+        at,
+      ),
+    (error) => error.code === "TRADE_ALREADY_USED",
+  );
+
+  state = traded;
+  while (state.phase === "MORNING") {
+    const playerId = state.turnOrder[state.currentTurnIndex];
+    state = engine.reduceGame(state, playerId, { type: "PASS" }, at);
+  }
+  assert.equal(state.phase, "AFTERNOON");
+  assert.equal(state.turnOrder[state.currentTurnIndex], artistId);
+
+  const afternoon = engine.reduceGame(
+    state,
+    artistId,
+    { type: "WORK" },
+    at,
+  );
+  assert.notEqual(
+    afternoon.turnOrder[afternoon.currentTurnIndex],
+    artistId,
+    "the free trade must not consume the artist's Afternoon action",
+  );
+});
+
 test("each day advances through morning, afternoon, and evening actions", () => {
   let state = engine.reduceGame(lobby(), "host", { type: "START_GAME" }, at);
   const playerCount = state.turnOrder.length;

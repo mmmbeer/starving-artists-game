@@ -593,6 +593,7 @@ function startGame(
     player.canvases = [];
     player.soldCanvasCount = 0;
     player.starved = false;
+    player.lastMarketTradeDay = null;
   }
 
   const firstIndex = Math.floor(nextRandom(state) * state.players.length);
@@ -761,6 +762,18 @@ function tradeMarket(
   action: Extract<GameAction, { type: "TRADE_MARKET" }>,
   at: string,
 ) {
+  if (player.starved) {
+    throw new GameRuleError(
+      "A starved artist cannot trade with the Paint Market.",
+      "PLAYER_STARVED",
+    );
+  }
+  if (player.lastMarketTradeDay === state.day) {
+    throw new GameRuleError(
+      "You have already used your Paint Market trade today.",
+      "TRADE_ALREADY_USED",
+    );
+  }
   uniqueIds(action.giveCubeIds, "Trade");
   uniqueIds(action.takeCubeIds, "Trade");
   const required = TRADE_RATES.get(action.takeCubeIds.length);
@@ -787,12 +800,12 @@ function tradeMarket(
     ...state.paintMarket.filter((cube) => !takenIds.has(cube.id)),
     ...give,
   ];
+  player.lastMarketTradeDay = state.day;
   addLog(
     state,
     `${player.displayName} traded ${give.length} cubes for ${take.length} from the Paint Market.`,
     at,
   );
-  finishActionTurn(state, at);
 }
 
 function declareSales(
@@ -915,41 +928,47 @@ export function reduceGame(
       throw new GameRuleError("The game has not started.");
     }
     const player = playerById(state, actorId);
-    requireTurn(state, actorId);
-    if (action.type === "DECLARE_SALES") {
-      if (state.phase !== "SELLING") {
-        throw new GameRuleError("Canvases are sold only at night.");
-      }
-      declareSales(state, player, action.canvasInstanceIds, at, catalog);
-    } else if (action.type === "COLLECT_PAINT") {
-      if (state.phase !== "SELLING") {
-        throw new GameRuleError("Paint is collected only during selling.");
-      }
-      collectPaint(state, player, action.cubeIds, at);
-    } else {
+    if (action.type === "TRADE_MARKET") {
       if (state.phase !== "MORNING" && state.phase !== "AFTERNOON") {
-        throw new GameRuleError("That action is not available in this phase.");
-      }
-      if (action.type === "WORK") work(state, player, at);
-      if (action.type === "BUY_CANVAS") {
-        buyCanvas(
-          state,
-          player,
-          action.slotIndex,
-          action.paymentCubeIds,
-          at,
-          catalog,
+        throw new GameRuleError(
+          "Paint Market trades are available only during Morning or Afternoon.",
         );
       }
-      if (action.type === "PAINT") {
-        paintCanvas(state, player, action, at, catalog);
-      }
-      if (action.type === "TRADE_MARKET") {
-        tradeMarket(state, player, action, at);
-      }
-      if (action.type === "PASS") {
-        addLog(state, `${player.displayName} passed.`, at);
-        finishActionTurn(state, at);
+      tradeMarket(state, player, action, at);
+    } else {
+      requireTurn(state, actorId);
+      if (action.type === "DECLARE_SALES") {
+        if (state.phase !== "SELLING") {
+          throw new GameRuleError("Canvases are sold only at night.");
+        }
+        declareSales(state, player, action.canvasInstanceIds, at, catalog);
+      } else if (action.type === "COLLECT_PAINT") {
+        if (state.phase !== "SELLING") {
+          throw new GameRuleError("Paint is collected only during selling.");
+        }
+        collectPaint(state, player, action.cubeIds, at);
+      } else {
+        if (state.phase !== "MORNING" && state.phase !== "AFTERNOON") {
+          throw new GameRuleError("That action is not available in this phase.");
+        }
+        if (action.type === "WORK") work(state, player, at);
+        if (action.type === "BUY_CANVAS") {
+          buyCanvas(
+            state,
+            player,
+            action.slotIndex,
+            action.paymentCubeIds,
+            at,
+            catalog,
+          );
+        }
+        if (action.type === "PAINT") {
+          paintCanvas(state, player, action, at, catalog);
+        }
+        if (action.type === "PASS") {
+          addLog(state, `${player.displayName} passed.`, at);
+          finishActionTurn(state, at);
+        }
       }
     }
   }
@@ -992,6 +1011,7 @@ export function createLobbyState(input: {
         canvases: [],
         soldCanvasCount: 0,
         starved: false,
+        lastMarketTradeDay: null,
       },
     ],
     day: 1,
@@ -1065,6 +1085,7 @@ export function joinLobby(
     canvases: [],
     soldCanvasCount: 0,
     starved: false,
+    lastMarketTradeDay: null,
   });
   addLog(state, `${displayName} joined the studio.`, at);
   state.updatedAt = at;

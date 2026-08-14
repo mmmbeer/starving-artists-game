@@ -70,6 +70,8 @@ export interface PlayerState {
   canvases: OwnedCanvas[];
   soldCanvasCount: number;
   starved: boolean;
+  /** The game day on which this artist used their free Paint Market trade. */
+  lastMarketTradeDay?: number | null;
 }
 
 export type GamePhase =

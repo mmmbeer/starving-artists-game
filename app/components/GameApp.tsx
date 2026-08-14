@@ -254,8 +254,8 @@ const TUTORIAL_PAGES = [
       "Starting with the first player, everyone takes one Morning action. Then everyone takes one Afternoon action in the same order.",
     bullets: [
       "Work: draw three random paint cubes.",
-      "Buy a canvas, paint, trade with the market, or pass.",
-      "One action finishes your turn. You may inspect markets and studios at any time.",
+      "Buy a canvas, paint, or pass. One action finishes your turn.",
+      "You may also trade with the Paint Market once per day as a free action.",
     ],
   },
   {
@@ -284,11 +284,12 @@ const TUTORIAL_PAGES = [
     eyebrow: "Trade",
     title: "Exchange quantity for precision.",
     summary:
-      "Give cubes from your studio to the shared Paint Market and take the exact colors you need.",
+      "Once per day, give cubes from your studio to the shared Paint Market and take the exact colors you need without spending an action.",
     bullets: [
+      "Trade at any time during Morning or Afternoon, even when another artist is taking their turn.",
       "Give 2 cubes to take 1.",
       "Give 5 cubes to take 2.",
-      "Give 9 cubes to take 3.",
+      "Or give 9 cubes to take 3.",
     ],
   },
   {
@@ -1332,6 +1333,7 @@ function TutorialScene({
           </div>
         </div>
         <div className="tutorial-trade-rates">
+          <b>Free · once per day</b>
           <b>2 → 1</b>
           <b>5 → 2</b>
           <b>9 → 3</b>
@@ -1663,8 +1665,10 @@ function WrittenRulesModal({
               <div>
                 <b>Trade</b>
                 <p>
-                  Give studio cubes to the Paint Market and take market cubes
-                  at one of three exact rates: 2→1, 5→2, or 9→3.
+                  Once per day during Morning or Afternoon, give studio cubes
+                  to the Paint Market and take market cubes at one of three
+                  exact rates: 2→1, 5→2, or 9→3. This is a free action and may
+                  be done at any time, even during another artist&apos;s turn.
                 </p>
               </div>
               <div>
@@ -2626,12 +2630,20 @@ function Landing({
             <strong>Starving Artists</strong>
           </span>
         </Link>
-        <GameHelpControls compact canvases={tutorialCanvases} />
+        <div className="landing-nav-actions">
+          <Link href="/art-history">Meet the art</Link>
+          <Link href="/how-to-play">How to play</Link>
+          <GameHelpControls compact canvases={tutorialCanvases} />
+        </div>
       </nav>
 
       <section className="hero">
         <div className="hero-copy">
           <h1>Paint. Sell. Survive.</h1>
+          <p className="hero-seo-lede">
+            A free online strategy game for one to four players. Collect paint,
+            finish famous canvases and sell enough art to keep your studio fed.
+          </p>
 
           {recentGames.length > 0 && (
             <section className="recent-games" aria-label="Your active games">
@@ -3026,6 +3038,11 @@ function GameBoard({
       selectedMarketCubes.length === 2) ||
     (selectedStudioCubes.length === 9 &&
       selectedMarketCubes.length === 3);
+  const hasUsedDailyTrade = me?.lastMarketTradeDay === game.day;
+  const canTradeMarket =
+    !me?.starved &&
+    !hasUsedDailyTrade &&
+    (game.phase === "MORNING" || game.phase === "AFTERNOON");
   const dayPhaseIndex = DAY_PHASES.findIndex(
     (entry) => entry.phase === game.phase,
   );
@@ -3285,7 +3302,7 @@ function GameBoard({
           </div>
           <div>
             <strong>{personalActionsRemaining}</strong>
-            <span>your actions left today</span>
+            <span>your turn actions left today</span>
           </div>
         </div>
         {waitingForTurn && currentPlayer && (
@@ -3392,7 +3409,7 @@ function GameBoard({
                     key={cube.id}
                     selected={selectedMarketCubes.includes(cube.id)}
                     disabled={
-                      !myTurn ||
+                      (!myTurn && !(panel === "trade" && canTradeMarket)) ||
                       (panel !== "trade" &&
                         game.selling?.stage !== "COLLECTION")
                     }
@@ -3612,17 +3629,25 @@ function GameBoard({
               Buy
             </button>
             <button
-              className={panel === "trade" ? "active" : ""}
-              disabled={!myTurn || busy || game.paintMarket.length === 0}
+              className={`${panel === "trade" ? "active " : ""}free-trade-action`}
+              disabled={
+                busy || !canTradeMarket || game.paintMarket.length === 0
+              }
               onClick={() => {
                 setPanel("trade");
                 setSelectedStudioCubes([]);
                 setSelectedMarketCubes([]);
                 setPendingPaint([]);
               }}
+              title={
+                hasUsedDailyTrade
+                  ? "You have already used today's free trade."
+                  : "One free Paint Market trade per day."
+              }
             >
-              <b>⇄</b>
+              <b>{hasUsedDailyTrade ? "✓" : "⇄"}</b>
               Trade
+              <span>{hasUsedDailyTrade ? "Used today" : "Free · 1/day"}</span>
             </button>
             <button
               disabled={!myTurn || busy}
@@ -3742,7 +3767,7 @@ function GameBoard({
         </FeatureModal>
       )}
 
-      {panel === "trade" && myTurn && (
+      {panel === "trade" && canTradeMarket && (
         <FeatureModal
           title="Trade Paint"
           onClose={closePanel}
@@ -3788,7 +3813,7 @@ function GameBoard({
                   })
                 }
               >
-                Trade
+                Make free trade
               </button>
             </>
           }
