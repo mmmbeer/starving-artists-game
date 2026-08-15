@@ -1,5 +1,9 @@
 import { saveCanvasDefinition } from "../../../../lib/canvas-catalog";
 import {
+  internalErrorResponse,
+  jsonError,
+} from "../../../../lib/api-response";
+import {
   isCuratorRequest,
   sameOrigin,
 } from "../../../../lib/curator-auth";
@@ -17,14 +21,14 @@ export async function PUT(
   context: { params: Promise<{ id: string }> },
 ) {
   if (!(await isCuratorRequest(request))) {
-    return Response.json({ error: "Curator sign-in required." }, { status: 401 });
+    return jsonError("Curator sign-in required.", 401);
   }
   if (!sameOrigin(request)) {
-    return Response.json({ error: "Invalid request origin." }, { status: 403 });
+    return jsonError("Invalid request origin.", 403);
   }
   const { id } = await context.params;
   if (!boundedString(id, 160)) {
-    return Response.json({ error: "Canvas not found." }, { status: 404 });
+    return jsonError("Canvas not found.", 404);
   }
   const limited = rateLimitResponse(
     request,
@@ -40,12 +44,8 @@ export async function PUT(
     const requestError = requestErrorResponse(error);
     if (requestError) return requestError;
     if (error instanceof Error && error.message === "Canvas not found.") {
-      return Response.json({ error: error.message }, { status: 404 });
+      return jsonError(error.message, 404);
     }
-    console.error(error);
-    return Response.json(
-      { error: "The canvas could not be saved." },
-      { status: 500 },
-    );
+    return internalErrorResponse(error, "The canvas could not be saved.");
   }
 }

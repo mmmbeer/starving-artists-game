@@ -1,4 +1,5 @@
-import { errorResponse, joinGame } from "../../../../lib/game-store";
+import { joinGame } from "../../../../lib/game-store";
+import { errorResponse } from "../../../../lib/api-response";
 import {
   boundedString,
   normalizeGameCode,

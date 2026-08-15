@@ -1,6 +1,40 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
 import test from "node:test";
+
+function readSourceTree(path, extensions) {
+  if (statSync(path).isFile()) return readFileSync(path, "utf8");
+  return readdirSync(path, { withFileTypes: true })
+    .sort((left, right) => left.name.localeCompare(right.name))
+    .map((entry) => {
+      const child = join(path, entry.name);
+      if (entry.isDirectory()) return readSourceTree(child, extensions);
+      return extensions.some((extension) => entry.name.endsWith(extension))
+        ? readFileSync(child, "utf8")
+        : "";
+    })
+    .join("\n");
+}
+
+function gameSource() {
+  return [
+    readFileSync("app/components/GameApp.tsx", "utf8"),
+    readSourceTree("app/components/game", [".ts", ".tsx"]),
+    readSourceTree("app/components/ui", [".ts", ".tsx"]),
+  ].join("\n");
+}
+
+function curatorSource() {
+  return [
+    readFileSync("app/components/CuratorApp.tsx", "utf8"),
+    readSourceTree("app/components/curator", [".ts", ".tsx"]),
+  ].join("\n");
+}
+
+function styleSource() {
+  return readSourceTree("app/styles", [".css"]);
+}
 
 test("declares production search metadata in the root layout", () => {
   const layout = readFileSync("app/layout.tsx", "utf8");
@@ -11,8 +45,8 @@ test("declares production search metadata in the root layout", () => {
 });
 
 test("gameplay UI exposes touch painting and confirmation dialogs", () => {
-  const component = readFileSync("app/components/GameApp.tsx", "utf8");
-  const styles = readFileSync("app/globals.css", "utf8");
+  const component = gameSource();
+  const styles = styleSource();
 
   assert.match(component, /onPointerDown=/);
   assert.match(component, /elementFromPoint/);
@@ -121,10 +155,10 @@ test("gameplay UI exposes touch painting and confirmation dialogs", () => {
 });
 
 test("lobby and game headers expose an animated tutorial and complete rules", () => {
-  const component = readFileSync("app/components/GameApp.tsx", "utf8");
+  const component = gameSource();
   const home = readFileSync("app/page.tsx", "utf8");
   const gameRoute = readFileSync("app/game/[code]/page.tsx", "utf8");
-  const styles = readFileSync("app/globals.css", "utf8");
+  const styles = styleSource();
 
   assert.match(component, /const TUTORIAL_PAGES = \[/);
   assert.match(component, /function TutorialModal/);
@@ -180,8 +214,8 @@ test("lobby and game headers expose an animated tutorial and complete rules", ()
 });
 
 test("curator canvas editor fits, zooms, drags, and creates combo spaces", () => {
-  const component = readFileSync("app/components/CuratorApp.tsx", "utf8");
-  const styles = readFileSync("app/globals.css", "utf8");
+  const component = curatorSource();
+  const styles = styleSource();
 
   assert.match(component, /new ResizeObserver\(fitCanvas\)/);
   assert.match(component, /className="curator-canvas-stage"/);
@@ -219,11 +253,11 @@ test("curator canvas editor fits, zooms, drags, and creates combo spaces", () =>
 });
 
 test("landing page presents the complete canvas catalog as a rotating museum wall", () => {
-  const component = readFileSync("app/components/GameApp.tsx", "utf8");
-  const styles = readFileSync("app/globals.css", "utf8");
+  const component = gameSource();
+  const styles = styleSource();
 
   assert.match(component, /function MuseumWall/);
-  assert.match(component, /import\("\.\.\/lib\/canvas-data"\)/);
+  assert.match(component, /import\("(?:\.\.\/)+lib\/canvas-data"\)/);
   assert.match(component, /const completeCollection = CANVASES\.map/);
   assert.match(component, /queue = shuffleMuseumQueue/);
   assert.match(component, /function createMuseumPlacement/);
@@ -269,7 +303,7 @@ test("landing page presents the complete canvas catalog as a rotating museum wal
 
 test("art history pairs two landscape cards with one portrait card", () => {
   const page = readFileSync("app/art-history/page.tsx", "utf8");
-  const styles = readFileSync("app/globals.css", "utf8");
+  const styles = styleSource();
 
   assert.match(page, /Math\.floor\(landscapes\.length \/ 2\)/);
   assert.match(page, /landscapes\.slice\(index \* 2, index \* 2 \+ 2\)/);
@@ -300,12 +334,12 @@ test("public pages expose legal policies and an essential-storage acknowledgemen
 });
 
 test("game routes and host moderation controls are wired into the UI", () => {
-  const component = readFileSync("app/components/GameApp.tsx", "utf8");
+  const component = gameSource();
   const actionRoute = readFileSync(
     "app/api/games/[code]/action/route.ts",
     "utf8",
   );
-  const styles = readFileSync("app/globals.css", "utf8");
+  const styles = styleSource();
 
   assert.match(component, /href=\{`\/game\/\$\{recent\.code\}`\}/);
   assert.match(component, /`\$\{window\.location\.origin\}\/game\/\$\{game\.code\}`/);

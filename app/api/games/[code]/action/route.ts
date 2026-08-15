@@ -1,7 +1,7 @@
 import {
   applyGameAction,
-  errorResponse,
 } from "../../../../lib/game-store";
+import { errorResponse } from "../../../../lib/api-response";
 import type { GameAction } from "../../../../lib/types";
 import {
   boundedString,
