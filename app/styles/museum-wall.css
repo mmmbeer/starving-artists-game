@@ -1,0 +1,656 @@
+/* Landing museum wall */
+
+.recent-games {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  overflow: hidden;
+  width: min(590px, 100%);
+  min-height: 66px;
+  margin-top: 24px;
+  border: 2px solid #111;
+  background: #fff;
+  box-shadow: 7px 7px 0 #bbb;
+}
+
+.recent-games-heading {
+  display: flex;
+  min-width: 82px;
+  flex-direction: column;
+  justify-content: center;
+  border-right: 2px solid #111;
+  background: #111;
+  padding: 9px 11px;
+  color: #fff;
+}
+
+.recent-games-heading strong {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.recent-games-heading span {
+  margin-top: 2px;
+  color: var(--red);
+  font-size: 19px;
+  font-weight: 900;
+}
+
+.recent-game-rail {
+  display: flex;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.recent-game-link {
+  display: grid;
+  min-width: 220px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  border-right: 1px solid #aaa;
+  padding: 9px 11px;
+  color: #111;
+  text-decoration: none;
+  transition:
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.recent-game-link:hover {
+  background: #f1f1f1;
+  box-shadow: inset 0 -4px var(--red);
+}
+
+.recent-game-link > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.recent-game-link > span strong,
+.recent-game-link > span small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-game-link > span strong {
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.recent-game-link > span small {
+  margin-top: 3px;
+  color: #666;
+  font-size: 8px;
+  font-weight: 750;
+}
+
+.recent-game-link > b {
+  color: var(--red);
+  font-size: 17px;
+}
+
+.recent-games + .entry-card {
+  margin-top: 18px;
+}
+
+.game-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+}
+
+.abandon-game-button {
+  border: 1px solid #777;
+  background: #fff;
+  padding: 8px 10px;
+  color: #555;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.abandon-game-button:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.danger-button {
+  min-height: 42px;
+  border: 2px solid #111;
+  background: var(--red);
+  padding: 0 18px;
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.danger-button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.abandon-game-warning {
+  display: flex;
+  min-height: 150px;
+  flex-direction: column;
+  justify-content: center;
+  border-left: 7px solid var(--red);
+  background: #eee;
+  padding: 24px;
+}
+
+.abandon-game-warning strong {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+}
+
+.abandon-game-warning span {
+  margin-top: 7px;
+  color: #555;
+  font-size: 13px;
+}
+
+.landing {
+  height: 100dvh;
+  min-height: 0;
+}
+
+.hero {
+  height: calc(100dvh - 66px);
+  min-height: 0;
+}
+
+.hero-gallery {
+  height: 100%;
+  min-height: 0;
+  margin-left: 20px;
+}
+
+@media (min-width: 981px) {
+  .hero {
+    align-items: stretch;
+    padding-block: 0;
+  }
+
+  .hero-copy {
+    align-self: center;
+    padding-block: 32px;
+  }
+
+  .hero-gallery {
+    align-self: stretch;
+    height: auto;
+  }
+}
+
+.museum-wall {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 0;
+  height: 100%;
+  border-left: 2px solid #111;
+  background:
+    linear-gradient(90deg, rgb(0 0 0 / 5%), transparent 10%),
+    linear-gradient(180deg, #f8f8f6, #ecece8);
+  box-shadow:
+    inset 14px 0 28px rgb(0 0 0 / 5%),
+    inset 0 -30px 60px rgb(0 0 0 / 4%);
+}
+
+.museum-wall::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent 0 49.8%, rgb(0 0 0 / 3%) 50%, transparent 50.2%),
+    repeating-linear-gradient(
+      180deg,
+      transparent 0 185px,
+      rgb(0 0 0 / 2%) 186px,
+      transparent 187px
+    );
+  content: "";
+}
+
+.museum-wall-light {
+  position: absolute;
+  z-index: -1;
+  top: -80px;
+  left: 4%;
+  width: 72%;
+  height: 118%;
+  background: linear-gradient(
+    105deg,
+    transparent 0 26%,
+    rgb(255 255 255 / 70%) 45%,
+    transparent 68%
+  );
+  filter: blur(8px);
+  opacity: 0.75;
+  animation: museum-light-shift 16s ease-in-out infinite alternate;
+  pointer-events: none;
+  transform: skewX(-8deg);
+}
+
+.museum-floor-line {
+  position: absolute;
+  right: 0;
+  bottom: 24px;
+  left: 0;
+  height: 1px;
+  background: #b8b8b3;
+  box-shadow: 0 8px 20px rgb(0 0 0 / 10%);
+}
+
+.museum-piece {
+  position: absolute;
+  top: var(--museum-y);
+  left: var(--museum-x);
+  display: flex;
+  width: auto;
+  align-items: center;
+  gap: var(--museum-gap);
+  margin: 0;
+  opacity: 1;
+  transform: rotate(var(--hang-tilt));
+  transform-origin: 15% 50%;
+  transition:
+    top 900ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    left 900ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: opacity, filter, transform;
+}
+
+.museum-frame {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding-top: 9px;
+}
+
+.museum-frame::before {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 1px;
+  height: 24px;
+  background: #777;
+  box-shadow: 0 -2px 0 1px #444;
+  content: "";
+  transform: translateX(-50%);
+  transform-origin: top;
+}
+
+.museum-art {
+  position: relative;
+  overflow: hidden;
+  width: var(--museum-art-width);
+  height: var(--museum-art-height);
+  border: 7px solid #111;
+  outline: 5px solid #fff;
+  background: #ddd;
+  box-shadow:
+    11px 14px 0 rgb(0 0 0 / 11%),
+    0 22px 36px rgb(0 0 0 / 13%);
+}
+
+.museum-art::after {
+  position: absolute;
+  inset: -40% auto -40% -55%;
+  width: 34%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 46%),
+    transparent
+  );
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  transform: skewX(-14deg);
+}
+
+.museum-art img {
+  position: absolute;
+  top: var(--museum-image-top);
+  left: var(--museum-image-left);
+  display: block;
+  width: var(--museum-image-width);
+  max-width: none;
+  height: var(--museum-image-height);
+  object-fit: fill;
+  transform: scale(1.015);
+  transform-origin: center;
+  transition: transform 8s ease;
+}
+
+.museum-piece.resting .museum-art img {
+  transform: scale(1.055);
+}
+
+.museum-placard {
+  display: flex;
+  width: var(--museum-placard-width);
+  min-height: 78px;
+  flex: 0 0 var(--museum-placard-width);
+  flex-direction: column;
+  justify-content: center;
+  border: 1px solid #555;
+  background: #fff;
+  box-shadow: 4px 5px 0 rgb(0 0 0 / 9%);
+  padding: 10px 11px;
+  color: #111;
+  transform-origin: left center;
+}
+
+.museum-placard strong {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.museum-placard span {
+  margin-top: 5px;
+  font-size: 9px;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.museum-placard small {
+  margin-top: 3px;
+  color: #666;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+}
+
+.museum-piece.departing {
+  animation: museum-depart 720ms cubic-bezier(0.62, 0, 0.78, 0.38) forwards;
+}
+
+.museum-piece.arriving {
+  animation: museum-plunk 1150ms cubic-bezier(0.16, 0.84, 0.22, 1.08) both;
+}
+
+.museum-piece-2.arriving {
+  animation-name: museum-plunk-side;
+}
+
+.museum-piece.arriving .museum-placard {
+  animation: museum-placard-arrive 880ms 310ms cubic-bezier(0.16, 0.84, 0.22, 1.04) both;
+}
+
+.museum-piece.arriving .museum-frame::before {
+  animation: museum-wire-settle 1050ms ease-out both;
+}
+
+.museum-piece.arriving .museum-art::after {
+  animation: museum-glass-flash 1050ms 120ms ease-out both;
+}
+
+@keyframes museum-depart {
+  0% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) rotate(var(--hang-tilt)) scale(1);
+  }
+
+  55% {
+    opacity: 0.35;
+    filter: blur(1px);
+    transform: translate3d(-18px, 8px, 0) rotate(-1.5deg) scale(0.97);
+  }
+
+  100% {
+    opacity: 0;
+    filter: blur(5px);
+    transform: translate3d(-54px, 22px, 0) rotate(-3deg) scale(0.9);
+  }
+}
+
+@keyframes museum-plunk {
+  0% {
+    opacity: 0;
+    filter: blur(7px);
+    transform: translate3d(64px, -52px, 0) rotate(4deg) scale(0.8);
+  }
+
+  58% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(-7px, 6px, 0) rotate(-1.1deg) scale(1.035);
+  }
+
+  76% {
+    transform: translate3d(3px, -3px, 0) rotate(0.7deg) scale(0.99);
+  }
+
+  90% {
+    transform: translate3d(-1px, 1px, 0) rotate(-0.25deg) scale(1.005);
+  }
+
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) rotate(var(--hang-tilt)) scale(1);
+  }
+}
+
+@keyframes museum-plunk-side {
+  0% {
+    opacity: 0;
+    filter: blur(7px);
+    transform: translate3d(-70px, -32px, 0) rotate(-4deg) scale(0.82);
+  }
+
+  60% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(8px, 5px, 0) rotate(1deg) scale(1.03);
+  }
+
+  78% {
+    transform: translate3d(-3px, -2px, 0) rotate(-0.55deg) scale(0.99);
+  }
+
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) rotate(var(--hang-tilt)) scale(1);
+  }
+}
+
+@keyframes museum-placard-arrive {
+  0% {
+    opacity: 0;
+    transform: translateX(24px) rotateY(-70deg);
+  }
+
+  70% {
+    opacity: 1;
+    transform: translateX(-2px) rotateY(4deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0) rotateY(0);
+  }
+}
+
+@keyframes museum-wire-settle {
+  0% {
+    transform: translateX(-50%) rotate(12deg);
+  }
+
+  45% {
+    transform: translateX(-50%) rotate(-5deg);
+  }
+
+  75% {
+    transform: translateX(-50%) rotate(2deg);
+  }
+
+  100% {
+    transform: translateX(-50%) rotate(0);
+  }
+}
+
+@keyframes museum-glass-flash {
+  0%,
+  38% {
+    left: -55%;
+    opacity: 0;
+  }
+
+  48% {
+    opacity: 0.65;
+  }
+
+  72%,
+  100% {
+    left: 130%;
+    opacity: 0;
+  }
+}
+
+@keyframes museum-light-shift {
+  from {
+    opacity: 0.45;
+    transform: translateX(-8%) skewX(-8deg);
+  }
+
+  to {
+    opacity: 0.82;
+    transform: translateX(18%) skewX(-8deg);
+  }
+}
+
+@media (max-width: 980px) {
+  .landing {
+    overflow-x: hidden;
+    overflow-y: visible;
+    height: auto;
+    min-height: 100dvh;
+  }
+
+  .hero {
+    height: auto;
+    min-height: 0;
+  }
+
+  .hero-gallery {
+    height: clamp(520px, 74dvh, 650px);
+    min-height: 0;
+    margin: 30px auto 0;
+    width: min(680px, 100%);
+  }
+}
+
+@media (max-width: 700px) {
+  .hero-gallery {
+    height: clamp(480px, 76dvh, 540px);
+    margin-top: 36px;
+  }
+
+  .recent-games {
+    grid-template-columns: 68px minmax(0, 1fr);
+  }
+
+  .recent-games-heading {
+    min-width: 68px;
+    padding-inline: 8px;
+  }
+
+  .recent-game-link {
+    min-width: 200px;
+  }
+
+  .game-header-actions {
+    gap: 6px;
+  }
+
+  .game-header .abandon-game-button {
+    padding-inline: 6px;
+    font-size: 7px;
+  }
+
+  .museum-art {
+    border-width: 5px;
+    outline-width: 3px;
+    box-shadow:
+      7px 9px 0 rgb(0 0 0 / 10%),
+      0 15px 24px rgb(0 0 0 / 12%);
+  }
+
+  .museum-placard {
+    min-height: 68px;
+    padding: 8px;
+  }
+
+  .museum-placard strong {
+    font-size: 8px;
+  }
+
+  .museum-placard span {
+    font-size: 8px;
+  }
+
+  .museum-floor-line {
+    bottom: 16px;
+  }
+}
+
+@media (max-width: 430px) {
+  .museum-placard {
+    min-height: 62px;
+  }
+}
+
+@media (min-width: 981px) and (max-height: 800px) {
+  .hero-copy {
+    padding-block: 22px;
+  }
+
+  .hero h1 {
+    font-size: clamp(52px, 6vw, 78px);
+  }
+
+  .hero h1::after {
+    height: 7px;
+    margin-top: 16px;
+  }
+
+  .entry-card {
+    margin-top: 20px;
+  }
+
+  .entry-tabs summary {
+    padding-block: 11px;
+  }
+
+  .avatar-icon-grid button {
+    min-height: 52px;
+  }
+
+  .avatar-icon-grid img {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+

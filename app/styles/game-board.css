@@ -1,0 +1,357 @@
+.game-page {
+  min-height: 100vh;
+  background:
+    linear-gradient(90deg, transparent 49.9%, rgb(65 61 50 / 4%) 50%),
+    #f2eee6;
+  padding-bottom: 108px;
+}
+
+.game-header {
+  position: sticky;
+  z-index: 20;
+  top: 0;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  min-height: 64px;
+  border-bottom: 1px solid var(--line);
+  background: rgb(249 246 239 / 94%);
+  backdrop-filter: blur(14px);
+  padding: 0 24px;
+}
+
+.brand-small strong {
+  font-size: 17px;
+}
+
+.phase-display {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.phase-display span {
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.phase-display strong {
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.turn-display {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.score-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-bottom: 1px solid var(--line);
+  background: var(--white);
+}
+
+.score-strip article {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 58px;
+  border-right: 1px solid var(--line);
+  padding: 8px 14px;
+}
+
+.score-strip article:last-child {
+  border-right: 0;
+}
+
+.score-strip article.current {
+  box-shadow: inset 0 -3px var(--green);
+}
+
+.score-strip article.starved {
+  opacity: 0.52;
+}
+
+.score-strip article > i {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: hsl(var(--player-hue) 48% 42%);
+  color: white;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.score-strip article > div {
+  min-width: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.score-strip strong {
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.score-strip span {
+  margin-top: 2px;
+  color: var(--ink-soft);
+  font-size: 10px;
+}
+
+.score-strip b {
+  border: 1px solid #d9cda9;
+  border-radius: 99px;
+  background: #fff8db;
+  color: #776221;
+  padding: 3px 6px;
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+.game-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.03fr) minmax(400px, 0.97fr);
+  min-height: calc(100vh - 123px);
+}
+
+.shared-board,
+.my-studio {
+  min-width: 0;
+  padding: 24px;
+}
+
+.shared-board {
+  border-right: 1px solid var(--line);
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.section-heading h2,
+.section-heading p {
+  margin: 0;
+}
+
+.section-heading h2 {
+  font-family: var(--font-display);
+  font-size: 25px;
+  font-weight: 620;
+}
+
+.section-heading > span {
+  color: var(--ink-soft);
+  font-size: 10px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.section-heading.small {
+  align-items: center;
+}
+
+.section-heading.small h2 {
+  font-size: 20px;
+}
+
+.canvas-market {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.canvas-card {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--white);
+  padding: 0;
+  text-align: left;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+
+.canvas-card:not(:disabled) {
+  cursor: pointer;
+}
+
+.canvas-card:not(:disabled):hover,
+.canvas-card.selected {
+  z-index: 2;
+  border-color: var(--green);
+  box-shadow: 0 14px 35px rgb(48 43 32 / 17%);
+  transform: translateY(-3px);
+}
+
+.canvas-art {
+  display: block;
+  overflow: hidden;
+  background: #d9d2c5;
+}
+
+.canvas-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.canvas-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+}
+
+.canvas-card-meta > span:first-child {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.canvas-card-meta strong {
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.canvas-card-meta small {
+  overflow: hidden;
+  margin-top: 2px;
+  color: var(--ink-soft);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reward-row {
+  display: flex;
+  gap: 5px;
+}
+
+.reward-row b {
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  padding: 3px 6px;
+  font-size: 9px;
+}
+
+.canvas-cost {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border-radius: 99px;
+  background: rgb(24 33 29 / 86%);
+  color: white;
+  padding: 5px 8px;
+  font-size: 9px;
+  font-weight: 780;
+  backdrop-filter: blur(7px);
+}
+
+.paint-market-section {
+  margin-top: 25px;
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+}
+
+.cube-rack {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 8px;
+  min-height: 64px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background:
+    linear-gradient(rgb(255 255 255 / 70%), rgb(255 255 255 / 70%)),
+    repeating-linear-gradient(90deg, #d5c5ad 0 2px, #dacbb5 2px 5px);
+  padding: 12px;
+}
+
+.studio-rack {
+  position: sticky;
+  z-index: 4;
+  top: 76px;
+  margin-bottom: 6px;
+  box-shadow: 0 8px 20px rgb(50 44 33 / 7%);
+}
+
+.paint-cube {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  padding: 0;
+  filter: drop-shadow(0 4px 3px rgb(34 31 25 / 18%));
+  cursor: grab;
+  transition:
+    transform 120ms ease,
+    filter 120ms ease;
+}
+
+.cube-artwork {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.paint-cube:hover:not(:disabled) {
+  transform: translateY(-3px) rotate(2deg);
+}
+
+.paint-cube.selected {
+  filter:
+    drop-shadow(0 0 2px #fff)
+    drop-shadow(0 0 4px var(--green));
+  transform: translateY(-3px);
+}
+
+.paint-cube:active {
+  cursor: grabbing;
+}
+
+.paint-cube.pending {
+  opacity: 0.62;
+  filter: grayscale(0.35) drop-shadow(0 0 5px rgb(255 255 255 / 75%));
+  animation: pending-paint-pulse 900ms ease-in-out infinite alternate;
+}
+
+@keyframes pending-paint-pulse {
+  to {
+    opacity: 0.9;
+    transform: translateY(-2px);
+  }
+}
+
+

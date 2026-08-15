@@ -1,0 +1,177 @@
+.lobby-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 82% 15%, rgb(50 132 198 / 10%), transparent 23%),
+    var(--paper);
+}
+
+.lobby-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(1120px, calc(100% - 40px));
+  margin: 0 auto;
+  border-bottom: 1px solid var(--line);
+  padding: 20px 0;
+}
+
+.connection-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.lobby-shell {
+  width: min(820px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 70px 0;
+}
+
+.lobby-title {
+  text-align: center;
+}
+
+.lobby-title h1 {
+  font-size: clamp(48px, 7vw, 72px);
+}
+
+.lobby-title > p:last-child {
+  margin: 14px 0 0;
+  color: var(--ink-soft);
+}
+
+.share-panel {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 35px 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--white);
+  box-shadow: 0 15px 40px rgb(47 40 27 / 8%);
+  padding: 14px;
+}
+
+.share-panel > div {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  padding-left: 6px;
+}
+
+.share-panel span {
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.share-panel strong {
+  font-size: 24px;
+  letter-spacing: 0.18em;
+}
+
+.player-seats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.player-seat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 76px;
+  border: 1px dashed #c8c0b2;
+  border-radius: 7px;
+  padding: 12px 14px;
+}
+
+.player-seat.filled {
+  border-style: solid;
+  background: var(--white);
+}
+
+.player-seat > i {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--paper-deep);
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.player-seat.filled > i {
+  background: var(--green);
+  color: white;
+}
+
+.player-seat > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.player-seat strong {
+  font-size: 14px;
+}
+
+.player-seat span {
+  margin-top: 3px;
+  color: var(--ink-soft);
+  font-size: 11px;
+}
+
+.player-seat b {
+  color: var(--green);
+}
+
+.lobby-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 30px;
+}
+
+.lobby-actions .primary-button {
+  min-width: 240px;
+}
+
+.lobby-actions > p {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.lobby-actions > small {
+  margin-top: 10px;
+  color: var(--ink-soft);
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--line);
+  border-top-color: var(--green);
+  border-radius: 50%;
+  animation: spin 850ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+

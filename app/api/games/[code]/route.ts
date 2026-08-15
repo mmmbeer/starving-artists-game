@@ -1,4 +1,5 @@
-import { errorResponse, getGame } from "../../../lib/game-store";
+import { getGame } from "../../../lib/game-store";
+import { errorResponse } from "../../../lib/api-response";
 import {
   normalizeGameCode,
   rateLimitResponse,

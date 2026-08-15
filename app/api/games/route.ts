@@ -1,4 +1,5 @@
-import { createGame, errorResponse } from "../../lib/game-store";
+import { createGame } from "../../lib/game-store";
+import { errorResponse } from "../../lib/api-response";
 import {
   boundedString,
   rateLimitResponse,

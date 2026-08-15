@@ -1,0 +1,446 @@
+.action-dock {
+  position: fixed;
+  z-index: 30;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  min-height: 82px;
+  border-top: 1px solid #c9c1b3;
+  background: rgb(255 253 248 / 96%);
+  box-shadow: 0 -12px 35px rgb(39 34 25 / 10%);
+  backdrop-filter: blur(15px);
+  padding: 9px 20px;
+}
+
+.action-status {
+  display: flex;
+  flex: 0 0 230px;
+  align-items: center;
+  gap: 10px;
+  border-right: 1px solid var(--line);
+  padding-right: 18px;
+}
+
+.action-status > i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #bbb4a8;
+}
+
+.action-status > i.active-pulse {
+  background: var(--green);
+  animation: pulse 1.7s ease infinite;
+}
+
+@keyframes pulse {
+  50% {
+    box-shadow: 0 0 0 7px rgb(30 100 77 / 12%);
+  }
+}
+
+.action-status > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.action-status small {
+  color: var(--ink-soft);
+  font-size: 9px;
+  font-weight: 760;
+  text-transform: uppercase;
+}
+
+.action-status strong {
+  margin-top: 2px;
+  font-size: 12px;
+}
+
+.action-buttons {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  gap: 5px;
+}
+
+.action-buttons > button {
+  display: flex;
+  min-width: 82px;
+  min-height: 58px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  font-size: 10px;
+  font-weight: 760;
+  cursor: pointer;
+}
+
+.action-buttons > button:hover:not(:disabled),
+.action-buttons > button.active {
+  border-color: var(--line);
+  background: var(--paper);
+}
+
+.action-buttons b {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.sale-controls {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 15px;
+}
+
+.sale-controls > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.sale-controls > div button {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--white);
+  padding: 7px 9px;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.sale-controls > div button.selected {
+  border-color: var(--green);
+  background: #e1eee7;
+}
+
+.sale-controls > div > span {
+  color: var(--ink-soft);
+  font-size: 11px;
+}
+
+.winner-banner {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--green);
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.winner-banner span {
+  color: var(--gold);
+  font-size: 26px;
+}
+
+.action-tray {
+  position: fixed;
+  z-index: 29;
+  right: 18px;
+  bottom: 94px;
+  width: min(360px, calc(100% - 36px));
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--white);
+  box-shadow: 0 20px 60px rgb(37 32 22 / 22%);
+  padding: 19px;
+}
+
+.action-tray h3,
+.action-tray p {
+  margin: 0;
+}
+
+.action-tray h3 {
+  font-family: var(--font-display);
+  font-size: 21px;
+}
+
+.action-tray > p:not(.eyebrow) {
+  margin: 7px 0 14px;
+  color: var(--ink-soft);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.action-tray .primary-button {
+  width: 100%;
+}
+
+.tray-close {
+  position: absolute;
+  top: 8px;
+  right: 9px;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.game-error {
+  position: fixed;
+  z-index: 50;
+  top: 74px;
+  right: 16px;
+  max-width: 380px;
+  border: 1px solid #e5bbb7;
+  border-radius: 5px;
+  background: #fff4f2;
+  box-shadow: 0 12px 35px rgb(73 35 30 / 14%);
+  padding: 11px 14px;
+  color: #983b34;
+  font-size: 12px;
+  font-weight: 680;
+}
+
+.fatal-state {
+  display: grid;
+  min-height: 100vh;
+  place-content: center;
+  text-align: center;
+}
+
+.fatal-state h1 {
+  font-family: var(--font-display);
+}
+
+.fatal-state a {
+  color: var(--green);
+}
+
+@media (max-width: 980px) {
+  .landing {
+    background: var(--paper);
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+    padding-top: 55px;
+  }
+
+  .hero-copy {
+    max-width: 720px;
+  }
+
+  .hero-gallery {
+    min-height: 520px;
+    margin-top: 25px;
+  }
+
+  .hero-card-one {
+    left: 33%;
+  }
+
+  .hero-card-two {
+    left: 13%;
+  }
+
+  .game-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .shared-board {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .game-page {
+    background: #f2eee6;
+  }
+
+  .action-status {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .landing-nav,
+  .hero,
+  .how-to {
+    width: min(100% - 28px, 620px);
+  }
+
+  .landing-nav {
+    padding-top: 15px;
+  }
+
+  .hero {
+    min-height: auto;
+    padding: 45px 0 35px;
+  }
+
+  .hero h1 {
+    font-size: clamp(45px, 13vw, 62px);
+  }
+
+  .hero-lede {
+    font-size: 16px;
+  }
+
+  .form-grid,
+  .join-code-form {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-gallery {
+    min-height: 390px;
+  }
+
+  .hero-card-one {
+    top: 20px;
+    left: 25%;
+    width: 330px;
+  }
+
+  .hero-card-two {
+    top: 130px;
+    left: -2%;
+    width: 230px;
+  }
+
+  .how-to > div {
+    grid-template-columns: 1fr;
+  }
+
+  .lobby-shell {
+    padding-top: 45px;
+  }
+
+  .share-panel {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .share-panel > div {
+    justify-content: space-between;
+  }
+
+  .player-seats {
+    grid-template-columns: 1fr;
+  }
+
+  .game-header {
+    grid-template-columns: 1fr auto;
+    padding: 0 13px;
+  }
+
+  .phase-display {
+    display: none;
+  }
+
+  .score-strip {
+    display: flex;
+    overflow-x: auto;
+  }
+
+  .score-strip article {
+    min-width: 180px;
+  }
+
+  .shared-board,
+  .my-studio {
+    padding: 18px 13px;
+  }
+
+  .canvas-market {
+    overflow-x: auto;
+    grid-template-columns: repeat(3, minmax(210px, 70vw));
+    margin-right: -13px;
+    padding-right: 13px;
+    scroll-snap-type: x mandatory;
+  }
+
+  .canvas-card {
+    scroll-snap-align: start;
+  }
+
+  .studio-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .studio-art {
+    max-height: none;
+  }
+
+  .paint-matrix {
+    grid-template-columns: repeat(5, minmax(30px, 1fr));
+  }
+
+  .game-page {
+    padding-bottom: 84px;
+  }
+
+  .action-dock {
+    min-height: 72px;
+    padding: 6px;
+  }
+
+  .action-buttons {
+    width: 100%;
+    justify-content: space-around;
+  }
+
+  .action-buttons > button {
+    min-width: 58px;
+    min-height: 56px;
+    padding: 4px;
+    font-size: 9px;
+  }
+
+  .action-buttons b {
+    font-size: 16px;
+  }
+
+  .sale-controls {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .sale-controls > div {
+    max-height: 54px;
+    overflow: auto;
+    justify-content: flex-start;
+  }
+
+  .winner-banner {
+    font-size: 16px;
+  }
+
+  .action-tray {
+    right: 8px;
+    bottom: 80px;
+    width: calc(100% - 16px);
+  }
+
+  .game-error {
+    top: 70px;
+    right: 9px;
+    left: 9px;
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+

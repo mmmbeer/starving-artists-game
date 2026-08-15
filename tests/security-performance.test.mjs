@@ -103,7 +103,10 @@ test("normal worker responses carry browser defense headers", () => {
 });
 
 test("game writes enforce expiry and group logical mutations", () => {
-  const store = readFileSync("app/lib/game-store.ts", "utf8");
+  const store = [
+    readFileSync("app/lib/game-store.ts", "utf8"),
+    readFileSync("app/lib/game-store-db.ts", "utf8"),
+  ].join("\n");
   assert.match(store, /expires_at > \?/);
   assert.match(store, /cleanupExpiredGames/);
   assert.match(store, /games_delete_player_secrets/);
